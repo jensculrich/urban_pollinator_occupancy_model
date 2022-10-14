@@ -46,10 +46,10 @@ params <- c("mu_psi_0",
 
 
 # MCMC settings
-n_iterations <- 200
+n_iterations <- 1200
 n_thin <- 1
-n_burnin <- 100
-n_chains <- 3
+n_burnin <- 600
+n_chains <- 4
 n_cores <- n_chains
 
 ## Initial values
@@ -93,3 +93,31 @@ stan_out <- stan(stan_model,
 print(stan_out, digits = 3)
 saveRDS(stan_out, "./analysis/stan_out.rds")
 stan_out <- readRDS("./analysis/stan_out.rds")
+
+## --------------------------------------------------
+### Simple diagnostic plots
+
+# traceplot
+traceplot(stan_out, pars = c(
+  "mu_psi_0",
+  "sigma_psi_species",
+  "mu_p_0", 
+  "sigma_p_species",
+  "mu_p_species_date",
+  "sigma_p_species_date",
+  "mu_p_species_date_sq",
+  "sigma_p_species_date_sq"))
+
+# pairs plot
+pairs(stan_out, pars = c(
+  "mu_psi_0",
+  "sigma_psi_species",
+  "mu_p_0", 
+  "sigma_p_species",
+  "mu_p_species_date",
+  "sigma_p_species_date",
+  "mu_p_species_date_sq",
+  "sigma_p_species_date_sq"))
+# should increase the adapt delta above default value
+
+# should now also write a posterior predictive check into the model
