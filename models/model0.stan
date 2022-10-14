@@ -197,7 +197,7 @@ model {
             // and needs to be rewritten to accomodate the specific number of max visits
             target += log_sum_exp(log(psi[i,j,k]) + 
                                  log1m(p[i,j,k,1]) + log1m(p[i,j,k,2]) + log1m(p[i,j,k,3]) + log1m(p[i,j,k,4])
-                                 + log1m(p[i,j,k,5]) + log1m(p[i,j,k,6]) + log1m(p[i,j,k,7]), 
+                                 + log1m(p[i,j,k,5]) + log1m(p[i,j,k,6]), 
                           log1m(psi[i,j,k]));
             
           } // end if/else

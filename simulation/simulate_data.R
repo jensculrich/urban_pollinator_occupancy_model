@@ -28,7 +28,7 @@ make_data <- function(## study dimensions
   n_species = 35, ## number of species
   n_sites = 30, ## number of sites
   n_intervals = 3, ## number of occupancy intervals (years)
-  n_visits = 7, ## number of samples per year
+  n_visits = 6, ## number of samples per year
   
   # introduce NAs (missed visits)?
   introduce_NAs = FALSE,

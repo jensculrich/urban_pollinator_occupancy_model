@@ -1,4 +1,4 @@
-sampling_round,site,date,,bee_id,sex,collected_specimen,unique_specimen_id,plant_netted_from_famly,plant_netted_from_genus,plant_netted_from_sci_name,notes
+SAMPLING_ROUND,SITE,DATE,CLADE,INSECT_ID,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIMEN_ID,PLANT_NETTED_FROM_FAMILY,PLANT_NETTED_FROM_GENUS,PLANT_NETTED_FROM_SCI_NAME,NOTES
 1,memorial south,5.6.2022,,Bombus vosnesenskii,NA,N,jcu2022_1,Lamiaceae,Lamium,Lamium purpureum,
 1,memorial south,5.6.2022,Syrphidae,Syrphus torvus,f,Y,jcu2022_2,Lamiaceae,Lamium,Lamium purpureum,
 1,memorial south,5.6.2022,,Apis mellifera,NA,N,jcu2022_3,Asteraceae,Taraxacum,Taraxacum officinale,
