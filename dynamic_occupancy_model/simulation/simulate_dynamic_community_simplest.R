@@ -17,7 +17,7 @@ phi <- 0.8 # persistence probability
 gamma <- 0.05 # colonization probability
 p <- 0.25
 p0 <- -1.5 # probability of detection (logit scaled)
-p_habitat_type <- 0.5 # increase in detection rate moving from one habitat type to the other (logit scaled)
+p_habitat <- 0.5 # increase in detection rate moving from one habitat type to the other (logit scaled)
 
 # simulate missing data
 # for STAN will also need to make an NA indicator array
@@ -53,8 +53,19 @@ simulate_data <- function(
   psi1 <- psi1 # prob of initial occupancy
   phi <- phi # persistence probability
   gamma <- gamma # colonization probability
-  p <- p # probability of detection
+  # p <- p # probability of detection
   (psi_eq <- gamma / (gamma+(1-phi))) # equilibrium occupancy rate
+  
+  logit_p <- array(NA, dim = c(n_sites, n_years)) 
+  
+  for(j in 1:n_sites){
+    for(k in 1:n_years){
+      
+      logit_p[j,k] = p0 +
+        p_habitat * habitat_type[j]
+      
+    }
+  }
   
   # generate initial presence/absence states
   z[,1] <- rbinom(n=n_sites, size=1, prob=psi1) #
@@ -79,7 +90,7 @@ simulate_data <- function(
   for(j in 1:n_sites){
     for(k in 1:n_years){
       for(l in 1:n_visits){
-        y[j,k,l] <- rbinom(n = 1, size = 1, prob = z[j,k]*p)
+        y[j,k,l] <- rbinom(n = 1, size = 1, prob = z[j,k]*ilogit(logit_p[j,k]))
       }
     }
   }
@@ -165,11 +176,12 @@ legend('topright', c('True psi', 'True finite-sample psi', 'Equilibrium psi', 'O
 ## --------------------------------------------------
 ### Prep data and tweak model options
 
-stan_data <- c("V",
+stan_data <- c("V", "habitat_type",
                "n_sites", "n_years", "n_visits") 
 
 ## Parameters monitored
-params <- c("p", "phi", "gamma", "psi1")
+params <- c("phi", "gamma", "psi1",
+            "p0", "p_habitat")
 
 # MCMC settings
 n_iterations <- 600
@@ -180,7 +192,7 @@ n_cores <- n_chains
 
 # targets
 parameter_values <-  c(
-  psi1, "NA: is a vector", phi, (1-phi), gamma, p
+  phi, gamma, psi1, p0, p_habitat
 )
 
 
@@ -191,7 +203,8 @@ parameter_values <-  c(
 inits <- lapply(1:n_chains, function(i)
   
   list(psi1 = runif(1, 0, 1),
-       p = runif(1, 0, 1)
+       p0 = runif(1, -1, 1),
+       p_habitat = runif(1, -1, 1)
   )
 )
 
