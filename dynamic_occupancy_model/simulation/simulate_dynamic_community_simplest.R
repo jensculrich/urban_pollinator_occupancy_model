@@ -1,7 +1,7 @@
 library(tidyverse)
 
 ##------------------------------------------------------------------------------
-# 4.3 Simulation and Analysis of dynocc model
+# 4.3 Simulation and Analysis of the simplest dynocc model
 
 ## --------------------------------------------------
 ### Define simulation conditions
@@ -15,6 +15,7 @@ n_visits <- 6 # number of surveys per year
 psi1 <- 0.7 # prob of initial occupancy
 phi <- 0.8 # persistence probability
 gamma <- 0.05 # colonization probability
+p <- 0.25
 p0 <- -1.5 # probability of detection (logit scaled)
 p_habitat_type <- 0.5 # increase in detection rate moving from one habitat type to the other (logit scaled)
 
@@ -27,11 +28,11 @@ prob_missing <- 0.2 # if so, what proportion of data missing?
 ### Define simulation function
 
 simulate_data <- function(
-  n_sites, n_years, n_visits,
-  psi1, phi, gamma, 
-  p0, p_habitat_type,
-  create_missing_data, prob_missing
-  ){
+    n_sites, n_years, n_visits,
+    psi1, phi, gamma, 
+    p, p0, p_habitat_type,
+    create_missing_data, prob_missing
+){
   
   ## ilogit and logit functions
   ilogit <- function(x) exp(x)/(1+exp(x))
@@ -52,25 +53,8 @@ simulate_data <- function(
   psi1 <- psi1 # prob of initial occupancy
   phi <- phi # persistence probability
   gamma <- gamma # colonization probability
-  #p <- p # probability of detection
+  p <- p # probability of detection
   (psi_eq <- gamma / (gamma+(1-phi))) # equilibrium occupancy rate
-  
-  # p matrix (variable detection rate)
-  logit_p_matrix <- array(NA, dim =c(n_sites, n_years))
-  
-  # heterogeneity in parameters
-  
-    for(site in 1:n_sites) { # for each interval
-      for(year in 1:n_years) { # for each species
-        #for(visit in 1:n_visits) { # for each visit (but sim constant rates across visits)
-          
-          logit_p_matrix[site, year] <- # detection is equal to 
-            p0 + # an intercept
-            p_habitat_type * habitat_type[site] # a spatial detection effect
-
-        #} # for each visit
-      } # for each year
-    } # for each site
   
   # generate initial presence/absence states
   z[,1] <- rbinom(n=n_sites, size=1, prob=psi1) #
@@ -90,16 +74,16 @@ simulate_data <- function(
   }
   
   apply(z, 2, sum) / n_sites # true occupancy proportions in each year
-
+  
   # detection / non-detection data
   for(j in 1:n_sites){
     for(k in 1:n_years){
       for(l in 1:n_visits){
-        y[j,k,l] <- rbinom(n = 1, size = 1, prob = z[j,k]*ilogit(logit_p_matrix[j,k]))
+        y[j,k,l] <- rbinom(n = 1, size = 1, prob = z[j,k]*p)
       }
     }
   }
-
+  
   y ; str(y)
   
   sum((y/n_visits) / sum(z)) # proportion of times detection given presence
@@ -157,7 +141,7 @@ set.seed(1)
 my_simulated_data <- simulate_data(  
   n_sites, n_years, n_visits,
   psi1, phi, gamma, 
-  p0, p_habitat_type,
+  p, p0, p_habitat_type,
   create_missing_data, prob_missing)
 
 V <- my_simulated_data$V
@@ -177,80 +161,15 @@ legend('topright', c('True psi', 'True finite-sample psi', 'Equilibrium psi', 'O
        lwd = c(3,1,2,3), cex = 1.2, bty = 'n')
 
 
-## --------------------------------------------------
-### Prep data and tweak model options
-
-stan_data <- c("V", "habitat_type",
-               "n_sites", "n_years", "n_visits") 
-
-## Parameters monitored
-params <- c("psi", "phi", "gamma", "p0", "p_habitat_type", "n_occ", "growthr", "turnover")
-
-# MCMC settings
-n_iterations <- 600
-n_thin <- 1
-n_burnin <- 300
-n_chains <- 4
-n_cores <- n_chains
-
-# targets
-parameter_values <-  c(
-  psi1, "NA: is a vector", phi, (1-phi), gamma, p
-)
-
-
-
-## Initial values
-# given the number of parameters, the chains need some decent initial values
-# otherwise sometimes they have a hard time starting to sample
-inits <- lapply(1:n_chains, function(i)
-  
-  list(psi1 = runif(1, 0, 1),
-       p0 = runif(1, -1, 1),
-       p_habitat_type = runif(1, -1, 1)
-  )
-)
-
-targets <- as.data.frame(cbind(params, parameter_values))
-
-
-## --------------------------------------------------
-### Run model
-
-library(rstan)
-stan_model <- "./dynamic_occupancy_model/models/dynocc_model0.stan"
-
-## Call Stan from R
-stan_out_sim <- stan(stan_model,
-                     data = stan_data, 
-                     init = inits, 
-                     pars = params,
-                     chains = n_chains, iter = n_iterations, 
-                     warmup = n_burnin, thin = n_thin,
-                     seed = 1,
-                     open_progress = FALSE,
-                     cores = n_cores)
-
-print(stan_out_sim, digits = 3)
-saveRDS(stan_out_sim, "./dynamic_occupancy_model/simulation/stan_out_sim.rds")
-stan_out_sim <- readRDS("./dynamic_occupancy_model/simulation/stan_out_sim.rds")
-
-traceplot(stan_out_sim, pars = c(
-  "psi", "phi", "gamma", "p0", "n_occ", "growthr", "turnover"
-  ))
-
-
-
-
 # run simpler model
 ## --------------------------------------------------
 ### Prep data and tweak model options
 
-stan_data <- c("V", "habitat_type",
+stan_data <- c("V",
                "n_sites", "n_years", "n_visits") 
 
 ## Parameters monitored
-params <- c("psi", "phi", "gamma", "p0", "p_habitat_type", "n_occ", "growthr", "turnover")
+params <- c("p", "phi", "gamma", "psi1")
 
 # MCMC settings
 n_iterations <- 600
@@ -272,8 +191,7 @@ parameter_values <-  c(
 inits <- lapply(1:n_chains, function(i)
   
   list(psi1 = runif(1, 0, 1),
-       p0 = runif(1, -1, 1),
-       p_habitat_type = runif(1, -1, 1)
+       p = runif(1, 0, 1)
   )
 )
 
@@ -302,5 +220,5 @@ saveRDS(stan_out_sim, "./dynamic_occupancy_model/simulation/stan_out_sim.rds")
 stan_out_sim <- readRDS("./dynamic_occupancy_model/simulation/stan_out_sim.rds")
 
 traceplot(stan_out_sim, pars = c(
-  "psi", "phi", "gamma", "p0", "n_occ", "growthr", "turnover"
+  "psi1", "phi", "gamma", "p"
 ))

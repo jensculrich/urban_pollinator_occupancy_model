@@ -1,9 +1,9 @@
 	
 data {
-   int<lower=0> nsite;
-   int<lower=0> nyear;
-   int<lower=0> nrep;
-   int<lower=0,upper=1> Y[nsite,nyear,nrep];
+   int<lower=0> n_sites;
+   int<lower=0> n_years;
+   int<lower=0> n_visits;
+   int<lower=0,upper=1> V[n_sites, n_years, n_visits];
 }
 parameters {
    real<lower=0,upper=1> p;
@@ -12,13 +12,13 @@ parameters {
    real<lower=0, upper=1> psi1;
 }
 transformed parameters {
-   matrix[nsite, nyear] psi;
-   for (r in 1:nsite){
-     for (t in 1:nyear){
-       if (t < 2){
-          psi[r, t] <- psi1;
-       } else {
-          psi[r, t] <- psi[r, t-1] * phi + (1 - psi[r, t-1]) * gamma;
+   matrix[n_sites, n_years] psi;
+   for (j in 1:n_sites){
+     for (k in 1:n_years){
+       if (k < 2){ // initial state
+          psi[j, k] = psi1; 
+       } else { // system dynamics
+          psi[j, k] = psi[j, k-1] * phi + (1 - psi[j, k-1]) * gamma; 
        }
      }
    }
@@ -31,13 +31,13 @@ model {
   p ~ uniform(0,1);
   
    // likelihood
-  for (r in 1:nsite){
-    for (t in 1:nyear){
-      if (sum(Y[r, t]) > 0){
-        increment_log_prob(log(psi[r, t]) + bernoulli_log(Y[r, t], p));
+  for (j in 1:n_sites){
+    for (k in 1:n_years){
+      if (sum(V[j, k]) > 0){
+        target += (log(psi[j, k]) + bernoulli_lpmf(V[j, k]|p));
       } else {
-        increment_log_prob(log_sum_exp(log(psi[r, t]) + bernoulli_log(Y[r, t],p),
-                                      log(1-psi[r, t])));
+        target += (log_sum_exp(log(psi[j, k]) + bernoulli_lpmf(V[j, k]|p),
+                                      log(1-psi[j, k])));
       }
     }
   }

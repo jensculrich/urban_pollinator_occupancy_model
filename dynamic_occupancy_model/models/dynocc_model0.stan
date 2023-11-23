@@ -20,7 +20,9 @@ data {
   int<lower=1> n_visits; // number of surveys per year
   
   int<lower=0> V[n_sites, n_years, n_visits]; // detection / non-detection data
-
+  
+  int<lower=0, upper=1> habitat_type[n_sites]; // categorical habitat type (0 or 1)
+  
 } // end data
 
 transformed data {
@@ -42,7 +44,11 @@ transformed data {
 parameters {
   
   real<lower=0, upper=1> psi1; // Occupancy probability at k=1
-  vector<lower=0, upper=1>[n_years] p; // Detection probability
+  
+  vector<lower=0, upper=1>[nyear] p; // Detection probability
+  real p0; // Detection probability (intercept for each year)
+  real p_habitat_type; // Detection probability (effect of habitat type)
+  
   array[2, n_years - 1] simplex[2] ps; // Transition probability
   // This is equivalent to the following:
   //  ps[1, k, 1] = phi[k];
@@ -54,16 +60,33 @@ parameters {
 
 transformed parameters {
   
+  real p[n_sites, n_years];  // odds of detection
+  
+    for(j in 1:n_sites){    // loop across all sites
+      for(k in 1:n_years){ // loop across all intervals
+        //for(l in 1:n_visits){ // loop across all visits
+        
+          p[j,k] = inv_logit( // the inverse of the log odds of detection is equal to..
+            p0 + # an intercept
+            p_habitat_type * habitat_type[j] # a spatial detection effect
+           ); // end p[j,k,l]
+           
+        //} // end loop across all visits
+      } // end loop across all intervals
+    } // end loop across all sites
+  
   array[2, n_years] simplex[n_visits + 1] po; // Emission Probability
   
-  // Either occupied or unoccupied with some probability
-  for (k in 1 : n_years) {
-    for (l in 1 : (n_visits + 1)) {
-      po[1, k, l] = exp(binomial_lpmf(l - 1 | n_visits, p[k])); // occupied
-      po[2, k, l] = l == 1; // not occupied
+  
+  for(j in 1:n_sites){
+    for(k in 1 : n_years) {
+      for(l in 1 : (n_visits + 1)) {
+        po[1, k, l] = exp(binomial_lpmf(l - 1 | n_visits, p[j,k])); // something broke down here when trying to expand p
+        po[2, k, l] = l == 1; 
+      }
     }
   }
-  
+
 }
 
 model {
@@ -72,7 +95,9 @@ model {
   // PRIORS //
   ////////////
   
-  // Flat priros Uniform(0, 1) are implicitly used on psi1, p and ps.
+  // Flat priros Uniform(0, 1) are implicitly used on psi1, and ps.
+  p0 ~ normal(0,2);
+  p_habitat_type ~ normal(0,2);
   
   ////////////////
   // LIKELIHOOD //
