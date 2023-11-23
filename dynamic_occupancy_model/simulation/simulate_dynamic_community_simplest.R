@@ -18,6 +18,11 @@ gamma <- 0.05 # colonization probability
 p <- 0.25
 p0 <- -1.5 # probability of detection (logit scaled)
 p_habitat <- 0.5 # increase in detection rate moving from one habitat type to the other (logit scaled)
+p_date <- 0
+p_date_sq <- -0.5
+
+mean_survey_date <- 180
+sigma_survey_date <- 40
 
 # simulate missing data
 # for STAN will also need to make an NA indicator array
@@ -31,6 +36,8 @@ simulate_data <- function(
     n_sites, n_years, n_visits,
     psi1, phi, gamma, 
     p, p0, p_habitat_type,
+    p_date, p_date_sq,
+    mean_survey_date, sigma_survey_date,
     create_missing_data, prob_missing
 ){
   
@@ -38,12 +45,16 @@ simulate_data <- function(
   ilogit <- function(x) exp(x)/(1+exp(x))
   logit <- function(x) log(x/(1-x))
   
+  ## predictor center scaling function
+  center_scale <- function(x) {
+    (x - mean(x)) / sd(x)
+  }
+  
   # choose sample sizes
   n_sites <- n_sites # number of sites
   n_years <- n_years # number of years
   n_visits <- n_visits # number of surveys per year
-  
-  habitat_type <- rep(c(0,1), each = n_sites / 2)
+
   
   # prepare arrays for z and y
   z <- array(NA, dim = c(n_sites, n_years)) # latent presence/absence
@@ -56,14 +67,39 @@ simulate_data <- function(
   # p <- p # probability of detection
   (psi_eq <- gamma / (gamma+(1-phi))) # equilibrium occupancy rate
   
-  logit_p <- array(NA, dim = c(n_sites, n_years)) 
+  ## --------------------------------------------------
+  ## Create covariate data
+  
+  ## day of year
+  # should have a value for each site*year*visit
+  date <- array(NA, dim =c(n_sites, n_years, n_visits))
+  
+  for(site in 1:n_sites) { # for each site
+    for(n_years in 1:n_years) { # for each n_years
+      # create a vector of visit dates centered on the middle of the early summer
+      date[site, n_years, 1:n_visits] <- sort(as.integer(rnorm(
+        n_visits, mean = mean_survey_date, sd = sigma_survey_dates))) 
+    }
+  }
+  
+  ## let's scale the calendar day of year by the mean date (z-score scaled)
+  date_scaled <- center_scale(date) 
+  
+  ## habitat type
+  habitat_type <- rep(c(0,1), each = n_sites / 2)
+  
+  logit_p <- array(NA, dim = c(n_sites, n_years, n_visits)) 
   
   for(j in 1:n_sites){
     for(k in 1:n_years){
-      
-      logit_p[j,k] = p0 +
-        p_habitat * habitat_type[j]
-      
+      for(l in 1:n_visits){
+        
+        logit_p[j,k,l] = p0 +
+          p_habitat * habitat_type[j] +
+          p_date*date_scaled[j, k, l] + # a spatiotemporally specific intercept
+          p_date_sq*(date_scaled[j, k, l])^2 # a spatiotemporally specific intercept
+        
+      }
     }
   }
   
@@ -90,7 +126,7 @@ simulate_data <- function(
   for(j in 1:n_sites){
     for(k in 1:n_years){
       for(l in 1:n_visits){
-        y[j,k,l] <- rbinom(n = 1, size = 1, prob = z[j,k]*ilogit(logit_p[j,k]))
+        y[j,k,l] <- rbinom(n = 1, size = 1, prob = z[j,k]*ilogit(logit_p[j,k,l]))
       }
     }
   }
@@ -139,7 +175,8 @@ simulate_data <- function(
     psi_fs = psi_fs,
     psi_obs = psi_obs,
     V = y2, # return detection data after potentially introducing NAs,
-    habitat_type = habitat_type
+    habitat_type = habitat_type,
+    date_scaled = date_scaled
   ))
   
 } # end function
@@ -153,6 +190,8 @@ my_simulated_data <- simulate_data(
   n_sites, n_years, n_visits,
   psi1, phi, gamma, 
   p, p0, p_habitat_type,
+  p_date, p_date_sq,
+  mean_survey_date, sigma_survey_date,
   create_missing_data, prob_missing)
 
 V <- my_simulated_data$V
@@ -160,6 +199,7 @@ habitat_type <- my_simulated_data$habitat_type
 psi <- my_simulated_data$psi
 psi_fs <- my_simulated_data$psi_fs
 psi_obs <- my_simulated_data$psi_obs
+date_scaled <- my_simulated_data$date_scaled
 
 # Plot trajectories of psi, psi_fs, psi_eq and psi_obs
 plot(1:n_years, psi, type = 'l', col = "red", lwd = 3, ylim = c(0,1), xlab = "Year",
@@ -176,12 +216,13 @@ legend('topright', c('True psi', 'True finite-sample psi', 'Equilibrium psi', 'O
 ## --------------------------------------------------
 ### Prep data and tweak model options
 
-stan_data <- c("V", "habitat_type",
-               "n_sites", "n_years", "n_visits") 
+stan_data <- c("V", 
+               "n_sites", "n_years", "n_visits",
+               "habitat_type", "date_scaled") 
 
 ## Parameters monitored
 params <- c("phi", "gamma", "psi1",
-            "p0", "p_habitat")
+            "p0", "p_habitat", "p_date", "p_date_sq")
 
 # MCMC settings
 n_iterations <- 600
@@ -192,7 +233,7 @@ n_cores <- n_chains
 
 # targets
 parameter_values <-  c(
-  phi, gamma, psi1, p0, p_habitat
+  phi, gamma, psi1, p0, p_habitat, p_date, p_date_sq
 )
 
 
@@ -204,7 +245,9 @@ inits <- lapply(1:n_chains, function(i)
   
   list(psi1 = runif(1, 0, 1),
        p0 = runif(1, -1, 1),
-       p_habitat = runif(1, -1, 1)
+       p_habitat = runif(1, -1, 1),
+       p_date = runif(1, -1, 1),
+       p_date_sq = runif(1, -1, 1)
   )
 )
 
@@ -233,5 +276,5 @@ saveRDS(stan_out_sim, "./dynamic_occupancy_model/simulation/stan_out_sim.rds")
 stan_out_sim <- readRDS("./dynamic_occupancy_model/simulation/stan_out_sim.rds")
 
 traceplot(stan_out_sim, pars = c(
-  "psi1", "phi", "gamma", "p"
+  "psi1", "phi", "gamma", "p0", "p_habitat"
 ))
