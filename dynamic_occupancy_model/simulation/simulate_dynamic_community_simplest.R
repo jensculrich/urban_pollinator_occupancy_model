@@ -73,12 +73,14 @@ simulate_data <- function(
   ## day of year
   # should have a value for each site*year*visit
   date <- array(NA, dim =c(n_sites, n_years, n_visits))
+  mean_survey_date = mean_survey_date
+  sigma_survey_date = sigma_survey_date
   
   for(site in 1:n_sites) { # for each site
     for(n_years in 1:n_years) { # for each n_years
       # create a vector of visit dates centered on the middle of the early summer
       date[site, n_years, 1:n_visits] <- sort(as.integer(rnorm(
-        n_visits, mean = mean_survey_date, sd = sigma_survey_dates))) 
+        n_visits, mean = mean_survey_date, sd = sigma_survey_date))) 
     }
   }
   

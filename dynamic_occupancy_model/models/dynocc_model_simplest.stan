@@ -62,7 +62,7 @@ transformed parameters {
           p0 + # an intercept
           p_habitat * habitat_type[j] + # a spatial detection effect
           p_date * date_scaled[j,k,l] + # a spatial detection effect
-          p_date_sq * (date_scaled[j,k,l]^2)  # a spatial detection effect
+          p_date_sq * (date_scaled[j,k,l])^2  # a spatial detection effect
           ); // end p[j,k,l]
            
       } // end loop across all visits
@@ -77,6 +77,7 @@ model {
   psi1 ~ uniform(0,1);
   gamma ~ uniform(0,1);
   phi ~ uniform(0,1);
+  
   //p ~ uniform(0,1);
   p0 ~ normal(0,2);
   p_habitat ~ normal(0,2);
@@ -88,7 +89,7 @@ model {
     for (k in 1:n_years){
       for (l in 1:n_visits){
         
-        if (sum(V[j, k]) > 0){
+        if (sum(V[j,k,1:l]) > 0){
           target += (log(psi[j, k]) + bernoulli_lpmf(V[j,k,l]|p[j,k,l]));
         } else {
           target += (log_sum_exp(log(psi[j, k]) + bernoulli_lpmf(V[j,k,l]|p[j,k,l]),
