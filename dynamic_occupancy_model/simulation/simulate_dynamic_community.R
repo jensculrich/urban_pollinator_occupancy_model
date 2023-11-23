@@ -7,13 +7,13 @@ library(tidyverse)
 ### Define simulation conditions
 
 # choose sample sizes and 
-n_sites <- 40 # number of sites
+n_sites <- 50 # number of sites
 n_years <- 5 # number of years
 n_visits <- 6 # number of surveys per year
 
 # set parameter values
 psi1 <- 0.7 # prob of initial occupancy
-phi <- 0.9 # persistence probability
+phi <- 0.8 # persistence probability
 gamma <- 0.05 # colonization probability
 p <- 0.25 # probability of detection
 
@@ -200,8 +200,8 @@ stan_out_sim <- stan(stan_model,
                      cores = n_cores)
 
 print(stan_out_sim, digits = 3)
-saveRDS(stan_out_sim, "./simulation/stan_out_sim.rds")
-stan_out_sim <- readRDS("./simulation/stan_out_sim.rds")
+saveRDS(stan_out_sim, "./dynamic_occupancy_model/simulation/stan_out_sim.rds")
+stan_out_sim <- readRDS("./dynamic_occupancy_model/simulation/stan_out_sim.rds")
 
 traceplot(stan_out_sim, pars = c(
   "psi", "phi", "gamma", "p", "n_occ", "growthr", "turnover"

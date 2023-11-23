@@ -29,6 +29,7 @@ model {
   gamma ~ uniform(0,1);
   phi ~ uniform(0,1);
   p ~ uniform(0,1);
+  
    // likelihood
   for (r in 1:nsite){
     for (t in 1:nyear){
