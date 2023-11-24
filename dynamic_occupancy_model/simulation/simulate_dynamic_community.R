@@ -1,7 +1,7 @@
 library(tidyverse)
 
 ##------------------------------------------------------------------------------
-# 4.3 Simulation and Analysis of dynocc model
+# 4.3 Simulation and Analysis of the simplest dynocc model
 
 ## --------------------------------------------------
 ### Define simulation conditions
@@ -15,8 +15,14 @@ n_visits <- 6 # number of surveys per year
 psi1 <- 0.7 # prob of initial occupancy
 phi <- 0.8 # persistence probability
 gamma <- 0.05 # colonization probability
-p0 <- -1.5 # probability of detection (logit scaled)
-p_habitat_type <- 0.5 # increase in detection rate moving from one habitat type to the other (logit scaled)
+
+p0 <- -1.75 # probability of detection (logit scaled)
+p_habitat <- 0.5 # increase in detection rate moving from one habitat type to the other (logit scaled)
+p_date <- 0
+p_date_sq <- -0.5
+
+mean_survey_date <- 180
+sigma_survey_date <- 40
 
 # simulate missing data
 # for STAN will also need to make an NA indicator array
@@ -27,22 +33,28 @@ prob_missing <- 0.2 # if so, what proportion of data missing?
 ### Define simulation function
 
 simulate_data <- function(
-  n_sites, n_years, n_visits,
-  psi1, phi, gamma, 
-  p0, p_habitat_type,
-  create_missing_data, prob_missing
-  ){
+    n_sites, n_years, n_visits,
+    psi1, phi, gamma, 
+    p0, p_habitat_type,
+    p_date, p_date_sq,
+    mean_survey_date, sigma_survey_date,
+    create_missing_data, prob_missing
+){
   
   ## ilogit and logit functions
   ilogit <- function(x) exp(x)/(1+exp(x))
   logit <- function(x) log(x/(1-x))
   
+  ## predictor center scaling function
+  center_scale <- function(x) {
+    (x - mean(x)) / sd(x)
+  }
+  
   # choose sample sizes
   n_sites <- n_sites # number of sites
   n_years <- n_years # number of years
   n_visits <- n_visits # number of surveys per year
-  
-  habitat_type <- rep(c(0,1), each = n_sites / 2)
+
   
   # prepare arrays for z and y
   z <- array(NA, dim = c(n_sites, n_years)) # latent presence/absence
@@ -52,25 +64,46 @@ simulate_data <- function(
   psi1 <- psi1 # prob of initial occupancy
   phi <- phi # persistence probability
   gamma <- gamma # colonization probability
-  #p <- p # probability of detection
+  # p <- p # probability of detection
   (psi_eq <- gamma / (gamma+(1-phi))) # equilibrium occupancy rate
   
-  # p matrix (variable detection rate)
-  logit_p_matrix <- array(NA, dim =c(n_sites, n_years))
+  ## --------------------------------------------------
+  ## Create covariate data
   
-  # heterogeneity in parameters
+  ## day of year
+  # should have a value for each site*year*visit
+  date <- array(NA, dim =c(n_sites, n_years, n_visits))
+  mean_survey_date = mean_survey_date
+  sigma_survey_date = sigma_survey_date
   
-    for(site in 1:n_sites) { # for each interval
-      for(year in 1:n_years) { # for each species
-        #for(visit in 1:n_visits) { # for each visit (but sim constant rates across visits)
-          
-          logit_p_matrix[site, year] <- # detection is equal to 
-            p0 + # an intercept
-            p_habitat_type * habitat_type[site] # a spatial detection effect
-
-        #} # for each visit
-      } # for each year
-    } # for each site
+  for(site in 1:n_sites) { # for each site
+    for(n_years in 1:n_years) { # for each n_years
+      # create a vector of visit dates centered on the middle of the early summer
+      date[site, n_years, 1:n_visits] <- sort(as.integer(rnorm(
+        n_visits, mean = mean_survey_date, sd = sigma_survey_date))) 
+    }
+  }
+  
+  ## let's scale the calendar day of year by the mean date (z-score scaled)
+  date_scaled <- center_scale(date) 
+  
+  ## habitat type
+  habitat_type <- rep(c(0,1), each = n_sites / 2)
+  
+  logit_p <- array(NA, dim = c(n_sites, n_years, n_visits)) 
+  
+  for(j in 1:n_sites){
+    for(k in 1:n_years){
+      for(l in 1:n_visits){
+        
+        logit_p[j,k,l] = p0 +
+          p_habitat * habitat_type[j] +
+          p_date*date_scaled[j, k, l] + # a spatiotemporally specific intercept
+          p_date_sq*(date_scaled[j, k, l])^2 # a spatiotemporally specific intercept
+        
+      }
+    }
+  }
   
   # generate initial presence/absence states
   z[,1] <- rbinom(n=n_sites, size=1, prob=psi1) #
@@ -90,16 +123,16 @@ simulate_data <- function(
   }
   
   apply(z, 2, sum) / n_sites # true occupancy proportions in each year
-
+  
   # detection / non-detection data
   for(j in 1:n_sites){
     for(k in 1:n_years){
       for(l in 1:n_visits){
-        y[j,k,l] <- rbinom(n = 1, size = 1, prob = z[j,k]*ilogit(logit_p_matrix[j,k]))
+        y[j,k,l] <- rbinom(n = 1, size = 1, prob = z[j,k]*ilogit(logit_p[j,k,l]))
       }
     }
   }
-
+  
   y ; str(y)
   
   sum((y/n_visits) / sum(z)) # proportion of times detection given presence
@@ -144,7 +177,8 @@ simulate_data <- function(
     psi_fs = psi_fs,
     psi_obs = psi_obs,
     V = y2, # return detection data after potentially introducing NAs,
-    habitat_type = habitat_type
+    habitat_type = habitat_type,
+    date_scaled = date_scaled
   ))
   
 } # end function
@@ -158,6 +192,8 @@ my_simulated_data <- simulate_data(
   n_sites, n_years, n_visits,
   psi1, phi, gamma, 
   p0, p_habitat_type,
+  p_date, p_date_sq,
+  mean_survey_date, sigma_survey_date,
   create_missing_data, prob_missing)
 
 V <- my_simulated_data$V
@@ -165,6 +201,7 @@ habitat_type <- my_simulated_data$habitat_type
 psi <- my_simulated_data$psi
 psi_fs <- my_simulated_data$psi_fs
 psi_obs <- my_simulated_data$psi_obs
+date_scaled <- my_simulated_data$date_scaled
 
 # Plot trajectories of psi, psi_fs, psi_eq and psi_obs
 plot(1:n_years, psi, type = 'l', col = "red", lwd = 3, ylim = c(0,1), xlab = "Year",
@@ -177,91 +214,29 @@ legend('topright', c('True psi', 'True finite-sample psi', 'Equilibrium psi', 'O
        lwd = c(3,1,2,3), cex = 1.2, bty = 'n')
 
 
-## --------------------------------------------------
-### Prep data and tweak model options
-
-stan_data <- c("V", "habitat_type",
-               "n_sites", "n_years", "n_visits") 
-
-## Parameters monitored
-params <- c("psi", "phi", "gamma", "p0", "p_habitat_type", "n_occ", "growthr", "turnover")
-
-# MCMC settings
-n_iterations <- 600
-n_thin <- 1
-n_burnin <- 300
-n_chains <- 4
-n_cores <- n_chains
-
-# targets
-parameter_values <-  c(
-  psi1, "NA: is a vector", phi, (1-phi), gamma, p
-)
-
-
-
-## Initial values
-# given the number of parameters, the chains need some decent initial values
-# otherwise sometimes they have a hard time starting to sample
-inits <- lapply(1:n_chains, function(i)
-  
-  list(psi1 = runif(1, 0, 1),
-       p0 = runif(1, -1, 1),
-       p_habitat_type = runif(1, -1, 1)
-  )
-)
-
-targets <- as.data.frame(cbind(params, parameter_values))
-
-
-## --------------------------------------------------
-### Run model
-
-library(rstan)
-stan_model <- "./dynamic_occupancy_model/models/dynocc_model0.stan"
-
-## Call Stan from R
-stan_out_sim <- stan(stan_model,
-                     data = stan_data, 
-                     init = inits, 
-                     pars = params,
-                     chains = n_chains, iter = n_iterations, 
-                     warmup = n_burnin, thin = n_thin,
-                     seed = 1,
-                     open_progress = FALSE,
-                     cores = n_cores)
-
-print(stan_out_sim, digits = 3)
-saveRDS(stan_out_sim, "./dynamic_occupancy_model/simulation/stan_out_sim.rds")
-stan_out_sim <- readRDS("./dynamic_occupancy_model/simulation/stan_out_sim.rds")
-
-traceplot(stan_out_sim, pars = c(
-  "psi", "phi", "gamma", "p0", "n_occ", "growthr", "turnover"
-  ))
-
-
-
-
 # run simpler model
 ## --------------------------------------------------
 ### Prep data and tweak model options
 
-stan_data <- c("V", "habitat_type",
-               "n_sites", "n_years", "n_visits") 
+stan_data <- c("V", 
+               "n_sites", "n_years", "n_visits",
+               "habitat_type", "date_scaled") 
 
 ## Parameters monitored
-params <- c("psi", "phi", "gamma", "p0", "p_habitat_type", "n_occ", "growthr", "turnover")
+params <- c("phi", "gamma", "psi1",
+            "p0", "p_habitat", "p_date", "p_date_sq",
+            "T_rep", "T_obs", "P_site")
 
 # MCMC settings
-n_iterations <- 600
+n_iterations <- 1000
 n_thin <- 1
-n_burnin <- 300
+n_burnin <- 500
 n_chains <- 4
 n_cores <- n_chains
 
 # targets
 parameter_values <-  c(
-  psi1, "NA: is a vector", phi, (1-phi), gamma, p
+  phi, gamma, psi1, p0, p_habitat, p_date, p_date_sq, NA, NA, NA
 )
 
 
@@ -273,7 +248,9 @@ inits <- lapply(1:n_chains, function(i)
   
   list(psi1 = runif(1, 0, 1),
        p0 = runif(1, -1, 1),
-       p_habitat_type = runif(1, -1, 1)
+       p_habitat = runif(1, -1, 1),
+       p_date = runif(1, -1, 1),
+       p_date_sq = runif(1, -1, 1)
   )
 )
 
@@ -297,10 +274,45 @@ stan_out_sim <- stan(stan_model,
                      open_progress = FALSE,
                      cores = n_cores)
 
-print(stan_out_sim, digits = 3)
+print(stan_out_sim, digits = 3, 
+      pars = c("phi", "gamma", "psi1",
+               "p0", "p_habitat", "p_date", "p_date_sq"))
+
 saveRDS(stan_out_sim, "./dynamic_occupancy_model/simulation/stan_out_sim.rds")
 stan_out_sim <- readRDS("./dynamic_occupancy_model/simulation/stan_out_sim.rds")
 
 traceplot(stan_out_sim, pars = c(
-  "psi", "phi", "gamma", "p0", "n_occ", "growthr", "turnover"
+  "psi1", "phi", "gamma", "p0", "p_habitat"
 ))
+
+
+### PPC's
+
+print(stan_out_sim, digits = 3, pars = c("P_site"))
+
+fit_summary <- rstan::summary(stan_out_sim)
+View(cbind(1:nrow(fit_summary$summary), fit_summary$summary)) # View to see which row corresponds to the parameter of interest
+(mean_FTP <- mean(fit_summary$summary[308:457,1]))
+
+# as data frame
+list_of_draws <- as.data.frame(stan_out_sim)
+
+# Evaluation of fit 
+# site 1
+plot(list_of_draws[,8], list_of_draws[,158], main = "", xlab =
+       "Discrepancy actual data", ylab = "Discrepancy replicate data",
+     frame.plot = FALSE,
+     ylim = c(0, 100),
+     xlim = c(0, 100))
+
+abline(0, 1, lwd = 2, col = "black")
+
+# site 2
+plot(list_of_draws[,9], list_of_draws[,159], main = "", xlab =
+       "Discrepancy actual data", ylab = "Discrepancy replicate data",
+     frame.plot = FALSE,
+     ylim = c(0, 100),
+     xlim = c(0, 100))
+
+abline(0, 1, lwd = 2, col = "black")
+

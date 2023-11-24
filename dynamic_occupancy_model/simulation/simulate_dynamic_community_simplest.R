@@ -1,4 +1,3 @@
-library(tidyverse)
 
 ##------------------------------------------------------------------------------
 # 4.3 Simulation and Analysis of the simplest dynocc model
@@ -7,13 +6,14 @@ library(tidyverse)
 ### Define simulation conditions
 
 # choose sample sizes and 
-n_sites <- 100 # number of sites
+n_sites <- 150 # number of sites
 n_years <- 7 # number of years
 n_visits <- 6 # number of surveys per year
 
 # set parameter values
 psi1 <- 0.7 # prob of initial occupancy
-phi <- 0.8 # persistence probability
+phi0 <- 0.75 # persistence probability
+phi_habitat <- 0.15 # persistence probability
 gamma <- 0.05 # colonization probability
 
 p0 <- -1.75 # probability of detection (logit scaled)
@@ -34,7 +34,7 @@ prob_missing <- 0.2 # if so, what proportion of data missing?
 
 simulate_data <- function(
     n_sites, n_years, n_visits,
-    psi1, phi, gamma, 
+    psi1, phi0, phi_habitat, gamma, 
     p0, p_habitat_type,
     p_date, p_date_sq,
     mean_survey_date, sigma_survey_date,
@@ -62,7 +62,8 @@ simulate_data <- function(
   
   # set parameter values
   psi1 <- psi1 # prob of initial occupancy
-  phi <- phi # persistence probability
+  phi0 <- phi0 # persistence probability
+  phi_habitat <- phi_habitat # effect of habitat type on persistence
   gamma <- gamma # colonization probability
   # p <- p # probability of detection
   (psi_eq <- gamma / (gamma+(1-phi))) # equilibrium occupancy rate
@@ -90,6 +91,7 @@ simulate_data <- function(
   ## habitat type
   habitat_type <- rep(c(0,1), each = n_sites / 2)
   
+  # generate p with heterogeneity
   logit_p <- array(NA, dim = c(n_sites, n_years, n_visits)) 
   
   for(j in 1:n_sites){
@@ -108,6 +110,18 @@ simulate_data <- function(
   # generate initial presence/absence states
   z[,1] <- rbinom(n=n_sites, size=1, prob=psi1) #
   sum(z[,1]) / n_sites # true occupancy proportion in year 1
+  
+  # generate p with heterogeneity
+  logit_phi <- array(NA, dim = c(n_sites, n_years)) 
+  
+  for(j in 1:n_sites){
+    for(k in 1:n_years){
+
+        logit_pphi[j,k] = phi0 +
+          phi_habitat * habitat_type[j] 
+        
+    }
+  }
   
   # generate presence/absence in subsequent years
   for(k in 2:n_years){
@@ -190,7 +204,7 @@ simulate_data <- function(
 set.seed(1)
 my_simulated_data <- simulate_data(  
   n_sites, n_years, n_visits,
-  psi1, phi, gamma, 
+  psi1, phi0, phi_habitat, gamma, 
   p0, p_habitat_type,
   p_date, p_date_sq,
   mean_survey_date, sigma_survey_date,
