@@ -15,8 +15,8 @@ n_visits <- 6 # number of surveys per year
 psi1 <- 0.7 # prob of initial occupancy
 phi <- 0.8 # persistence probability
 gamma <- 0.05 # colonization probability
-p <- 0.25
-p0 <- -1.5 # probability of detection (logit scaled)
+
+p0 <- -1.75 # probability of detection (logit scaled)
 p_habitat <- 0.5 # increase in detection rate moving from one habitat type to the other (logit scaled)
 p_date <- 0
 p_date_sq <- -0.5
@@ -35,7 +35,7 @@ prob_missing <- 0.2 # if so, what proportion of data missing?
 simulate_data <- function(
     n_sites, n_years, n_visits,
     psi1, phi, gamma, 
-    p, p0, p_habitat_type,
+    p0, p_habitat_type,
     p_date, p_date_sq,
     mean_survey_date, sigma_survey_date,
     create_missing_data, prob_missing
@@ -191,7 +191,7 @@ set.seed(1)
 my_simulated_data <- simulate_data(  
   n_sites, n_years, n_visits,
   psi1, phi, gamma, 
-  p, p0, p_habitat_type,
+  p0, p_habitat_type,
   p_date, p_date_sq,
   mean_survey_date, sigma_survey_date,
   create_missing_data, prob_missing)
@@ -224,18 +224,19 @@ stan_data <- c("V",
 
 ## Parameters monitored
 params <- c("phi", "gamma", "psi1",
-            "p0", "p_habitat", "p_date", "p_date_sq")
+            "p0", "p_habitat", "p_date", "p_date_sq",
+            "T_rep", "T_obs", "P_site")
 
 # MCMC settings
-n_iterations <- 600
+n_iterations <- 1000
 n_thin <- 1
-n_burnin <- 300
+n_burnin <- 500
 n_chains <- 4
 n_cores <- n_chains
 
 # targets
 parameter_values <-  c(
-  phi, gamma, psi1, p0, p_habitat, p_date, p_date_sq
+  phi, gamma, psi1, p0, p_habitat, p_date, p_date_sq, NA, NA, NA
 )
 
 
@@ -273,10 +274,45 @@ stan_out_sim <- stan(stan_model,
                      open_progress = FALSE,
                      cores = n_cores)
 
-print(stan_out_sim, digits = 3)
+print(stan_out_sim, digits = 3, 
+      pars = c("phi", "gamma", "psi1",
+               "p0", "p_habitat", "p_date", "p_date_sq"))
+
 saveRDS(stan_out_sim, "./dynamic_occupancy_model/simulation/stan_out_sim.rds")
 stan_out_sim <- readRDS("./dynamic_occupancy_model/simulation/stan_out_sim.rds")
 
 traceplot(stan_out_sim, pars = c(
   "psi1", "phi", "gamma", "p0", "p_habitat"
 ))
+
+
+### PPC's
+
+print(stan_out_sim, digits = 3, pars = c("P_site"))
+
+fit_summary <- rstan::summary(stan_out_sim)
+View(cbind(1:nrow(fit_summary$summary), fit_summary$summary)) # View to see which row corresponds to the parameter of interest
+(mean_FTP <- mean(fit_summary$summary[308:457,1]))
+
+# as data frame
+list_of_draws <- as.data.frame(stan_out_sim)
+
+# Evaluation of fit 
+# site 1
+plot(list_of_draws[,8], list_of_draws[,158], main = "", xlab =
+       "Discrepancy actual data", ylab = "Discrepancy replicate data",
+     frame.plot = FALSE,
+     ylim = c(0, 100),
+     xlim = c(0, 100))
+
+abline(0, 1, lwd = 2, col = "black")
+
+# site 2
+plot(list_of_draws[,9], list_of_draws[,159], main = "", xlab =
+       "Discrepancy actual data", ylab = "Discrepancy replicate data",
+     frame.plot = FALSE,
+     ylim = c(0, 100),
+     xlim = c(0, 100))
+
+abline(0, 1, lwd = 2, col = "black")
+
