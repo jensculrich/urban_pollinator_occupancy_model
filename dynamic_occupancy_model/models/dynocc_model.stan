@@ -24,17 +24,34 @@ data {
 
 parameters {
   
+  real<lower=0, upper=1> psi1;
+  real<lower=0,upper=1> gamma;
+  real phi0;
+  real phi_habitat;
+  
   real p0;
   real p_habitat;
   real p_date;
   real p_date_sq;
-  real<lower=0,upper=1> gamma;
-  real<lower=0,upper=1> phi;
-  real<lower=0, upper=1> psi1;
+
    
 }
 
 transformed parameters {
+   
+   // logit scale phi
+   real phi[n_sites, n_years]; // odds of persistence
+   
+   for(j in 1:n_sites){    // loop across all sites
+    for(k in 1:n_years){ // loop across all intervals
+
+      phi[j,k] = inv_logit( // the inverse of the log odds of detection is equal to..
+        phi0 + # an intercept
+        phi_habitat * habitat_type[j] # a spatial detection effect
+        ); // end phi[j,k]
+           
+    } // end loop across all intervals
+  } // end loop across all sites
    
    // construct an occurrence matrix
    matrix[n_sites, n_years] psi;
@@ -46,7 +63,7 @@ transformed parameters {
        } else { // describe temporally autocorrelated system dynamics
           // As psi approaches 1, there's a weighted switch on phi (survival)
           // As psi approaches 0, there's a weighted switch on gamma (colonization)
-          psi[j, k] = psi[j, k-1] * phi + (1 - psi[j, k-1]) * gamma; 
+          psi[j, k] = psi[j, k-1] * phi[j,k] + (1 - psi[j, k-1]) * gamma; 
        } 
      }
    }
@@ -75,7 +92,8 @@ model {
   // priors
   psi1 ~ uniform(0,1);
   gamma ~ uniform(0,1);
-  phi ~ uniform(0,1);
+  phi0 ~ normal(0,2);
+  phi_habitat ~ normal(0,2);
   
   p0 ~ normal(0,2);
   p_habitat ~ normal(0,2);

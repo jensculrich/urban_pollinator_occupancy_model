@@ -1,19 +1,16 @@
-library(tidyverse)
-
-##------------------------------------------------------------------------------
-# 4.3 Simulation and Analysis of the simplest dynocc model
 
 ## --------------------------------------------------
 ### Define simulation conditions
 
 # choose sample sizes and 
-n_sites <- 100 # number of sites
-n_years <- 7 # number of years
+n_sites <- 150 # number of sites
+n_years <- 10 # number of years
 n_visits <- 6 # number of surveys per year
 
 # set parameter values
 psi1 <- 0.7 # prob of initial occupancy
-phi <- 0.8 # persistence probability
+phi0 <- 1 # persistence probability
+phi_habitat <- 0.5 # persistence probability
 gamma <- 0.05 # colonization probability
 
 p0 <- -1.75 # probability of detection (logit scaled)
@@ -34,7 +31,7 @@ prob_missing <- 0.2 # if so, what proportion of data missing?
 
 simulate_data <- function(
     n_sites, n_years, n_visits,
-    psi1, phi, gamma, 
+    psi1, phi0, phi_habitat, gamma, 
     p0, p_habitat_type,
     p_date, p_date_sq,
     mean_survey_date, sigma_survey_date,
@@ -54,7 +51,7 @@ simulate_data <- function(
   n_sites <- n_sites # number of sites
   n_years <- n_years # number of years
   n_visits <- n_visits # number of surveys per year
-
+  
   
   # prepare arrays for z and y
   z <- array(NA, dim = c(n_sites, n_years)) # latent presence/absence
@@ -62,10 +59,11 @@ simulate_data <- function(
   
   # set parameter values
   psi1 <- psi1 # prob of initial occupancy
-  phi <- phi # persistence probability
+  phi0 <- phi0 # persistence probability
+  phi_habitat <- phi_habitat # effect of habitat type on persistence
   gamma <- gamma # colonization probability
   # p <- p # probability of detection
-  (psi_eq <- gamma / (gamma+(1-phi))) # equilibrium occupancy rate
+  (psi_eq <- gamma / (gamma+(1-phi0))) # equilibrium occupancy rate (no covariates)
   
   ## --------------------------------------------------
   ## Create covariate data
@@ -90,6 +88,7 @@ simulate_data <- function(
   ## habitat type
   habitat_type <- rep(c(0,1), each = n_sites / 2)
   
+  # generate p with heterogeneity
   logit_p <- array(NA, dim = c(n_sites, n_years, n_visits)) 
   
   for(j in 1:n_sites){
@@ -109,17 +108,32 @@ simulate_data <- function(
   z[,1] <- rbinom(n=n_sites, size=1, prob=psi1) #
   sum(z[,1]) / n_sites # true occupancy proportion in year 1
   
+  # generate p with heterogeneity
+  logit_phi <- array(NA, dim = c(n_sites, n_years)) 
+  
+  for(j in 1:n_sites){
+    for(k in 1:n_years){
+      
+      logit_phi[j,k] = phi0 +
+        phi_habitat * habitat_type[j] 
+      
+    }
+  }
+  
   # generate presence/absence in subsequent years
-  for(k in 2:n_years){
+  for(j in 1:n_sites){
+    for(k in 2:n_years){
     
-    # use z as a switch so we are estimating 
-    exp_z <- z[,k-1] * phi + # survival if z=1
-      (1 - z[,k-1]) * gamma # or colonization if z=0
+      # use z as a switch so we are estimating 
+      exp_z <- z[j,k-1] * ilogit(logit_phi[j,k]) + # survival if z=1
+        (1 - z[j,k-1]) * gamma # or colonization if z=0
+      
+      # and then assign z stochastically
+      # some sites may transition if they are colonized or local extinction occurs
+      # but might otherwise retain their state across years
+      z[,k] <- rbinom(n = n_sites, size = 1, prob = exp_z) 
     
-    # and then assign z stochastically
-    # some sites may transition if they are colonized or local extinction occurs
-    # but might otherwise retain their state across years
-    z[,k] <- rbinom(n = n_sites, size = 1, prob = exp_z) 
+    }
   }
   
   apply(z, 2, sum) / n_sites # true occupancy proportions in each year
@@ -160,9 +174,11 @@ simulate_data <- function(
   
   # compute true expected and realized occupancy (psi and psi_fs)
   psi <- numeric(n_years) ; psi[1] <- psi1
-  for(t in 2:n_years){ # compute true values of psi
-    psi[t] <- psi[t-1] * phi + (1 - psi[t-1]) * gamma
-  }
+  
+    for(k in 2:n_years){ # compute true values of psi
+      psi[k] <- psi[k-1] * mean(logit_phi[,k]) + (1 - psi[k-1]) * gamma
+    }
+
   psi_fs <- colSums(z) / n_sites # psi finite sample
   
   # compute observed occupancy proportion
@@ -190,7 +206,7 @@ simulate_data <- function(
 set.seed(1)
 my_simulated_data <- simulate_data(  
   n_sites, n_years, n_visits,
-  psi1, phi, gamma, 
+  psi1, phi0, phi_habitat, gamma, 
   p0, p_habitat_type,
   p_date, p_date_sq,
   mean_survey_date, sigma_survey_date,
@@ -214,7 +230,6 @@ legend('topright', c('True psi', 'True finite-sample psi', 'Equilibrium psi', 'O
        lwd = c(3,1,2,3), cex = 1.2, bty = 'n')
 
 
-# run simpler model
 ## --------------------------------------------------
 ### Prep data and tweak model options
 
@@ -223,7 +238,7 @@ stan_data <- c("V",
                "habitat_type", "date_scaled") 
 
 ## Parameters monitored
-params <- c("phi", "gamma", "psi1",
+params <- c("psi1", "phi0", "phi_habitat", "gamma", 
             "p0", "p_habitat", "p_date", "p_date_sq",
             "T_rep", "T_obs", "P_site")
 
@@ -236,7 +251,7 @@ n_cores <- n_chains
 
 # targets
 parameter_values <-  c(
-  phi, gamma, psi1, p0, p_habitat, p_date, p_date_sq, NA, NA, NA
+  psi1, phi0, phi_habitat, gamma, p0, p_habitat, p_date, p_date_sq, NA, NA, NA
 )
 
 
@@ -261,7 +276,7 @@ targets <- as.data.frame(cbind(params, parameter_values))
 ### Run model
 
 library(rstan)
-stan_model <- "./dynamic_occupancy_model/models/dynocc_model_simplest.stan"
+stan_model <- "./dynamic_occupancy_model/models/dynocc_model.stan"
 
 ## Call Stan from R
 stan_out_sim <- stan(stan_model,
