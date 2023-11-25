@@ -9,12 +9,12 @@ n_visits <- 6 # number of surveys per year
 
 # set parameter values
 psi1 <- 0.7 # prob of initial occupancy
-phi0 <- 1 # persistence probability
-phi_habitat <- 0.5 # persistence probability
+phi0 <- 0.75 # persistence probability
+phi_habitat <- 1.5 # persistence probability
 gamma <- 0.05 # colonization probability
 
-p0 <- -1.75 # probability of detection (logit scaled)
-p_habitat <- 0.5 # increase in detection rate moving from one habitat type to the other (logit scaled)
+p0 <- -1.25 # probability of detection (logit scaled)
+p_habitat <- -0.5 # increase in detection rate moving from one habitat type to the other (logit scaled)
 p_date <- 0
 p_date_sq <- -0.5
 
@@ -63,7 +63,8 @@ simulate_data <- function(
   phi_habitat <- phi_habitat # effect of habitat type on persistence
   gamma <- gamma # colonization probability
   # p <- p # probability of detection
-  (psi_eq <- gamma / (gamma+(1-phi0))) # equilibrium occupancy rate (no covariates)
+  (psi_eq_habitat0 <- gamma / (gamma+(1-ilogit(phi0 + phi_habitat*0)))) # equilibrium occupancy rate 
+  (psi_eq_habitat1 <- gamma / (gamma+(1-ilogit(phi0 + phi_habitat*1)))) # equilibrium occupancy rate
   
   ## --------------------------------------------------
   ## Create covariate data
@@ -120,6 +121,7 @@ simulate_data <- function(
     }
   }
   
+  
   # generate presence/absence in subsequent years
   for(j in 1:n_sites){
     for(k in 2:n_years){
@@ -131,12 +133,15 @@ simulate_data <- function(
       # and then assign z stochastically
       # some sites may transition if they are colonized or local extinction occurs
       # but might otherwise retain their state across years
-      z[,k] <- rbinom(n = n_sites, size = 1, prob = exp_z) 
+      z[j,k] <- rbinom(n = 1, size = 1, prob = exp_z) 
     
     }
   }
   
   apply(z, 2, sum) / n_sites # true occupancy proportions in each year
+  
+  apply(z[1:(n_sites/2),], 2, sum) # true occupancy proportions in each year
+  apply(z[(n_sites/2+1):n_sites,], 2, sum) # true occupancy proportions in each year
   
   # detection / non-detection data
   for(j in 1:n_sites){
@@ -173,25 +178,37 @@ simulate_data <- function(
   # _ sites with no visits, _ with 1 visit, and _ with 2 visits through 7 visits
   
   # compute true expected and realized occupancy (psi and psi_fs)
-  psi <- numeric(n_years) ; psi[1] <- psi1
+  psi_habitat0 <- numeric(n_years) ; psi_habitat0[1] <- psi1
+  psi_habitat1 <- numeric(n_years) ; psi_habitat1[1] <- psi1
   
     for(k in 2:n_years){ # compute true values of psi
-      psi[k] <- psi[k-1] * mean(logit_phi[,k]) + (1 - psi[k-1]) * gamma
+      psi_habitat0[k] <- psi_habitat0[k-1] * ilogit(phi0) + (1 - psi_habitat0[k-1]) * gamma
+    }
+  
+    for(k in 2:n_years){ # compute true values of psi
+      psi_habitat1[k] <- psi_habitat1[k-1] * ilogit(phi0 + phi_habitat) + (1 - psi_habitat1[k-1]) * gamma
     }
 
-  psi_fs <- colSums(z) / n_sites # psi finite sample
+  psi_fs_habitat0 <- colSums(z[1:(n_sites/2),]) / (n_sites/2) # psi finite sample
+  psi_fs_habitat1 <- colSums(z[(n_sites/2+1):n_sites,]) / (n_sites/2) # psi finite sample
   
   # compute observed occupancy proportion
   zobs <- apply(y2, c(1,2), function(x) max(x, na.rm = TRUE))
   zobs[zobs == "-Inf"] <- NA
-  psi_obs <- apply(zobs, 2, sum, na.rm = TRUE) / apply(zobs, 2, function(x) sum(!is.na(x)))
+  psi_obs_habitat0 <- apply(zobs[1:(n_sites/2),], 2, sum, na.rm = TRUE) / apply(zobs, 2, function(x) sum(!is.na(x)))
+  psi_obs_habitat1 <- apply(zobs[(n_sites/2+1):n_sites,], 2, sum, na.rm = TRUE) / apply(zobs, 2, function(x) sum(!is.na(x)))
   
   ## --------------------------------------------------
   # Return stuff
   return(list(
-    psi = psi,
-    psi_fs = psi_fs,
-    psi_obs = psi_obs,
+    psi_habitat0 = psi_habitat0,
+    psi_habitat1 = psi_habitat1,
+    psi_fs_habitat0 = psi_fs_habitat0,
+    psi_fs_habitat1 = psi_fs_habitat1,
+    psi_obs_habitat0 = psi_obs_habitat0,
+    psi_obs_habitat1 = psi_obs_habitat1,
+    psi_eq_habitat0 = psi_eq_habitat0,
+    psi_eq_habitat1 = psi_eq_habitat1,
     V = y2, # return detection data after potentially introducing NAs,
     habitat_type = habitat_type,
     date_scaled = date_scaled
@@ -214,20 +231,37 @@ my_simulated_data <- simulate_data(
 
 V <- my_simulated_data$V
 habitat_type <- my_simulated_data$habitat_type
-psi <- my_simulated_data$psi
-psi_fs <- my_simulated_data$psi_fs
-psi_obs <- my_simulated_data$psi_obs
+psi_habitat0 <- my_simulated_data$psi_habitat0
+psi_habitat1 <- my_simulated_data$psi_habitat1
+psi_fs_habitat0 <- my_simulated_data$psi_fs_habitat0
+psi_fs_habitat1 <- my_simulated_data$psi_fs_habitat1
+psi_obs_habitat0 <- my_simulated_data$psi_obs_habitat0
+psi_obs_habitat1 <- my_simulated_data$psi_obs_habitat1
+psi_eq_habitat0 <- my_simulated_data$psi_eq_habitat0
+psi_eq_habitat1 <- my_simulated_data$psi_eq_habitat1
 date_scaled <- my_simulated_data$date_scaled
 
 # Plot trajectories of psi, psi_fs, psi_eq and psi_obs
-plot(1:n_years, psi, type = 'l', col = "red", lwd = 3, ylim = c(0,1), xlab = "Year",
+plot(1:n_years, psi_habitat0, type = 'l', col = "red3", lwd = 3, ylim = c(0,1), xlab = "Year",
      ylab = "Occupancy of Species speciosa", frame = F)
-points(1:n_years, psi_fs, type = 'b', col = "red", pch = 16, cex = 2)
-abline(h = gamma / (gamma+(1-phi)), lty = 2)
-lines(1:n_years, psi_obs, col = "blue", lwd = 3)
-legend('topright', c('True psi', 'True finite-sample psi', 'Equilibrium psi', 'Observed psi'),
-       col = c('red', 'red', 'black', 'blue'), pch = c(NA, 16, NA, NA), lty = c(1,1,2,1),
-       lwd = c(3,1,2,3), cex = 1.2, bty = 'n')
+lines(psi_habitat1, type = 'l', col = "blue", lwd = 3)
+points(1:n_years, psi_fs_habitat0, type = 'b', col = "red3", pch = 16, cex = 2)
+points(1:n_years, psi_fs_habitat1, type = 'b', col = "blue", pch = 16, cex = 2)
+abline(h = psi_eq_habitat0, lty = 2, col = "red3")
+abline(h = psi_eq_habitat1, lty = 2, col = "blue")
+lines(1:n_years, psi_obs_habitat0, col = "red", lwd = 3)
+lines(1:n_years, psi_obs_habitat1, col = "lightblue", lwd = 3)
+
+legend('topright', c('True psi hab0', 'True psi hab1', 
+                     'Finite-sample psi hab0', 'Finite-sample psi hab1', 
+                     'Equilibrium psi hab0', 'Equilibrium psi hab1', 
+                     'Observed psi hab0', 'Observed psi hab1'),
+       col = c('red3', 'blue', 
+               'red3', 'blue',
+               'red3', 'blue',
+               'red', 'lightblue'
+               ), pch = c(NA, NA, 16, 16, NA, NA, NA, NA), lty = c(1,1,1,1,2,2,1,1),
+       lwd = c(3,3,1,1,2,2,3,3), cex = 1.2, bty = 'n')
 
 
 ## --------------------------------------------------
@@ -290,14 +324,14 @@ stan_out_sim <- stan(stan_model,
                      cores = n_cores)
 
 print(stan_out_sim, digits = 3, 
-      pars = c("phi", "gamma", "psi1",
+      pars = c("phi0", "phi_habitat", "gamma", "psi1",
                "p0", "p_habitat", "p_date", "p_date_sq"))
 
 saveRDS(stan_out_sim, "./dynamic_occupancy_model/simulation/stan_out_sim.rds")
 stan_out_sim <- readRDS("./dynamic_occupancy_model/simulation/stan_out_sim.rds")
 
 traceplot(stan_out_sim, pars = c(
-  "psi1", "phi", "gamma", "p0", "p_habitat"
+  "psi1", "phi0", "phi_habitat", "gamma", "p0", "p_habitat"
 ))
 
 

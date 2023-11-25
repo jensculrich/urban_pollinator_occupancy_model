@@ -45,9 +45,9 @@ transformed parameters {
    for(j in 1:n_sites){    // loop across all sites
     for(k in 1:n_years){ // loop across all intervals
 
-      phi[j,k] = inv_logit( // the inverse of the log odds of detection is equal to..
+      phi[j,k] = inv_logit( // probability (0-1) of persistence is equal to..
         phi0 + # an intercept
-        phi_habitat * habitat_type[j] # a spatial detection effect
+        phi_habitat * habitat_type[j] # a spatial persistence effect
         ); // end phi[j,k]
            
     } // end loop across all intervals
@@ -74,7 +74,7 @@ transformed parameters {
     for(k in 1:n_years){ // loop across all intervals
       for(l in 1:n_visits){ // loop across all visits
         
-        p[j,k,l] = inv_logit( // the inverse of the log odds of detection is equal to..
+        p[j,k,l] = inv_logit( // probability (0-1) of detection is equal to..
           p0 + # an intercept
           p_habitat * habitat_type[j] + # a spatial detection effect
           p_date * date_scaled[j,k,l] + # a spatial detection effect
