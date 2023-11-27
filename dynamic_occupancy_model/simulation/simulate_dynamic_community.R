@@ -3,17 +3,22 @@
 ### Define simulation conditions
 
 # choose sample sizes and 
-n_species <- 60 # number of species
-n_sites <- 60 # number of sites
-n_years <- 7 # number of years
+n_species <- 80 # number of species
+n_sites <- 60 # number of sites (must be an even number for simulation code)
+n_years <- 10 # number of years
 n_visits <- 6 # number of surveys per year
 
 # set parameter values
-psi1 <- 0.7 # prob of initial occupancy
+psi1_0 <- 0.75 # prob of initial occupancy
+sigma_psi1_species <- 1 # prob of initial occupancy
+psi1_habitat <- 0.5 # persistence probability
+
+gamma <- 0.075 # colonization probability
+
 phi0 <- 1 # persistence probability
 sigma_phi_species <- 1 # species-specific variation
 phi_habitat <- 1.5 # persistence probability
-gamma <- 0.075 # colonization probability
+
 
 p0 <- 0.5 # probability of detection (logit scaled)
 sigma_p_species <- 1 # species-specific variation
@@ -36,7 +41,9 @@ prob_missing <- 0.2 # if so, what proportion of data missing?
 
 simulate_data <- function(
     n_species, n_sites, n_years, n_visits,
-    psi1, phi0, sigma_phi_species, phi_habitat, gamma, 
+    psi1_0, sigma_psi1_species, psi1_habitat, 
+    gamma,
+    phi0, sigma_phi_species, phi_habitat, 
     p0, sigma_p_species, p_habitat_type,
     mu_p_species_date, sigma_p_species_date, mu_p_species_date_sq, sigma_p_species_date_sq,
     mean_survey_date, sigma_survey_date,
@@ -63,11 +70,16 @@ simulate_data <- function(
   y <- array(NA, dim = c(n_species, n_sites, n_years, n_visits)) # observed data
   
   # set parameter values
-  psi1 <- psi1 # prob of initial occupancy
+  psi1_0 <- psi1_0 # prob of initial occupancy
+  sigma_psi1_species <- sigma_psi1_species # species-specific variation
+  psi1_habitat <- psi1_habitat # effect of habitat type on persistence
+  
+  gamma <- gamma # colonization probability
+  
   phi0 <- phi0 # persistence probability
   sigma_phi_species <- sigma_phi_species # species-specific variation
   phi_habitat <- phi_habitat # effect of habitat type on persistence
-  gamma <- gamma # colonization probability
+
   # p <- p # probability of detection
   # equilibrium occupancy rate (for the average species)
   (psi_eq_habitat0 <- gamma / (gamma+(1-ilogit(phi0 + phi_habitat*0)))) # equilibrium occupancy rate 
@@ -101,6 +113,8 @@ simulate_data <- function(
   ## Create random effects
   
   ## species-specific random intercepts
+  psi1_species <- rnorm(n=n_species, mean=psi1_0, sd=sigma_psi1_species)
+  
   phi_species <- rnorm(n=n_species, mean=phi0, sd=sigma_phi_species)
   
   p_species <- rnorm(n=n_species, mean=p0, sd=sigma_p_species)
@@ -132,16 +146,17 @@ simulate_data <- function(
   }
 
   
-  # generate initial presence/absence states
-  z[,,1] <- rbinom(n=n_sites, size=1, prob=psi1) #
-  sum(z[,,1]) / n_sites # true occupancy proportion in year 1
-  
-  # generate p with heterogeneity
+  # generate ecological expected values with heterogeneity
+  logit_psi1 <- array(NA, dim = c(n_species, n_sites)) 
   logit_phi <- array(NA, dim = c(n_species, n_sites, n_years)) 
   
   for(i in 1:n_species){
     for(j in 1:n_sites){
       for(k in 1:n_years){
+        
+        logit_psi1[i,j] = 
+          psi1_species[i] +
+          psi1_habitat * habitat_type[j] 
         
         logit_phi[i,j,k] = 
           phi_species[i] +
@@ -151,7 +166,14 @@ simulate_data <- function(
     } 
   }
 
-  
+  # generate initial presence/absence states
+  for(i in 1:n_species){
+    for(j in 1:n_sites){
+      z[i,j,1] <- rbinom(n=1, size=1, prob=ilogit(logit_psi1[i,j])) 
+    }
+  }
+
+  sum(z[,,1]) / n_sites # true occupancy proportion in year 1
   
   # generate presence/absence in subsequent years
   for(i in 1:n_species){
@@ -171,11 +193,10 @@ simulate_data <- function(
     }    
   }
 
+  apply(z, 3, sum) / n_sites # true occupancy proportions in each year
   
-  apply(z, 2, sum) / n_sites # true occupancy proportions in each year
-  
-  apply(z[,1:(n_sites/2),], 3, sum) # true occupancy proportions in each year
-  apply(z[,(n_sites/2+1):n_sites,], 3, sum) # true occupancy proportions in each year
+  apply(z[,1:(n_sites/2),], 3, sum) / (n_sites / 2) # true occupancy proportions in each year
+  apply(z[,(n_sites/2+1):n_sites,], 3, sum) / (n_sites / 2) # true occupancy proportions in each year
   
   # detection / non-detection data
   for(i in 1:n_species){
@@ -214,8 +235,8 @@ simulate_data <- function(
   # _ sites with no visits, _ with 1 visit, and _ with 2 visits through 7 visits
   
   # compute true expected and realized occupancy (psi and psi_fs)
-  psi_habitat0 <- numeric(n_years) ; psi_habitat0[1] <- psi1
-  psi_habitat1 <- numeric(n_years) ; psi_habitat1[1] <- psi1
+  psi_habitat0 <- numeric(n_years) ; psi_habitat0[1] <- ilogit(psi1_0)
+  psi_habitat1 <- numeric(n_years) ; psi_habitat1[1] <- ilogit(psi1_0 + psi1_habitat)
   
   # expected for the average species across the two habitat types
     for(k in 2:n_years){ # compute true values of psi
@@ -263,7 +284,9 @@ simulate_data <- function(
 set.seed(1)
 my_simulated_data <- simulate_data(  
   n_species, n_sites, n_years, n_visits,
-  psi1, phi0, sigma_phi_species, phi_habitat, gamma, 
+  psi1_0, sigma_psi1_species, psi1_habitat, 
+  gamma,
+  phi0, sigma_phi_species, phi_habitat, 
   p0, sigma_p_species, p_habitat_type,
   mu_p_species_date, sigma_p_species_date, mu_p_species_date_sq, sigma_p_species_date_sq,
   mean_survey_date, sigma_survey_date,
@@ -315,7 +338,9 @@ stan_data <- c("V", "species",
                "habitat_type", "date_scaled") 
 
 ## Parameters monitored
-params <- c("psi1", "phi0", "sigma_phi_species", "phi_habitat", "gamma", 
+params <- c("psi1_0",  "sigma_psi1_species", "psi1_habitat", 
+            "gamma", 
+            "phi0", "sigma_phi_species", "phi_habitat", 
             "p0", "sigma_p_species", "p_habitat", 
             "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq",
             "T_rep", "T_obs", "P_species")
@@ -329,7 +354,9 @@ n_cores <- n_chains
 
 # targets
 parameter_values <-  c(
-  psi1, phi0, sigma_phi_species, phi_habitat, gamma, 
+  psi1_0, sigma_psi1_species, psi1_habitat,
+  gamma, 
+  phi0, sigma_phi_species, phi_habitat,
   p0, sigma_p_species, p_habitat, 
   mu_p_species_date, sigma_p_species_date, mu_p_species_date_sq, sigma_p_species_date_sq,
   NA, NA, NA
@@ -342,7 +369,9 @@ parameter_values <-  c(
 # otherwise sometimes they have a hard time starting to sample
 inits <- lapply(1:n_chains, function(i)
   
-  list(psi1 = runif(1, 0, 1),
+  list(psi1_0 = runif(1, -1, 1),
+       sigma_psi1_species = runif(1, 0, 1),
+       psi1_habitat = runif(1, -1, 1),
        phi0 = runif(1, -1, 1),
        sigma_phi_species = runif(1, 0, 1),
        phi_habitat = runif(1, -1, 1),
@@ -377,7 +406,9 @@ stan_out_sim <- stan(stan_model,
                      cores = n_cores)
 
 print(stan_out_sim, digits = 3, 
-      pars = c("psi1", "phi0", "sigma_phi_species", "phi_habitat", "gamma", 
+      pars = c("psi1_0",  "sigma_psi1_species", "psi1_habitat", 
+               "gamma", 
+               "phi0", "sigma_phi_species", "phi_habitat",  
                "p0", "sigma_p_species", "p_habitat", 
                "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq"))
 
@@ -385,7 +416,9 @@ saveRDS(stan_out_sim, "./dynamic_occupancy_model/simulation/stan_out_sim.rds")
 stan_out_sim <- readRDS("./dynamic_occupancy_model/simulation/stan_out_sim.rds")
 
 traceplot(stan_out_sim, pars = c(
-  "phi0", "sigma_phi_species", "phi_habitat", "gamma", "psi1"
+  "psi1_0",  "sigma_psi1_species", "psi1_habitat", 
+  "gamma", 
+  "phi0", "sigma_phi_species", "phi_habitat"
 ))
 
 traceplot(stan_out_sim, pars = c(
@@ -399,20 +432,22 @@ print(stan_out_sim, digits = 3, pars = c("P_species"))
 
 fit_summary <- rstan::summary(stan_out_sim)
 View(cbind(1:nrow(fit_summary$summary), fit_summary$summary)) # View to see which row corresponds to the parameter of interest
-(mean_FTP <- mean(fit_summary$summary[308:457,1]))
+(mean_FTP <- mean(fit_summary$summary[:,1]))
 
 # as data frame
 list_of_draws <- as.data.frame(stan_out_sim)
 
 # Evaluation of fit 
 # species 1
-plot(list_of_draws[,161], list_of_draws[,11], main = "", xlab =
+plot(list_of_draws[,95], list_of_draws[,15], main = "", xlab =
        "Discrepancy actual data", ylab = "Discrepancy replicate data",
      frame.plot = FALSE,
-     ylim = c(0, 1000),
-     xlim = c(0, 1000))
+     ylim = c(0, 2000),
+     xlim = c(0, 2000))
 
 abline(0, 1, lwd = 2, col = "black")
+
+# discrepancy in the actual data too low (or discrepancy in replicate data too high)?
 
 # site 2
 plot(list_of_draws[,], list_of_draws[,], main = "", xlab =

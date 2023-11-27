@@ -26,7 +26,10 @@ data {
 
 parameters {
   
-  real<lower=0, upper=1> psi1;
+  real psi1_0;
+  vector[n_species] psi1_species;
+  real sigma_psi1_species;
+  real psi1_habitat;
   real<lower=0,upper=1> gamma;
   real phi0;
   vector[n_species] phi_species;
@@ -48,13 +51,19 @@ parameters {
 
 transformed parameters {
    
-  // logit scale phi
+  // logit scale psi1, phi
+  real psi1[n_species, n_sites]; // odds of occurrence year 1
   real phi[n_species, n_sites, n_years]; // odds of persistence
    
   for(i in 1:n_species){
     for(j in 1:n_sites){    // loop across all sites
       for(k in 1:n_years){ // loop across all intervals
   
+        psi1[i,j] = inv_logit( // probability (0-1) of persistence is equal to..
+          psi1_species[species[i]] + // a species specific persistence intercept
+          psi1_habitat * habitat_type[j] // a spatial persistence effect
+          ); // end phi[j,k]
+        
         phi[i,j,k] = inv_logit( // probability (0-1) of persistence is equal to..
           phi_species[species[i]] + // a species specific persistence intercept
           phi_habitat * habitat_type[j] // a spatial persistence effect
@@ -73,7 +82,7 @@ transformed parameters {
       for(k in 1:n_years){
         
         if(k < 2){ // define initial state
-          psi[i,j,k] = psi1; 
+          psi[i,j,k] = psi1[i,j]; 
         } else { // describe temporally autocorrelated system dynamics
           // As psi approaches 1, there's a weighted switch on phi (survival)
           // As psi approaches 0, there's a weighted switch on gamma (colonization)
@@ -111,8 +120,13 @@ model {
   
   // PRIORS
   // occupancy
-  psi1 ~ uniform(0,1); // initial occupancy rate
+  psi1_0 ~ normal(0,2); // initial occupancy rate
+  psi1_species ~ normal(psi1_0, sigma_psi1_species); // species-specific intercepts (centered on global)
+  sigma_psi1_species ~ normal(0, 1); // variation in species-specific intercepts
+  psi1_habitat ~ normal(0,2); // effect of habitat on persistence
+  
   gamma ~ uniform(0,1); // colonization rate
+  
   phi0 ~ normal(0,2); // global persistence intercept
   phi_species ~ normal(phi0, sigma_phi_species); // species-specific intercepts (centered on global)
   sigma_phi_species ~ normal(0, 1); // variation in species-specific intercepts
@@ -221,24 +235,25 @@ generated quantities{
   for(i in 1:n_species) { // loop across all species
     for(j in 1:n_sites) { // loop across all sites
       for(k in 1:n_years){ // loop across all intervals
-        for(l in 1:n_visits){
+        for(l in 1:n_visits){ // loop across all visits
           
           // expected detections
           eval[i,j,k,l] = Z[i,j,k] * 
-            bernoulli_logit_rng(p[i,j,k,l]);
+            p[i,j,k,l];
+            // this is what it was before:
+            // bernoulli_logit_rng(p[i,j,k,l]);
           
           // occupancy in replicated data
-          // should evaluate to zero if the site is not in range
           z_rep[i,j,k] = bernoulli_logit_rng(psi[i,j,k]); 
 
           // detections in replicated data
           y_rep[i,j,k,l] = z_rep[i,j,k] * bernoulli_logit_rng(p[i,j,k,l]);
 
-          // Compute fit statistic (Tukey-Freeman) for replicate data
+          // Compute fit statistic (Freeman-Tukey) for replicate data
           // Binned by species
           T_rep[i] = T_rep[i] + (sqrt(y_rep[i,j,k,l]) - 
             sqrt(eval[i,j,k,l]))^2;
-          // Compute fit statistic (Tukey-Freeman) for real data
+          // Compute fit statistic (Freeman-Tukey) for real data
           // Binned by species
           T_obs[i] = T_obs[i] + (sqrt(V[i,j,k,l]) - 
             sqrt(eval[i,j,k,l]))^2;
