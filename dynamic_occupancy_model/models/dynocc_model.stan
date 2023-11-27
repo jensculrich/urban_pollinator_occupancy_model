@@ -37,8 +37,12 @@ parameters {
   vector[n_species] p_species;
   real sigma_p_species;
   real p_habitat;
-  real p_date;
-  real p_date_sq;
+  vector[n_species] p_date;
+  real mu_p_species_date;
+  real sigma_p_species_date;
+  vector[n_species] p_date_sq;
+  real sigma_p_species_date_sq;
+  real mu_p_species_date_sq;
 
 } // end parameters
 
@@ -91,9 +95,8 @@ transformed parameters {
           p[i,j,k,l] = inv_logit( // probability (0-1) of detection is equal to..
             p_species[species[i]] + // a species-specific intercept
             p_habitat * habitat_type[j] + // a spatial detection effect
-            // should make date species-specific
-            p_date * date_scaled[j,k,l] + // a phenological detection effect (peak)
-            p_date_sq * (date_scaled[j,k,l])^2 // a phenological detection effect (decay)
+            p_date[species[i]] * date_scaled[j,k,l] + // a species-specific phenological detection effect (peak)
+            p_date_sq[species[i]] * (date_scaled[j,k,l])^2 // a species-specific phenological detection effect (decay)
             ); // end p[j,k,l]
              
         } // end loop across all visits
@@ -108,20 +111,24 @@ model {
   
   // PRIORS
   // occupancy
-  psi1 ~ uniform(0,1);
-  gamma ~ uniform(0,1);
-  phi0 ~ normal(0,2);
+  psi1 ~ uniform(0,1); // initial occupancy rate
+  gamma ~ uniform(0,1); // colonization rate
+  phi0 ~ normal(0,2); // global persistence intercept
   phi_species ~ normal(phi0, sigma_phi_species); // species-specific intercepts (centered on global)
   sigma_phi_species ~ normal(0, 1); // variation in species-specific intercepts
-  phi_habitat ~ normal(0,2);
+  phi_habitat ~ normal(0,2); // effect of habitat on persistence
   
   // detection
   p0 ~ normal(0,2); // global intercept
   p_species ~ normal(p0, sigma_p_species); // species-specific intercepts (centered on global)
   sigma_p_species ~ normal(0, 1); // variation in species-specific intercepts
-  p_habitat ~ normal(0,2);
-  p_date ~ normal(0,2);
-  p_date_sq ~ normal(0,2);
+  p_habitat ~ normal(0,2); // effect of habitat on detection
+  p_date ~ normal(mu_p_species_date, sigma_p_species_date); // species-specific phenology (peak)
+  mu_p_species_date ~ normal(0,2); // mean
+  sigma_p_species_date ~ normal(0, 1); // variation
+  p_date_sq ~ normal(mu_p_species_date_sq, sigma_p_species_date_sq); // species-specific phenology (decay)
+  mu_p_species_date_sq ~ normal(0,2); // mean
+  sigma_p_species_date_sq ~ normal(0, 1); // variation
   
   // LIKELIHOOD
   for(i in 1:n_species){
@@ -161,18 +168,18 @@ generated quantities{
 
   real eval[n_species, n_sites,n_years,n_visits]; // expected values
 
-  real T_rep[n_sites]; // Freeman-Tukey distance from eval (species bin)
-  real T_obs[n_sites]; // Freeman-Tukey distance from eval (species bin)
+  real T_rep[n_species]; // Freeman-Tukey distance from eval (species bin)
+  real T_obs[n_species]; // Freeman-Tukey distance from eval (species bin)
 
-  real P_site[n_sites]; // P-value by species
+  real P_species[n_species]; // P-value by species
 
   // Initialize T_rep and T_obs and P-values
-  for(j in 1:n_sites){
+  for(i in 1:n_species){
     
-    T_rep[j] = 0;
-    T_obs[j] = 0;
+    T_rep[i] = 0;
+    T_obs[i] = 0;
     
-    P_site[j] = 0;
+    P_species[i] = 0;
 
   }
       
@@ -229,11 +236,11 @@ generated quantities{
 
           // Compute fit statistic (Tukey-Freeman) for replicate data
           // Binned by species
-          T_rep[j] = T_rep[j] + (sqrt(y_rep[i,j,k,l]) - 
+          T_rep[i] = T_rep[i] + (sqrt(y_rep[i,j,k,l]) - 
             sqrt(eval[i,j,k,l]))^2;
           // Compute fit statistic (Tukey-Freeman) for real data
           // Binned by species
-          T_obs[j] = T_obs[j] + (sqrt(V[i,j,k,l]) - 
+          T_obs[i] = T_obs[i] + (sqrt(V[i,j,k,l]) - 
             sqrt(eval[i,j,k,l]))^2;
           
         } // end loop across visits
@@ -242,14 +249,14 @@ generated quantities{
   } // end loop across species
   
   // bin by sites
-  for(j in 1:n_sites) { // loop across all years
+  for(i in 1:n_species) { // loop across all species
     
-    // if the discrepancy is lower for the real data for the site
+    // if the discrepancy is lower for the real data for the species
     // versus the replicated data
-    if(T_obs[j] < T_rep[j]){
+    if(T_obs[i] < T_rep[i]){
       
       // then increase site P by 1      
-      P_site[j] = P_site[j] + 1;
+      P_species[i] = P_species[i] + 1;
       // the ppc will involve averaging P across the number of post-burnin iterations
             
     }

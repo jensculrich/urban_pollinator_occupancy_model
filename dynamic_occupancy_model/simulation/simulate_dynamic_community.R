@@ -3,23 +3,25 @@
 ### Define simulation conditions
 
 # choose sample sizes and 
-n_species <- 25 # number of species
-n_sites <- 150 # number of sites
-n_years <- 10 # number of years
+n_species <- 60 # number of species
+n_sites <- 60 # number of sites
+n_years <- 7 # number of years
 n_visits <- 6 # number of surveys per year
 
 # set parameter values
 psi1 <- 0.7 # prob of initial occupancy
-phi0 <- 0.75 # persistence probability
+phi0 <- 1 # persistence probability
 sigma_phi_species <- 1 # species-specific variation
 phi_habitat <- 1.5 # persistence probability
-gamma <- 0.05 # colonization probability
+gamma <- 0.075 # colonization probability
 
-p0 <- -1 # probability of detection (logit scaled)
+p0 <- 0.5 # probability of detection (logit scaled)
 sigma_p_species <- 1 # species-specific variation
 p_habitat <- -0.5 # increase in detection rate moving from one habitat type to the other (logit scaled)
-p_date <- 0
-p_date_sq <- -0.5
+mu_p_species_date <- 0
+sigma_p_species_date <- 0.5
+mu_p_species_date_sq <- -0.5  
+sigma_p_species_date_sq <- 0.5
 
 mean_survey_date <- 180
 sigma_survey_date <- 40
@@ -36,7 +38,7 @@ simulate_data <- function(
     n_species, n_sites, n_years, n_visits,
     psi1, phi0, sigma_phi_species, phi_habitat, gamma, 
     p0, sigma_p_species, p_habitat_type,
-    p_date, p_date_sq,
+    mu_p_species_date, sigma_p_species_date, mu_p_species_date_sq, sigma_p_species_date_sq,
     mean_survey_date, sigma_survey_date,
     create_missing_data, prob_missing
 ){
@@ -103,6 +105,9 @@ simulate_data <- function(
   
   p_species <- rnorm(n=n_species, mean=p0, sd=sigma_p_species)
   
+  p_species_date <- rnorm(n=n_species, mean=mu_p_species_date, sd=sigma_p_species_date)
+  
+  p_species_date_sq <- rnorm(n=n_species, mean=mu_p_species_date_sq, sd=sigma_p_species_date_sq)
   
   ## --------------------------------------------------
   ## Create expected values
@@ -118,8 +123,8 @@ simulate_data <- function(
           logit_p[i,j,k,l] = 
             p_species[i] +
             p_habitat * habitat_type[j] +
-            p_date*date_scaled[j, k, l] + # a spatiotemporally specific intercept
-            p_date_sq*(date_scaled[j, k, l])^2 # a spatiotemporally specific intercept
+            p_species_date[i]*date_scaled[j, k, l] + # a spatiotemporally specific intercept
+            p_species_date_sq[i]*(date_scaled[j, k, l])^2 # a spatiotemporally specific intercept
           
         }
       }
@@ -260,7 +265,7 @@ my_simulated_data <- simulate_data(
   n_species, n_sites, n_years, n_visits,
   psi1, phi0, sigma_phi_species, phi_habitat, gamma, 
   p0, sigma_p_species, p_habitat_type,
-  p_date, p_date_sq,
+  mu_p_species_date, sigma_p_species_date, mu_p_species_date_sq, sigma_p_species_date_sq,
   mean_survey_date, sigma_survey_date,
   create_missing_data, prob_missing
   )
@@ -311,8 +316,9 @@ stan_data <- c("V", "species",
 
 ## Parameters monitored
 params <- c("psi1", "phi0", "sigma_phi_species", "phi_habitat", "gamma", 
-            "p0", "sigma_p_species", "p_habitat", "p_date", "p_date_sq",
-            "T_rep", "T_obs", "P_site")
+            "p0", "sigma_p_species", "p_habitat", 
+            "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq",
+            "T_rep", "T_obs", "P_species")
 
 # MCMC settings
 n_iterations <- 800
@@ -324,7 +330,8 @@ n_cores <- n_chains
 # targets
 parameter_values <-  c(
   psi1, phi0, sigma_phi_species, phi_habitat, gamma, 
-  p0, sigma_p_species, p_habitat, p_date, p_date_sq, 
+  p0, sigma_p_species, p_habitat, 
+  mu_p_species_date, sigma_p_species_date, mu_p_species_date_sq, sigma_p_species_date_sq,
   NA, NA, NA
 )
 
@@ -342,8 +349,10 @@ inits <- lapply(1:n_chains, function(i)
        p0 = runif(1, -1, 1),
        sigma_p_species = runif(1, 0, 1),
        p_habitat = runif(1, -1, 1),
-       p_date = runif(1, -1, 1),
-       p_date_sq = runif(1, -1, 1)
+       mu_p_species_date = runif(1, -1, 1),
+       sigma_p_species_date = runif(1, 0, 1),
+       mu_p_species_date_sq = runif(1, -1, 1),
+       sigma_p_species_date_sq = runif(1, 0, 1)
   )
 )
 
@@ -368,8 +377,9 @@ stan_out_sim <- stan(stan_model,
                      cores = n_cores)
 
 print(stan_out_sim, digits = 3, 
-      pars = c("phi0", "sigma_phi_species", "phi_habitat", "gamma", "psi1",
-               "p0", "sigma_p_species", "p_habitat", "p_date", "p_date_sq"))
+      pars = c("psi1", "phi0", "sigma_phi_species", "phi_habitat", "gamma", 
+               "p0", "sigma_p_species", "p_habitat", 
+               "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq"))
 
 saveRDS(stan_out_sim, "./dynamic_occupancy_model/simulation/stan_out_sim.rds")
 stan_out_sim <- readRDS("./dynamic_occupancy_model/simulation/stan_out_sim.rds")
@@ -385,7 +395,7 @@ traceplot(stan_out_sim, pars = c(
 
 ### PPC's
 
-print(stan_out_sim, digits = 3, pars = c("P_site"))
+print(stan_out_sim, digits = 3, pars = c("P_species"))
 
 fit_summary <- rstan::summary(stan_out_sim)
 View(cbind(1:nrow(fit_summary$summary), fit_summary$summary)) # View to see which row corresponds to the parameter of interest
@@ -395,17 +405,17 @@ View(cbind(1:nrow(fit_summary$summary), fit_summary$summary)) # View to see whic
 list_of_draws <- as.data.frame(stan_out_sim)
 
 # Evaluation of fit 
-# site 1
-plot(list_of_draws[,8], list_of_draws[,158], main = "", xlab =
+# species 1
+plot(list_of_draws[,161], list_of_draws[,11], main = "", xlab =
        "Discrepancy actual data", ylab = "Discrepancy replicate data",
      frame.plot = FALSE,
-     ylim = c(0, 100),
-     xlim = c(0, 100))
+     ylim = c(0, 1000),
+     xlim = c(0, 1000))
 
 abline(0, 1, lwd = 2, col = "black")
 
 # site 2
-plot(list_of_draws[,9], list_of_draws[,159], main = "", xlab =
+plot(list_of_draws[,], list_of_draws[,], main = "", xlab =
        "Discrepancy actual data", ylab = "Discrepancy replicate data",
      frame.plot = FALSE,
      ylim = c(0, 100),
