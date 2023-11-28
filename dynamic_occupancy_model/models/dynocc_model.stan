@@ -30,7 +30,10 @@ parameters {
   vector[n_species] psi1_species;
   real sigma_psi1_species;
   real psi1_habitat;
-  real<lower=0,upper=1> gamma;
+  real gamma0;
+  vector[n_species] gamma_species;
+  real sigma_gamma_species;
+  real gamma_habitat;
   real phi0;
   vector[n_species] phi_species;
   real sigma_phi_species;
@@ -51,22 +54,28 @@ parameters {
 
 transformed parameters {
    
-  // logit scale psi1, phi
+  // logit scale psi1, gamma, phi
   real psi1[n_species, n_sites]; // odds of occurrence year 1
+  real gamma[n_species, n_sites, n_years]; // odds of colonization
   real phi[n_species, n_sites, n_years]; // odds of persistence
    
   for(i in 1:n_species){
     for(j in 1:n_sites){    // loop across all sites
       for(k in 1:n_years){ // loop across all intervals
   
-        psi1[i,j] = inv_logit( // probability (0-1) of persistence is equal to..
-          psi1_species[species[i]] + // a species specific persistence intercept
-          psi1_habitat * habitat_type[j] // a spatial persistence effect
+        psi1[i,j] = inv_logit( // probability (0-1) of occurrence in year 1 is equal to..
+          psi1_species[species[i]] + // a species specific intercept
+          psi1_habitat * habitat_type[j] // a spatial effect
+          ); // end phi[j,k]
+        
+        gamma[i,j,k] = inv_logit( // probability (0-1) of colonization is equal to..
+          gamma_species[species[i]] + // a species specific intercept
+          gamma_habitat * habitat_type[j] // a spatial effect
           ); // end phi[j,k]
         
         phi[i,j,k] = inv_logit( // probability (0-1) of persistence is equal to..
-          phi_species[species[i]] + // a species specific persistence intercept
-          phi_habitat * habitat_type[j] // a spatial persistence effect
+          phi_species[species[i]] + // a species specific intercept
+          phi_habitat * habitat_type[j] // a spatial effect
           ); // end phi[j,k]
              
       } // end loop across all intervals
@@ -86,7 +95,7 @@ transformed parameters {
         } else { // describe temporally autocorrelated system dynamics
           // As psi approaches 1, there's a weighted switch on phi (survival)
           // As psi approaches 0, there's a weighted switch on gamma (colonization)
-          psi[i,j,k] = psi[i,j,k-1] * phi[i,j,k] + (1 - psi[i,j,k-1]) * gamma; 
+          psi[i,j,k] = psi[i,j,k-1] * phi[i,j,k] + (1 - psi[i,j,k-1]) * gamma[i,j,k]; 
         } // end if/else
         
       } // end loop across all intervals
@@ -120,13 +129,17 @@ model {
   
   // PRIORS
   // occupancy
+  // initial state
   psi1_0 ~ normal(0,2); // initial occupancy rate
   psi1_species ~ normal(psi1_0, sigma_psi1_species); // species-specific intercepts (centered on global)
   sigma_psi1_species ~ normal(0, 1); // variation in species-specific intercepts
-  psi1_habitat ~ normal(0,2); // effect of habitat on persistence
-  
-  gamma ~ uniform(0,1); // colonization rate
-  
+  psi1_habitat ~ normal(0,2); // effect of habitat on occurrence
+  // colonization
+  gamma0 ~ normal(0,2); // colonization rate
+  gamma_species ~ normal(gamma0, sigma_gamma_species); // species-specific intercepts (centered on global)
+  sigma_gamma_species ~ normal(0, 1); // variation in species-specific intercepts
+  gamma_habitat ~ normal(0,2); // effect of habitat on colonization
+  // persistence
   phi0 ~ normal(0,2); // global persistence intercept
   phi_species ~ normal(phi0, sigma_phi_species); // species-specific intercepts (centered on global)
   sigma_phi_species ~ normal(0, 1); // variation in species-specific intercepts
@@ -137,6 +150,7 @@ model {
   p_species ~ normal(p0, sigma_p_species); // species-specific intercepts (centered on global)
   sigma_p_species ~ normal(0, 1); // variation in species-specific intercepts
   p_habitat ~ normal(0,2); // effect of habitat on detection
+  // phenology X detection
   p_date ~ normal(mu_p_species_date, sigma_p_species_date); // species-specific phenology (peak)
   mu_p_species_date ~ normal(0,2); // mean
   sigma_p_species_date ~ normal(0, 1); // variation
@@ -239,15 +253,20 @@ generated quantities{
           
           // expected detections
           eval[i,j,k,l] = Z[i,j,k] * 
+            // before
+            //bernoulli_logit_rng(p[i,j,k,l]);
+            // Try:
             p[i,j,k,l];
-            // this is what it was before:
-            // bernoulli_logit_rng(p[i,j,k,l]);
-          
+            
+          // before
           // occupancy in replicated data
-          z_rep[i,j,k] = bernoulli_logit_rng(psi[i,j,k]); 
+          //z_rep[i,j,k] = bernoulli_logit_rng(psi[i,j,k]); 
 
           // detections in replicated data
-          y_rep[i,j,k,l] = z_rep[i,j,k] * bernoulli_logit_rng(p[i,j,k,l]);
+          //y_rep[i,j,k,l] = z_rep[i,j,k] * bernoulli_logit_rng(p[i,j,k,l]);
+          
+          // Try:
+          y_rep[i,j,k,l] = Z[i,j,k] * bernoulli_logit_rng(p[i,j,k,l]);
 
           // Compute fit statistic (Freeman-Tukey) for replicate data
           // Binned by species
