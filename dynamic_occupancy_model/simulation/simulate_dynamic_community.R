@@ -26,6 +26,7 @@ sigma_phi_habitat <- 1 # species-specific variation
 
 p0 <- 0 # probability of detection (logit scaled)
 sigma_p_species <- 2 # species-specific variation
+sigma_p_site <- 0.5 # site-specific variation
 # site specific random effect
 p_habitat <- -0.5 # increase in detection rate moving from one habitat type to the other (logit scaled)
 mu_p_species_date <- 0
@@ -49,7 +50,7 @@ simulate_data <- function(
     psi1_0, sigma_psi1_species, mu_psi1_habitat, sigma_psi1_habitat,
     gamma0, sigma_gamma_species, mu_gamma_habitat, sigma_gamma_habitat, 
     phi0, sigma_phi_species, mu_phi_habitat, sigma_phi_habitat, 
-    p0, sigma_p_species, p_habitat_type,
+    p0, sigma_p_species, sigma_p_site, p_habitat_type,
     mu_p_species_date, sigma_p_species_date, mu_p_species_date_sq, sigma_p_species_date_sq,
     mean_survey_date, sigma_survey_date,
     create_missing_data, prob_missing
@@ -133,6 +134,8 @@ simulate_data <- function(
   phi_habitat <- rnorm(n=n_species, mean=mu_phi_habitat, sd=sigma_phi_habitat)
   
   p_species <- rnorm(n=n_species, mean=p0, sd=sigma_p_species)
+
+  p_site <- rnorm(n=n_sites, mean=0, sd=sigma_p_site)
   
   p_species_date <- rnorm(n=n_species, mean=mu_p_species_date, sd=sigma_p_species_date)
   
@@ -151,6 +154,7 @@ simulate_data <- function(
           
           logit_p[i,j,k,l] = 
             p_species[i] +
+            p_site[j] +
             p_habitat * habitat_type[j] +
             p_species_date[i]*date_scaled[j, k, l] + # a spatiotemporally specific intercept
             p_species_date_sq[i]*(date_scaled[j, k, l])^2 # a spatiotemporally specific intercept
@@ -316,7 +320,7 @@ my_simulated_data <- simulate_data(
   psi1_0, sigma_psi1_species, mu_psi1_habitat, sigma_psi1_habitat,
   gamma0, sigma_gamma_species, mu_gamma_habitat, sigma_gamma_habitat, 
   phi0, sigma_phi_species, mu_phi_habitat, sigma_phi_habitat, 
-  p0, sigma_p_species, p_habitat_type,
+  p0, sigma_p_species, sigma_p_site, p_habitat_type,
   mu_p_species_date, sigma_p_species_date, mu_p_species_date_sq, sigma_p_species_date_sq,
   mean_survey_date, sigma_survey_date,
   create_missing_data, prob_missing
@@ -334,6 +338,7 @@ psi_eq_habitat0 <- my_simulated_data$psi_eq_habitat0
 psi_eq_habitat1 <- my_simulated_data$psi_eq_habitat1
 date_scaled <- my_simulated_data$date_scaled
 species <- seq(1, n_species, by=1)
+sites <- seq(1, n_sites, by=1)
 
 
 # Plot trajectories of psi, psi_fs, psi_eq and psi_obs
@@ -362,7 +367,7 @@ legend('topright', c('True psi hab0', 'True psi hab1',
 ## --------------------------------------------------
 ### Prep data and tweak model options
 
-stan_data <- c("V", "species",
+stan_data <- c("V", "species", "sites",
                "n_species", "n_sites", "n_years", "n_visits",
                "habitat_type", "date_scaled") 
 
@@ -370,7 +375,7 @@ stan_data <- c("V", "species",
 params <- c("psi1_0",  "sigma_psi1_species", "mu_psi1_habitat", "sigma_psi1_habitat",
             "gamma0",  "sigma_gamma_species", "mu_gamma_habitat", "sigma_gamma_habitat",
             "phi0", "sigma_phi_species", "mu_phi_habitat", "sigma_phi_habitat", 
-            "p0", "sigma_p_species", "p_habitat", 
+            "p0", "sigma_p_species", "sigma_p_site", "p_habitat", 
             "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq",
             "T_rep", "T_obs", "P_species")
 
@@ -386,7 +391,7 @@ parameter_values <-  c(
   psi1_0, sigma_psi1_species, mu_psi1_habitat, sigma_psi1_habitat,
   gamma0, sigma_gamma_species, mu_gamma_habitat, sigma_gamma_habitat,
   phi0, sigma_phi_species, mu_phi_habitat, sigma_phi_habitat,
-  p0, sigma_p_species, p_habitat, 
+  p0, sigma_p_species, sigma_p_site, p_habitat, 
   mu_p_species_date, sigma_p_species_date, mu_p_species_date_sq, sigma_p_species_date_sq,
   NA, NA, NA
 )
@@ -412,6 +417,7 @@ inits <- lapply(1:n_chains, function(i)
        sigma_phi_habitat = runif(1, 0, 1),
        p0 = runif(1, -1, 1),
        sigma_p_species = runif(1, 0, 1),
+       sigma_p_site = runif(1, 0, 1),
        p_habitat = runif(1, -1, 1),
        mu_p_species_date = runif(1, -1, 1),
        sigma_p_species_date = runif(1, 0, 1),
@@ -444,7 +450,7 @@ print(stan_out_sim, digits = 3,
       pars = c("psi1_0",  "sigma_psi1_species", "mu_psi1_habitat", "sigma_psi1_habitat",
                "gamma0",  "sigma_gamma_species", "mu_gamma_habitat", "sigma_gamma_habitat",
                "phi0", "sigma_phi_species", "mu_phi_habitat", "sigma_phi_habitat", 
-               "p0", "sigma_p_species", "p_habitat", 
+               "p0", "sigma_p_species", "sigma_p_site", "p_habitat", 
                "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq"
                ))
 
@@ -458,7 +464,7 @@ traceplot(stan_out_sim, pars = c(
 ))
 
 traceplot(stan_out_sim, pars = c(
-  "p0", "sigma_p_species", "p_habitat", 
+  "p0", "sigma_p_species", "sigma_p_site", "p_habitat", 
   "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq" 
 ))
 

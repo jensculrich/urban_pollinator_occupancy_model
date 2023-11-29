@@ -14,6 +14,7 @@ data {
   int<lower=0> n_species;
   int<lower=1> species[n_species]; // vector of species identities
   int<lower=0> n_sites;
+  int<lower=1> sites[n_sites]; // vector of site identities
   int<lower=0> n_years;
   int<lower=0> n_visits;
   int<lower=0,upper=1> V[n_species, n_sites, n_years, n_visits];
@@ -48,6 +49,8 @@ parameters {
   real p0;
   vector[n_species] p_species;
   real sigma_p_species;
+  vector[n_sites] p_site;
+  real sigma_p_site;
   real p_habitat;
   vector[n_species] p_date;
   real mu_p_species_date;
@@ -118,6 +121,7 @@ transformed parameters {
           
           p[i,j,k,l] = inv_logit( // probability (0-1) of detection is equal to..
             p_species[species[i]] + // a species-specific intercept
+            p_site[sites[j]] + // a site-specific intercept
             p_habitat * habitat_type[j] + // a spatial detection effect
             p_date[species[i]] * date_scaled[j,k,l] + // a species-specific phenological detection effect (peak)
             p_date_sq[species[i]] * (date_scaled[j,k,l])^2 // a species-specific phenological detection effect (decay)
@@ -161,6 +165,8 @@ model {
   p0 ~ normal(0,2); // global intercept
   p_species ~ normal(p0, sigma_p_species); // species-specific intercepts (centered on global)
   sigma_p_species ~ normal(0, 1); // variation in species-specific intercepts
+  p_site ~ normal(0, sigma_p_site); // site-specific intercepts
+  sigma_p_site ~ normal(0,1); // variation in site-specific intercepts
   p_habitat ~ normal(0,2); // effect of habitat on detection
   // phenology X detection
   p_date ~ normal(mu_p_species_date, sigma_p_species_date); // species-specific phenology (peak)
