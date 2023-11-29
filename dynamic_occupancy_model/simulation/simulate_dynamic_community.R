@@ -18,11 +18,19 @@ gamma0 <- -2 # colonization probability
 sigma_gamma_species <- 0.5 # species-specific variation
 mu_gamma_habitat <- 0.25 # habitat effect
 sigma_gamma_habitat <- 0.75 # species-specific variation
+# add year effects (logit-scale) # make min and max == 0 if not including this in model
+# min must be lower than max
+gamma_min = -0.5
+gamma_max = 0.5
 
 phi0 <- 1.25 # persistence probability
 sigma_phi_species <- 1 # species-specific variation
 mu_phi_habitat <- 1.5 # habitat effect
 sigma_phi_habitat <- 1 # species-specific variation
+# add year effects (logit-scale) # make min and max == 0 if not including this in model
+# min must be lower than max
+phi_min = -0.5
+phi_max = 0.5
 
 p0 <- 0 # probability of detection (logit scaled)
 sigma_p_species <- 2 # species-specific variation
@@ -85,12 +93,20 @@ simulate_data <- function(
   sigma_gamma_species <- sigma_gamma_species # species-specific variation
   mu_gamma_habitat <- mu_gamma_habitat # effect of habitat type on colonization
   sigma_gamma_habitat <- sigma_gamma_habitat # effect of habitat type on colonization
+  gamma_year <- vector(length = n_years - 1)
+  for(k in 1:length(gamma_year)){
+    gamma_year[k] <- runif(1, min=gamma_min, max=gamma_max)
+  }
   
   phi0 <- phi0 # persistence probability
   sigma_phi_species <- sigma_phi_species # species-specific variation
   mu_phi_habitat <- mu_phi_habitat # effect of habitat type on persistence
   sigma_phi_habitat <- sigma_phi_habitat # effect of habitat type on persistence
-
+  phi_year <- vector(length = n_years - 1)
+  for(k in 1:length(phi_year)){
+    phi_year[k] <- runif(1, min=phi_min, max=phi_max)
+  }
+  
   # p <- p # probability of detection
   # equilibrium occupancy rate (for the average species)
   (psi_eq_habitat0 <- ilogit(gamma0) / (ilogit(gamma0)+(1-ilogit(phi0)))) # equilibrium occupancy rate 
@@ -180,11 +196,13 @@ simulate_data <- function(
         
         logit_gamma[i,j,k] = 
           gamma_species[i] +
-          gamma_habitat[i] * habitat_type[j] 
+          gamma_habitat[i] * habitat_type[j] +
+          gamma_year[k]
         
         logit_phi[i,j,k] = 
           phi_species[i] +
-          phi_habitat[i] * habitat_type[j] 
+          phi_habitat[i] * habitat_type[j] +
+          phi[k]
         
       }
     } 
