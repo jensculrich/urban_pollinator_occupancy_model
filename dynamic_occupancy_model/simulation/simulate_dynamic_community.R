@@ -77,15 +77,18 @@ simulate_data <- function(
   # set parameter values
   psi1_0 <- psi1_0 # prob of initial occupancy
   sigma_psi1_species <- sigma_psi1_species # species-specific variation
-  psi1_habitat <- psi1_habitat # effect of habitat type on occurrence
+  mu_psi1_habitat <- mu_psi1_habitat # effect of habitat type on occurrence
+  sigma_psi1_habitat <- sigma_psi1_habitat
   
   gamma0 <- gamma0 # colonization probability
   sigma_gamma_species <- sigma_gamma_species # species-specific variation
-  gamma_habitat <- gamma_habitat # effect of habitat type on colonization
+  mu_gamma_habitat <- mu_gamma_habitat # effect of habitat type on colonization
+  sigma_gamma_habitat <- sigma_gamma_habitat # effect of habitat type on colonization
   
   phi0 <- phi0 # persistence probability
   sigma_phi_species <- sigma_phi_species # species-specific variation
-  phi_habitat <- phi_habitat # effect of habitat type on persistence
+  mu_phi_habitat <- mu_phi_habitat # effect of habitat type on persistence
+  sigma_phi_habitat <- sigma_phi_habitat # effect of habitat type on persistence
 
   # p <- p # probability of detection
   # equilibrium occupancy rate (for the average species)
@@ -372,9 +375,9 @@ params <- c("psi1_0",  "sigma_psi1_species", "mu_psi1_habitat", "sigma_psi1_habi
             "T_rep", "T_obs", "P_species")
 
 # MCMC settings
-n_iterations <- 300
+n_iterations <- 400
 n_thin <- 1
-n_burnin <- 150
+n_burnin <- 200
 n_chains <- 4
 n_cores <- n_chains
 
@@ -451,7 +454,7 @@ stan_out_sim <- readRDS("./dynamic_occupancy_model/simulation/stan_out_sim.rds")
 traceplot(stan_out_sim, pars = c(
   "psi1_0",  "sigma_psi1_species", "mu_psi1_habitat", "sigma_psi1_habitat",
   "gamma0",  "sigma_gamma_species", "mu_gamma_habitat", "sigma_gamma_habitat",
-  "phi0", "sigma_phi_species", "mu_phi_habitat", "sigma_phi_habitat", 
+  "phi0", "sigma_phi_species", "mu_phi_habitat", "sigma_phi_habitat"
 ))
 
 traceplot(stan_out_sim, pars = c(
