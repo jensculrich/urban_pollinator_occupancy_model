@@ -3,32 +3,35 @@
 ### Define simulation conditions
 
 # choose sample sizes and 
-n_species <- 100 # number of species
+n_species <- 120 # number of species
 n_sites <- 60 # number of sites (must be an even number for simulation code)
-n_years <- 10 # number of years
+n_years <- 7 # number of years
 n_visits <- 6 # number of surveys per year
 
 # set parameter values
-psi1_0 <- 0.75 # prob of initial occupancy
-sigma_psi1_species <- 1 # prob of initial occupancy
-psi1_habitat <- 0.5 # habitat effect
+psi1_0 <- 0 # prob of initial occupancy
+sigma_psi1_species <- 2 # prob of initial occupancy
+mu_psi1_habitat <- 0.5 # habitat effect
+sigma_psi1_habitat <- 1 # species-specific variation
 
 gamma0 <- -2 # colonization probability
 sigma_gamma_species <- 0.5 # species-specific variation
-gamma_habitat <- 0.25 # habitat effect
+mu_gamma_habitat <- 0.25 # habitat effect
+sigma_gamma_habitat <- 0.75 # species-specific variation
 
-phi0 <- 1 # persistence probability
+phi0 <- 1.25 # persistence probability
 sigma_phi_species <- 1 # species-specific variation
-phi_habitat <- 1.5 # habitat effect
+mu_phi_habitat <- 1.5 # habitat effect
+sigma_phi_habitat <- 1 # species-specific variation
 
-
-p0 <- 1 # probability of detection (logit scaled)
-sigma_p_species <- 1 # species-specific variation
+p0 <- 0 # probability of detection (logit scaled)
+sigma_p_species <- 2 # species-specific variation
+# site specific random effect
 p_habitat <- -0.5 # increase in detection rate moving from one habitat type to the other (logit scaled)
 mu_p_species_date <- 0
-sigma_p_species_date <- 0.5
+sigma_p_species_date <- 1
 mu_p_species_date_sq <- -0.5  
-sigma_p_species_date_sq <- 0.5
+sigma_p_species_date_sq <- 1
 
 mean_survey_date <- 180
 sigma_survey_date <- 40
@@ -43,9 +46,9 @@ prob_missing <- 0.2 # if so, what proportion of data missing?
 
 simulate_data <- function(
     n_species, n_sites, n_years, n_visits,
-    psi1_0, sigma_psi1_species, psi1_habitat, 
-    gamma0, sigma_gamma_species, gamma_habitat, 
-    phi0, sigma_phi_species, phi_habitat, 
+    psi1_0, sigma_psi1_species, mu_psi1_habitat, sigma_psi1_habitat,
+    gamma0, sigma_gamma_species, mu_gamma_habitat, sigma_gamma_habitat, 
+    phi0, sigma_phi_species, mu_phi_habitat, sigma_phi_habitat, 
     p0, sigma_p_species, p_habitat_type,
     mu_p_species_date, sigma_p_species_date, mu_p_species_date_sq, sigma_p_species_date_sq,
     mean_survey_date, sigma_survey_date,
@@ -86,8 +89,8 @@ simulate_data <- function(
 
   # p <- p # probability of detection
   # equilibrium occupancy rate (for the average species)
-  (psi_eq_habitat0 <- ilogit(gamma0) / (ilogit(gamma0)+(1-ilogit(phi0 + phi_habitat*0)))) # equilibrium occupancy rate 
-  (psi_eq_habitat1 <- ilogit(gamma0 + gamma_habitat) / (ilogit(gamma0 + gamma_habitat)+(1-ilogit(phi0 + phi_habitat*1)))) # equilibrium occupancy rate
+  (psi_eq_habitat0 <- ilogit(gamma0) / (ilogit(gamma0)+(1-ilogit(phi0)))) # equilibrium occupancy rate 
+  (psi_eq_habitat1 <- ilogit(gamma0 + mu_gamma_habitat) / (ilogit(gamma0 + mu_gamma_habitat)+(1-ilogit(phi0 + mu_phi_habitat)))) # equilibrium occupancy rate
   
   ## --------------------------------------------------
   ## Create covariate data
@@ -118,10 +121,13 @@ simulate_data <- function(
   
   ## species-specific random intercepts
   psi1_species <- rnorm(n=n_species, mean=psi1_0, sd=sigma_psi1_species)
+  psi1_habitat <- rnorm(n=n_species, mean=mu_psi1_habitat, sd=sigma_psi1_habitat)
   
   gamma_species <- rnorm(n=n_species, mean=gamma0, sd=sigma_gamma_species)
+  gamma_habitat <- rnorm(n=n_species, mean=mu_gamma_habitat, sd=sigma_gamma_habitat)
   
   phi_species <- rnorm(n=n_species, mean=phi0, sd=sigma_phi_species)
+  phi_habitat <- rnorm(n=n_species, mean=mu_phi_habitat, sd=sigma_phi_habitat)
   
   p_species <- rnorm(n=n_species, mean=p0, sd=sigma_p_species)
   
@@ -163,15 +169,15 @@ simulate_data <- function(
         
         logit_psi1[i,j] = 
           psi1_species[i] +
-          psi1_habitat * habitat_type[j] 
+          psi1_habitat[i] * habitat_type[j] 
         
         logit_gamma[i,j,k] = 
           gamma_species[i] +
-          gamma_habitat * habitat_type[j] 
+          gamma_habitat[i] * habitat_type[j] 
         
         logit_phi[i,j,k] = 
           phi_species[i] +
-          phi_habitat * habitat_type[j] 
+          phi_habitat[i] * habitat_type[j] 
         
       }
     } 
@@ -242,12 +248,18 @@ simulate_data <- function(
     y2 <- y # duplicate dataset with no missing data
   }
   
+  # which species never occurred
+  species_not_occurring <- length(which(apply(z, 1, sum) == 0))
+  
+  # which species were never detected (even though they occurred)
+  species_not_observed <- length(which(apply(y2, 1, sum) == 0))
+  
   table(nvisits <- apply(y2, c(1,3), function(x) sum(!is.na(x))))
   # _ sites with no visits, _ with 1 visit, and _ with 2 visits through 7 visits
   
   # compute true expected and realized occupancy (psi and psi_fs)
   psi_habitat0 <- numeric(n_years) ; psi_habitat0[1] <- ilogit(psi1_0)
-  psi_habitat1 <- numeric(n_years) ; psi_habitat1[1] <- ilogit(psi1_0 + psi1_habitat)
+  psi_habitat1 <- numeric(n_years) ; psi_habitat1[1] <- ilogit(psi1_0 + mu_psi1_habitat)
   
   # expected for the average species across the two habitat types
     for(k in 2:n_years){ # compute true values of psi
@@ -255,7 +267,7 @@ simulate_data <- function(
     }
   
     for(k in 2:n_years){ # compute true values of psi
-      psi_habitat1[k] <- psi_habitat1[k-1] * ilogit(phi0 + phi_habitat) + (1 - psi_habitat1[k-1]) * ilogit(gamma0 + gamma_habitat)
+      psi_habitat1[k] <- psi_habitat1[k-1] * ilogit(phi0 + mu_phi_habitat) + (1 - psi_habitat1[k-1]) * ilogit(gamma0 + mu_gamma_habitat)
     }
   
   # actual occupancy rate given the simulated data (for the average species)
@@ -269,6 +281,9 @@ simulate_data <- function(
   zobs[zobs == "-Inf"] <- NA
   psi_obs_habitat0 <- apply(zobs[,1:(n_sites/2),], 3, sum, na.rm = TRUE) / apply(zobs, 3, function(x) sum(!is.na(x)))
   psi_obs_habitat1 <- apply(zobs[,(n_sites/2+1):n_sites,], 3, sum, na.rm = TRUE) / apply(zobs, 3, function(x) sum(!is.na(x)))
+  
+  print(paste0("*** ", species_not_occurring, " / ", n_species, " species never occurred ***"))
+  print(paste0("*** ", species_not_observed, " / ", n_species, " species never detected ***"))
   
   ## --------------------------------------------------
   # Return stuff
@@ -295,9 +310,9 @@ simulate_data <- function(
 set.seed(1)
 my_simulated_data <- simulate_data(  
   n_species, n_sites, n_years, n_visits,
-  psi1_0, sigma_psi1_species, psi1_habitat, 
-  gamma0, sigma_gamma_species, gamma_habitat, 
-  phi0, sigma_phi_species, phi_habitat, 
+  psi1_0, sigma_psi1_species, mu_psi1_habitat, sigma_psi1_habitat,
+  gamma0, sigma_gamma_species, mu_gamma_habitat, sigma_gamma_habitat, 
+  phi0, sigma_phi_species, mu_phi_habitat, sigma_phi_habitat, 
   p0, sigma_p_species, p_habitat_type,
   mu_p_species_date, sigma_p_species_date, mu_p_species_date_sq, sigma_p_species_date_sq,
   mean_survey_date, sigma_survey_date,
@@ -349,25 +364,25 @@ stan_data <- c("V", "species",
                "habitat_type", "date_scaled") 
 
 ## Parameters monitored
-params <- c("psi1_0",  "sigma_psi1_species", "psi1_habitat", 
-            "gamma0",  "sigma_gamma_species", "gamma_habitat", 
-            "phi0", "sigma_phi_species", "phi_habitat", 
+params <- c("psi1_0",  "sigma_psi1_species", "mu_psi1_habitat", "sigma_psi1_habitat",
+            "gamma0",  "sigma_gamma_species", "mu_gamma_habitat", "sigma_gamma_habitat",
+            "phi0", "sigma_phi_species", "mu_phi_habitat", "sigma_phi_habitat", 
             "p0", "sigma_p_species", "p_habitat", 
             "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq",
             "T_rep", "T_obs", "P_species")
 
 # MCMC settings
-n_iterations <- 400
+n_iterations <- 300
 n_thin <- 1
-n_burnin <- 200
+n_burnin <- 150
 n_chains <- 4
 n_cores <- n_chains
 
 # targets
 parameter_values <-  c(
-  psi1_0, sigma_psi1_species, psi1_habitat,
-  gamma0, sigma_gamma_species, gamma_habitat,
-  phi0, sigma_phi_species, phi_habitat,
+  psi1_0, sigma_psi1_species, mu_psi1_habitat, sigma_psi1_habitat,
+  gamma0, sigma_gamma_species, mu_gamma_habitat, sigma_gamma_habitat,
+  phi0, sigma_phi_species, mu_phi_habitat, sigma_phi_habitat,
   p0, sigma_p_species, p_habitat, 
   mu_p_species_date, sigma_p_species_date, mu_p_species_date_sq, sigma_p_species_date_sq,
   NA, NA, NA
@@ -382,13 +397,16 @@ inits <- lapply(1:n_chains, function(i)
   
   list(psi1_0 = runif(1, -1, 1),
        sigma_psi1_species = runif(1, 0, 1),
-       psi1_habitat = runif(1, -1, 1),
+       mu_psi1_habitat = runif(1, -1, 1),
+       sigma_psi1_habitat = runif(1, 0, 1),
        gamma0 = runif(1, -1, 1),
        sigma_gamma_species = runif(1, 0, 1),
-       gamma_habitat = runif(1, -1, 1),
+       mu_gamma_habitat = runif(1, -2, -1), # colonization rates are usually low
+       sigma_gamma_habitat = runif(1, 0, 1),
        phi0 = runif(1, -1, 1),
        sigma_phi_species = runif(1, 0, 1),
-       phi_habitat = runif(1, -1, 1),
+       mu_phi_habitat = runif(1, 0, 1), # persistence rates are usually greater than 50%
+       sigma_phi_habitat = runif(1, 0, 1),
        p0 = runif(1, -1, 1),
        sigma_p_species = runif(1, 0, 1),
        p_habitat = runif(1, -1, 1),
@@ -420,9 +438,9 @@ stan_out_sim <- stan(stan_model,
                      cores = n_cores)
 
 print(stan_out_sim, digits = 3, 
-      pars = c("psi1_0",  "sigma_psi1_species", "psi1_habitat", 
-               "gamma0",  "sigma_gamma_species", "gamma_habitat", 
-               "phi0", "sigma_phi_species", "phi_habitat", 
+      pars = c("psi1_0",  "sigma_psi1_species", "mu_psi1_habitat", "sigma_psi1_habitat",
+               "gamma0",  "sigma_gamma_species", "mu_gamma_habitat", "sigma_gamma_habitat",
+               "phi0", "sigma_phi_species", "mu_phi_habitat", "sigma_phi_habitat", 
                "p0", "sigma_p_species", "p_habitat", 
                "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq"
                ))
@@ -431,13 +449,14 @@ saveRDS(stan_out_sim, "./dynamic_occupancy_model/simulation/stan_out_sim.rds")
 stan_out_sim <- readRDS("./dynamic_occupancy_model/simulation/stan_out_sim.rds")
 
 traceplot(stan_out_sim, pars = c(
-  "psi1_0",  "sigma_psi1_species", "psi1_habitat", 
-  "gamma0",  "sigma_gamma_species", "gamma_habitat", 
-  "phi0", "sigma_phi_species", "phi_habitat"
+  "psi1_0",  "sigma_psi1_species", "mu_psi1_habitat", "sigma_psi1_habitat",
+  "gamma0",  "sigma_gamma_species", "mu_gamma_habitat", "sigma_gamma_habitat",
+  "phi0", "sigma_phi_species", "mu_phi_habitat", "sigma_phi_habitat", 
 ))
 
 traceplot(stan_out_sim, pars = c(
-  "p0", "sigma_p_species", "p_habitat", "mu_p_species_date", "mu_p_species_date_sq"
+  "p0", "sigma_p_species", "p_habitat", 
+  "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq" 
 ))
 
 
@@ -454,11 +473,11 @@ list_of_draws <- as.data.frame(stan_out_sim)
 
 # Evaluation of fit 
 # species 1
-plot(list_of_draws[,95], list_of_draws[,15], main = "", xlab =
+plot(list_of_draws[,127], list_of_draws[,27], main = "", xlab =
        "Discrepancy actual data", ylab = "Discrepancy replicate data",
      frame.plot = FALSE,
-     ylim = c(0, 2000),
-     xlim = c(0, 2000))
+     ylim = c(0, 500),
+     xlim = c(0, 500))
 
 abline(0, 1, lwd = 2, col = "black")
 
