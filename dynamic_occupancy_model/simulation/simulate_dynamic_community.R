@@ -6,6 +6,7 @@
 n_species <- 120 # number of species
 n_sites <- 60 # number of sites (must be an even number for simulation code)
 n_years <- 7 # number of years
+n_years_minus1 <- n_years - 1
 n_visits <- 6 # number of surveys per year
 
 # set parameter values
@@ -29,8 +30,8 @@ mu_phi_habitat <- 1.5 # habitat effect
 sigma_phi_habitat <- 1 # species-specific variation
 # add year effects (logit-scale) # make min and max == 0 if not including this in model
 # min must be lower than max
-phi_min = -0.5
-phi_max = 0.5
+phi_min = -1
+phi_max = 1
 
 p0 <- 0 # probability of detection (logit scaled)
 sigma_p_species <- 2 # species-specific variation
@@ -93,7 +94,7 @@ simulate_data <- function(
   sigma_gamma_species <- sigma_gamma_species # species-specific variation
   mu_gamma_habitat <- mu_gamma_habitat # effect of habitat type on colonization
   sigma_gamma_habitat <- sigma_gamma_habitat # effect of habitat type on colonization
-  gamma_year <- vector(length = n_years - 1)
+  gamma_year <- vector(length = n_years_minus1)
   for(k in 1:length(gamma_year)){
     gamma_year[k] <- runif(1, min=gamma_min, max=gamma_max)
   }
@@ -102,7 +103,7 @@ simulate_data <- function(
   sigma_phi_species <- sigma_phi_species # species-specific variation
   mu_phi_habitat <- mu_phi_habitat # effect of habitat type on persistence
   sigma_phi_habitat <- sigma_phi_habitat # effect of habitat type on persistence
-  phi_year <- vector(length = n_years - 1)
+  phi_year <- vector(length = n_years_minus1)
   for(k in 1:length(phi_year)){
     phi_year[k] <- runif(1, min=phi_min, max=phi_max)
   }
@@ -183,12 +184,12 @@ simulate_data <- function(
   
   # generate ecological expected values with heterogeneity
   logit_psi1 <- array(NA, dim = c(n_species, n_sites)) 
-  logit_gamma <- array(NA, dim = c(n_species, n_sites, n_years)) 
-  logit_phi <- array(NA, dim = c(n_species, n_sites, n_years)) 
+  logit_gamma <- array(NA, dim = c(n_species, n_sites, n_years_minus1)) 
+  logit_phi <- array(NA, dim = c(n_species, n_sites, n_years_minus1)) 
   
   for(i in 1:n_species){
     for(j in 1:n_sites){
-      for(k in 1:n_years){
+      for(k in 1:n_years_minus1){
         
         logit_psi1[i,j] = 
           psi1_species[i] +
@@ -202,7 +203,7 @@ simulate_data <- function(
         logit_phi[i,j,k] = 
           phi_species[i] +
           phi_habitat[i] * habitat_type[j] +
-          phi[k]
+          phi_year[k]
         
       }
     } 
@@ -223,8 +224,8 @@ simulate_data <- function(
       for(k in 2:n_years){
         
         # use z as a switch so we are estimating 
-        exp_z <- z[i,j,k-1] * ilogit(logit_phi[i,j,k]) + # survival if z=1
-          (1 - z[i,j,k-1]) * ilogit(logit_gamma[i,j,k]) # or colonization if z=0
+        exp_z <- z[i,j,k-1] * ilogit(logit_phi[i,j,k-1]) + # survival if z=1
+          (1 - z[i,j,k-1]) * ilogit(logit_gamma[i,j,k-1]) # or colonization if z=0
         
         # and then assign z stochastically
         # some sites may transition if they are colonized or local extinction occurs
@@ -323,7 +324,9 @@ simulate_data <- function(
     psi_eq_habitat1 = psi_eq_habitat1,
     V = y2, # return detection data after potentially introducing NAs,
     habitat_type = habitat_type,
-    date_scaled = date_scaled
+    date_scaled = date_scaled,
+    gamma_year = gamma_year,
+    phi_year = phi_year
   ))
   
 } # end function
@@ -357,7 +360,10 @@ psi_eq_habitat1 <- my_simulated_data$psi_eq_habitat1
 date_scaled <- my_simulated_data$date_scaled
 species <- seq(1, n_species, by=1)
 sites <- seq(1, n_sites, by=1)
+years <- seq(1, n_years_minus1, by=1)
 
+gamma_year <- my_simulated_data$gamma_year
+phi_year <- my_simulated_data$phi_year
 
 # Plot trajectories of psi, psi_fs, psi_eq and psi_obs
 plot(1:n_years, psi_habitat0, type = 'l', col = "red3", lwd = 3, ylim = c(0,1), xlab = "Year",
@@ -386,13 +392,13 @@ legend('topright', c('True psi hab0', 'True psi hab1',
 ### Prep data and tweak model options
 
 stan_data <- c("V", "species", "sites",
-               "n_species", "n_sites", "n_years", "n_visits",
+               "n_species", "n_sites", "n_years", "n_years_minus1", "n_visits",
                "habitat_type", "date_scaled") 
 
 ## Parameters monitored
 params <- c("psi1_0",  "sigma_psi1_species", "mu_psi1_habitat", "sigma_psi1_habitat",
-            "gamma0",  "sigma_gamma_species", "mu_gamma_habitat", "sigma_gamma_habitat",
-            "phi0", "sigma_phi_species", "mu_phi_habitat", "sigma_phi_habitat", 
+            "gamma0",  "sigma_gamma_species", "mu_gamma_habitat", "sigma_gamma_habitat", "gamma_year",
+            "phi0", "sigma_phi_species", "mu_phi_habitat", "sigma_phi_habitat", "phi_year",
             "p0", "sigma_p_species", "sigma_p_site", "p_habitat", 
             "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq",
             "T_rep", "T_obs", "P_species")
@@ -407,8 +413,8 @@ n_cores <- n_chains
 # targets
 parameter_values <-  c(
   psi1_0, sigma_psi1_species, mu_psi1_habitat, sigma_psi1_habitat,
-  gamma0, sigma_gamma_species, mu_gamma_habitat, sigma_gamma_habitat,
-  phi0, sigma_phi_species, mu_phi_habitat, sigma_phi_habitat,
+  gamma0, sigma_gamma_species, mu_gamma_habitat, sigma_gamma_habitat, NA,
+  phi0, sigma_phi_species, mu_phi_habitat, sigma_phi_habitat, NA,
   p0, sigma_p_species, sigma_p_site, p_habitat, 
   mu_p_species_date, sigma_p_species_date, mu_p_species_date_sq, sigma_p_species_date_sq,
   NA, NA, NA
@@ -451,7 +457,7 @@ targets <- as.data.frame(cbind(params, parameter_values))
 ### Run model
 
 library(rstan)
-stan_model <- "./dynamic_occupancy_model/models/dynocc_model.stan"
+stan_model <- "./dynamic_occupancy_model/models/dynocc_model_with_year_effects.stan"
 
 ## Call Stan from R
 stan_out_sim <- stan(stan_model,
@@ -471,6 +477,10 @@ print(stan_out_sim, digits = 3,
                "p0", "sigma_p_species", "sigma_p_site", "p_habitat", 
                "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq"
                ))
+
+print(stan_out_sim, digits = 3, 
+      pars = c("gamma_year", "phi_year"
+      ))
 
 saveRDS(stan_out_sim, "./dynamic_occupancy_model/simulation/stan_out_sim.rds")
 stan_out_sim <- readRDS("./dynamic_occupancy_model/simulation/stan_out_sim.rds")
