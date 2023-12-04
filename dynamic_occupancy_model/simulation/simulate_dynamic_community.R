@@ -391,7 +391,7 @@ legend('topright', c('True psi hab0', 'True psi hab1',
 ## --------------------------------------------------
 ### Prep data and tweak model options
 
-stan_data <- c("V", "species", "sites",
+stan_data <- c("V", "species", "sites", "years",
                "n_species", "n_sites", "n_years", "n_years_minus1", "n_visits",
                "habitat_type", "date_scaled") 
 
@@ -404,9 +404,9 @@ params <- c("psi1_0",  "sigma_psi1_species", "mu_psi1_habitat", "sigma_psi1_habi
             "T_rep", "T_obs", "P_species")
 
 # MCMC settings
-n_iterations <- 400
+n_iterations <- 300
 n_thin <- 1
-n_burnin <- 200
+n_burnin <- 150
 n_chains <- 4
 n_cores <- n_chains
 
@@ -482,6 +482,9 @@ print(stan_out_sim, digits = 3,
       pars = c("gamma_year", "phi_year"
       ))
 
+print(gamma_year)
+print(phi_year)
+
 saveRDS(stan_out_sim, "./dynamic_occupancy_model/simulation/stan_out_sim.rds")
 stan_out_sim <- readRDS("./dynamic_occupancy_model/simulation/stan_out_sim.rds")
 
@@ -489,6 +492,10 @@ traceplot(stan_out_sim, pars = c(
   "psi1_0",  "sigma_psi1_species", "mu_psi1_habitat", "sigma_psi1_habitat",
   "gamma0",  "sigma_gamma_species", "mu_gamma_habitat", "sigma_gamma_habitat",
   "phi0", "sigma_phi_species", "mu_phi_habitat", "sigma_phi_habitat"
+))
+
+traceplot(stan_out_sim, pars = c(
+  "gamma_year",  "phi_year"
 ))
 
 traceplot(stan_out_sim, pars = c(

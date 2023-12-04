@@ -17,7 +17,7 @@ data {
   int<lower=1> sites[n_sites]; // vector of site identities
   int<lower=0> n_years;
   int<lower=0> n_years_minus1; // for variable annual transitions
-  //int<lower=0> years[n_years_minus1]; // vector of year identities (no final year because we don't return after last transition)
+  int<lower=0> years[n_years_minus1]; // vector of year identities (no final year because we don't return after last transition)
   int<lower=0> n_visits;
   int<lower=0,upper=1> V[n_species, n_sites, n_years, n_visits];
    
@@ -89,13 +89,13 @@ transformed parameters {
         gamma[i,j,k] = inv_logit( // probability (0-1) of colonization is equal to..
           gamma_species[species[i]] + // a species specific intercept
           gamma_habitat[species[i]] * habitat_type[j] + // a spatial effect
-          gamma_year[k]
+          gamma_year[years[k]]
           ); // end phi[j,k]
         
         phi[i,j,k] = inv_logit( // probability (0-1) of persistence is equal to..
           phi_species[species[i]] + // a species specific intercept
           phi_habitat[species[i]] * habitat_type[j] + // a spatial effect
-          phi_year[k]
+          phi_year[years[k]]
           ); // end phi[j,k]
              
       } // end loop across all intervals
@@ -152,29 +152,33 @@ model {
   // PRIORS
   // occupancy
   // initial state
-  psi1_0 ~ normal(0,2); // initial occupancy rate
+  psi1_0 ~ normal(0,1); // initial occupancy rate
   psi1_species ~ normal(psi1_0, sigma_psi1_species); // species-specific intercepts (centered on global)
   sigma_psi1_species ~ normal(0, 1); // variation in species-specific intercepts
   psi1_habitat ~ normal(mu_psi1_habitat,sigma_psi1_habitat); // effect of habitat on occurrence
   mu_psi1_habitat ~ normal(0,2); // community mean
   sigma_psi1_habitat ~ normal(0,1); // species variation
   // colonization
-  gamma0 ~ normal(0,2); // colonization rate
+  gamma0 ~ normal(0,1); // colonization rate
   gamma_species ~ normal(gamma0, sigma_gamma_species); // species-specific intercepts (centered on global)
   sigma_gamma_species ~ normal(0, 1); // variation in species-specific intercepts
   gamma_habitat ~ normal(mu_gamma_habitat,sigma_gamma_habitat); // effect of habitat on colonization
   mu_gamma_habitat ~ normal(0,2); // community mean
   sigma_gamma_habitat ~ normal(0,1); // species variation
+  gamma_year ~ normal(0,1); // year effects
+  // prior on year effects?
   // persistence
-  phi0 ~ normal(0,2); // global persistence intercept
+  phi0 ~ normal(0,1); // global persistence intercept
   phi_species ~ normal(phi0, sigma_phi_species); // species-specific intercepts (centered on global)
   sigma_phi_species ~ normal(0, 1); // variation in species-specific intercepts
   phi_habitat ~ normal(mu_phi_habitat, sigma_phi_habitat); // effect of habitat on persistence
   mu_phi_habitat ~ normal(0,2); // community mean
   sigma_phi_habitat ~ normal(0,1); // species variation
+  phi_year ~ normal(0,1); // year effects
+  // prior on year effects?
   
   // detection
-  p0 ~ normal(0,2); // global intercept
+  p0 ~ normal(0,1); // global intercept
   p_species ~ normal(p0, sigma_p_species); // species-specific intercepts (centered on global)
   sigma_p_species ~ normal(0, 1); // variation in species-specific intercepts
   p_site ~ normal(0, sigma_p_site); // site-specific intercepts
