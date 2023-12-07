@@ -23,6 +23,9 @@ years <- seq(1, n_years_minus1, by=1)
 date_scaled <- my_data$date_scaled
 habitat_type <- my_data$habitat_category
 
+species_names <- my_data$species
+site_names <- my_data$sites
+
 ## --------------------------------------------------
 ### Prep data and tweak model options
 
@@ -34,10 +37,10 @@ stan_data <- c("V", "species", "sites", "years",
 params <- c("psi1_0",  "sigma_psi1_species", "mu_psi1_habitat", "sigma_psi1_habitat",
             "gamma0",  "sigma_gamma_species", "mu_gamma_habitat", "sigma_gamma_habitat", 
             "phi0", "sigma_phi_species", "mu_phi_habitat", "sigma_phi_habitat", 
-            "p0", "sigma_p_species", "sigma_p_site", "p_habitat", 
+            "p0", "sigma_p_species", "p_habitat", # "sigma_p_site", 
             "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq",
             "species_richness", "avg_species_richness_control", "avg_species_richness_enhanced", 
-            "psi_eq_habitat0", "psi_eq_habitat0",
+            "psi_eq_habitat0", "psi_eq_habitat1",
             "T_rep", "T_obs", "P_species")
 
 # MCMC settings
@@ -67,7 +70,7 @@ inits <- lapply(1:n_chains, function(i)
        sigma_phi_habitat = runif(1, 0, 1),
        p0 = runif(1, -1, 1),
        sigma_p_species = runif(1, 0, 1),
-       sigma_p_site = runif(1, 0, 1),
+       #sigma_p_site = runif(1, 0, 1),
        p_habitat = runif(1, -1, 1),
        mu_p_species_date = runif(1, -1, 1),
        sigma_p_species_date = runif(1, 0, 1),
@@ -94,20 +97,24 @@ stan_out <- stan(stan_model,
                      open_progress = FALSE,
                      cores = n_cores)
 
-saveRDS(stan_out, "./dynamic_occupancy_model/simulation/stan_out.rds")
-stan_out <- readRDS("./dynamic_occupancy_model/simulation/stan_out.rds")
+saveRDS(stan_out, "./dynamic_occupancy_model/model_outputs/stan_out.rds")
+stan_out <- readRDS("./dynamic_occupancy_model/model_outputs/stan_out.rds")
 
 
 print(stan_out, digits = 3, 
       pars = c("psi1_0",  "sigma_psi1_species", "mu_psi1_habitat", "sigma_psi1_habitat",
                "gamma0",  "sigma_gamma_species", "mu_gamma_habitat", "sigma_gamma_habitat",
                "phi0", "sigma_phi_species", "mu_phi_habitat", "sigma_phi_habitat", 
-               "p0", "sigma_p_species", "sigma_p_site", "p_habitat", 
+               "p0", "sigma_p_species", "p_habitat", #  "sigma_p_site",
                "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq"
       ))
 
 print(stan_out, digits = 3, 
-      pars = c("species_richness", "species_richness_control", "species_richness_enhanced"
+      pars = c("species_richness", "avg_species_richness_control", "avg_species_richness_enhanced"
+      ))
+
+print(stan_out, digits = 3, 
+      pars = c("psi_eq_habitat0", "psi_eq_habitat1"
       ))
 
 print(stan_out, digits = 3, 
@@ -120,13 +127,13 @@ traceplot(stan_out, pars = c(
   "phi0", "sigma_phi_species", "mu_phi_habitat", "sigma_phi_habitat"
 ))
 
-traceplot(stan_out_sim, pars = c(
+traceplot(stan_out, pars = c(
   "gamma_year",  "phi_year"
 ))
 
-traceplot(stan_out_sim, pars = c(
+traceplot(stan_out, pars = c(
   "p0", "sigma_p_species", "sigma_p_site", "p_habitat", 
   "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq" 
 ))
 
-print(stan_out_sim, digits = 3, pars = c("P_species"))
+print(stan_out, digits = 3, pars = c("P_species"))

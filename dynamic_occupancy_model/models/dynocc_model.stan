@@ -49,8 +49,8 @@ parameters {
   real p0;
   vector[n_species] p_species;
   real sigma_p_species;
-  vector[n_sites] p_site;
-  real sigma_p_site;
+  //vector[n_sites] p_site;
+  //real sigma_p_site;
   real p_habitat;
   vector[n_species] p_date;
   real mu_p_species_date;
@@ -70,7 +70,7 @@ transformed parameters {
    
   for(i in 1:n_species){
     for(j in 1:n_sites){    // loop across all sites
-      for(k in 1:n_years){ // loop across all intervals
+      for(k in 1:n_years){ // loop across all years
   
         psi1[i,j] = inv_logit( // probability (0-1) of occurrence in year 1 is equal to..
           psi1_species[species[i]] + // a species specific intercept
@@ -87,7 +87,7 @@ transformed parameters {
           phi_habitat[species[i]] * habitat_type[j] // a spatial effect
           ); // end phi[j,k]
              
-      } // end loop across all intervals
+      } // end loop across all years
     } // end loop across all sites
   } // end loop across all species 
      
@@ -107,7 +107,7 @@ transformed parameters {
           psi[i,j,k] = psi[i,j,k-1] * phi[i,j,k] + (1 - psi[i,j,k-1]) * gamma[i,j,k]; 
         } // end if/else
         
-      } // end loop across all intervals
+      } // end loop across all years
     } // end loop across all sites
   } // end loop across all species
 
@@ -116,19 +116,19 @@ transformed parameters {
   
   for(i in 1:n_species){
     for(j in 1:n_sites){    // loop across all sites
-      for(k in 1:n_years){ // loop across all intervals
+      for(k in 1:n_years){ // loop across all years
         for(l in 1:n_visits){ // loop across all visits
           
           p[i,j,k,l] = inv_logit( // probability (0-1) of detection is equal to..
             p_species[species[i]] + // a species-specific intercept
-            p_site[sites[j]] + // a site-specific intercept
+            //p_site[sites[j]] + // a site-specific intercept
             p_habitat * habitat_type[j] + // a spatial detection effect
             p_date[species[i]] * date_scaled[j,k,l] + // a species-specific phenological detection effect (peak)
             p_date_sq[species[i]] * (date_scaled[j,k,l])^2 // a species-specific phenological detection effect (decay)
             ); // end p[j,k,l]
              
         } // end loop across all visits
-      } // end loop across all intervals
+      } // end loop across all years
     } // end loop across all sites
   } // end loop across all species 
   
@@ -152,21 +152,21 @@ model {
   sigma_gamma_species ~ normal(0, 1); // variation in species-specific intercepts
   gamma_habitat ~ normal(mu_gamma_habitat,sigma_gamma_habitat); // effect of habitat on colonization
   mu_gamma_habitat ~ normal(0,2); // community mean
-  sigma_gamma_habitat ~ normal(0,0.5); // species variation
+  sigma_gamma_habitat ~ normal(0,1); // species variation
   // persistence
   phi0 ~ normal(0,1); // global persistence intercept
   phi_species ~ normal(phi0, sigma_phi_species); // species-specific intercepts (centered on global)
   sigma_phi_species ~ normal(0, 1); // variation in species-specific intercepts
   phi_habitat ~ normal(mu_phi_habitat, sigma_phi_habitat); // effect of habitat on persistence
   mu_phi_habitat ~ normal(0,2); // community mean
-  sigma_phi_habitat ~ normal(0,0.5); // species variation
+  sigma_phi_habitat ~ normal(0,1); // species variation
   
   // detection
   p0 ~ normal(0,1); // global intercept
   p_species ~ normal(p0, sigma_p_species); // species-specific intercepts (centered on global)
   sigma_p_species ~ normal(0, 1); // variation in species-specific intercepts
-  p_site ~ normal(0, sigma_p_site); // site-specific intercepts
-  sigma_p_site ~ normal(0,1); // variation in site-specific intercepts
+  //p_site ~ normal(0, sigma_p_site); // site-specific intercepts
+  //sigma_p_site ~ normal(0,1); // variation in site-specific intercepts
   p_habitat ~ normal(0,2); // effect of habitat on detection
   // phenology X detection
   p_date ~ normal(mu_p_species_date, sigma_p_species_date); // species-specific phenology (peak)
@@ -190,7 +190,7 @@ model {
                                           log1m(psi[i,j,k])));
           } // end if/else
           
-      } // end loop across all intervals
+      } // end loop across all years
     } // end loop across all sites   
   } // end loop across all species
 
@@ -202,8 +202,8 @@ generated quantities{
   // number of species at each site in each year
   int z_simmed[n_species, n_sites, n_years]; // simulate occurrence
   int species_richness[n_sites, n_years]; // site/year species richness
-  vector[n_years] avg_species_richness_enhanced; // average across sites
-  vector[n_years] avg_species_richness_control; // average across sites
+  real avg_species_richness_enhanced[n_years]; // average across sites
+  real avg_species_richness_control[n_years]; // average across sites
   
   // equilibrium occupancy rate (for average species)  
   real psi_eq_habitat0; // control sites
@@ -217,6 +217,12 @@ generated quantities{
     }
   }
   
+  // Initialize avg_species_richness
+  for(k in 1:n_years){
+    avg_species_richness_control[k] = 0;
+    avg_species_richness_enhanced[k] = 0;
+  }
+  
   // summed number of species occurring in site/year
   for(j in 1:n_sites){
     for(k in 1:n_years){
@@ -224,19 +230,18 @@ generated quantities{
       // first calc site/year specific species richness
       species_richness[j,k] = sum(z_simmed[,j,k]);
       
-      // average species richness by habitat type across all j within each year k 
-      if(habitat_type[j] == 0){
-        avg_species_richness_control[k] = avg_species_richness_control[k] + species_richness[j,k];
-      } else{
-        avg_species_richness_enhanced[k] = avg_species_richness_enhanced[k] + species_richness[j,k];
-      }
+      // use habitat type as a switch for whether or not you will add it to the species richness group
+      avg_species_richness_control[k] = avg_species_richness_control[k] + ((1 - habitat_type[j]) *  species_richness[j,k]);
+      avg_species_richness_enhanced[k] = avg_species_richness_enhanced[k] + (habitat_type[j] *  species_richness[j,k]);
       
     }
   }
   
-  // average out species richness by number of sites (1/2 of total sites were in each category)
-  avg_species_richness_control = avg_species_richness_control / n_sites / 2;
-  avg_species_richness_enhanced = avg_species_richness_enhanced / n_sites / 2;
+  for(k in 1:n_years){
+    // average out species richness by number of sites (1/2 of total sites were in each category)
+    avg_species_richness_control[k] = avg_species_richness_control[k] / (n_sites / 2.0);
+    avg_species_richness_enhanced[k] = avg_species_richness_enhanced[k] / (n_sites / 2.0);
+  }
   
   psi_eq_habitat0 = inv_logit(gamma0) / (inv_logit(gamma0)+(1-inv_logit(phi0))); // equilibrium occupancy rate 
   psi_eq_habitat1 = inv_logit(gamma0 + mu_gamma_habitat) / (inv_logit(gamma0 + mu_gamma_habitat)+(1-inv_logit(phi0 + mu_phi_habitat))); // equilibrium occupancy rate
@@ -244,7 +249,6 @@ generated quantities{
   //
   // posterior predictive check (Freeman-Tukey posterior pred check, binned by species)
   //
-  
   // estimate expected values (occurrence is a partially latent variable so when we don't observe the species, we don't actually know the expected values)
   // create replicated data using the paramter estimates and stochastic process defined by the model
   // gather real detecions
@@ -254,10 +258,10 @@ generated quantities{
   
   int Z[n_species, n_sites, n_years];
   
-  int z_rep[n_species, n_sites, n_years];
-  int y_rep[n_species, n_sites, n_years, n_visits]; // repd detections
+  int z_rep[n_species, n_sites, n_years]; // repd occurrence
+  int y_rep[n_species, n_sites, n_years, n_visits]; // repd detections given repd occurrence
 
-  real eval[n_species, n_sites,n_years,n_visits]; // expected values
+  real eval[n_species,n_sites,n_years,n_visits]; // expected values
 
   real T_rep[n_species]; // Freeman-Tukey distance from eval (species bin)
   real T_obs[n_species]; // Freeman-Tukey distance from eval (species bin)
@@ -277,29 +281,29 @@ generated quantities{
   // Predict Z at sites
   for(i in 1:n_species) { // loop across all species
     for(j in 1:n_sites) { // loop across all sites
-      for(k in 1:n_years){ // loop across all intervals
+      for(k in 1:n_years){ // loop across all years
       
           // if occupancy state is certain then the expected occupancy is 1
-          if(sum(V[i,j,k,1:n_visits]) > 0) {
+          if(sum(V[i, j, k, 1:n_visits]) > 0) {
           
             Z[i,j,k] = 1;
           
           // else the site could be occupied or not
           } else {
             
-            // occupancy but never observed by either dataset
-            real ulo = inv_logit(psi[i,j,k]) * 
-              // ((1 - inv_logit(p[j,k]))^n_visits) // for no visit heterogeneity in p
-              (1 - inv_logit(p[i,j,k,1])) * (1 - inv_logit(p[i,j,k,2])) *
-              (1 - inv_logit(p[i,j,k,3])) * (1 - inv_logit(p[i,j,k,4])) *
-              (1 - inv_logit(p[i,j,k,5])) * (1 - inv_logit(p[i,j,k,6]));
-            // non-occupancy
-            real uln = (1 - inv_logit(psi[i,j,k]));
+            Z[i,j,k] = bernoulli_logit_rng(psi[i,j,k]);
             
-            // outcome of occupancy given the number of ways to get either outcome
-            // higher psi values will yield a higher probability of success in the bernoulli_rng()
-            // higher detection rates will yield a lower probability of success (odds are low that it was there but you never saw it)
-            Z[i,j,k] = bernoulli_rng(ulo / (ulo + uln));
+            // occupancy but never observed by either dataset
+            //real ulo = inv_logit(psi[i,j,k]) * 
+              // ((1 - inv_logit(p[j,k]))^n_visits) // for no visit heterogeneity in p
+              //(1 - inv_logit(p[i,j,k,1])) * (1 - inv_logit(p[i,j,k,2])) *
+              //(1 - inv_logit(p[i,j,k,3])) * (1 - inv_logit(p[i,j,k,4])) *
+              //(1 - inv_logit(p[i,j,k,5])) * (1 - inv_logit(p[i,j,k,6]));
+            // non-occupancy
+           //real uln = (1 - inv_logit(psi[i,j,k]));
+            
+            // outcome of occupancy given the likelihood associated with both possibilities
+            //Z[i,j,k] = bernoulli_rng(ulo / (ulo + uln));
             
           } // end else uncertain occupancy state
         
@@ -311,31 +315,26 @@ generated quantities{
   // Predict Z at sites
   for(i in 1:n_species) { // loop across all species
     for(j in 1:n_sites) { // loop across all sites
-      for(k in 1:n_years){ // loop across all intervals
-        for(l in 1:n_visits){ // loop across all visits
+      for(k in 1:n_years){ // loop across all years
+        for(l in 1:n_visits){
           
           // expected detections
           eval[i,j,k,l] = Z[i,j,k] * 
-            // before
-            //bernoulli_logit_rng(p[i,j,k,l]);
-            // Try:
-            p[i,j,k,l];
-            
-          // before
-          // occupancy in replicated data
-          //z_rep[i,j,k] = bernoulli_logit_rng(psi[i,j,k]); 
-
-          // detections in replicated data
-          //y_rep[i,j,k,l] = z_rep[i,j,k] * bernoulli_logit_rng(p[i,j,k,l]);
+            bernoulli_logit_rng(p[i,j,k,l]);
           
-          // Try:
-          y_rep[i,j,k,l] = Z[i,j,k] * bernoulli_logit_rng(p[i,j,k,l]);
+          // occupancy in replicated data
+          // should evaluate to zero if the site is not in range
+          z_rep[i,j,k] = bernoulli_logit_rng(psi[i,j,k]); 
+          
+          // detections in replicated data
+          y_rep[i,j,k,l] = z_rep[i,j,k] * bernoulli_logit_rng(p[i,j,k,l]);
 
-          // Compute fit statistic (Freeman-Tukey) for replicate data
+          // Compute fit statistic (Tukey-Freeman) for replicate data
+          // community science records
           // Binned by species
           T_rep[i] = T_rep[i] + (sqrt(y_rep[i,j,k,l]) - 
             sqrt(eval[i,j,k,l]))^2;
-          // Compute fit statistic (Freeman-Tukey) for real data
+          // Compute fit statistic (Tukey-Freeman) for real data
           // Binned by species
           T_obs[i] = T_obs[i] + (sqrt(V[i,j,k,l]) - 
             sqrt(eval[i,j,k,l]))^2;
@@ -345,14 +344,14 @@ generated quantities{
     } // end loop across sites
   } // end loop across species
   
-  // bin by sites
+  // bin by species
   for(i in 1:n_species) { // loop across all species
     
     // if the discrepancy is lower for the real data for the species
     // versus the replicated data
     if(T_obs[i] < T_rep[i]){
       
-      // then increase site P by 1      
+      // then increase species P by 1      
       P_species[i] = P_species[i] + 1;
       // the ppc will involve averaging P across the number of post-burnin iterations
             
