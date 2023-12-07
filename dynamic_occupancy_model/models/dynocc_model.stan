@@ -140,29 +140,29 @@ model {
   // PRIORS
   // occupancy
   // initial state
-  psi1_0 ~ normal(0,2); // initial occupancy rate
+  psi1_0 ~ normal(0,1); // initial occupancy rate
   psi1_species ~ normal(psi1_0, sigma_psi1_species); // species-specific intercepts (centered on global)
   sigma_psi1_species ~ normal(0, 1); // variation in species-specific intercepts
   psi1_habitat ~ normal(mu_psi1_habitat,sigma_psi1_habitat); // effect of habitat on occurrence
   mu_psi1_habitat ~ normal(0,2); // community mean
   sigma_psi1_habitat ~ normal(0,1); // species variation
   // colonization
-  gamma0 ~ normal(0,2); // colonization rate
+  gamma0 ~ normal(0,1); // colonization rate
   gamma_species ~ normal(gamma0, sigma_gamma_species); // species-specific intercepts (centered on global)
   sigma_gamma_species ~ normal(0, 1); // variation in species-specific intercepts
   gamma_habitat ~ normal(mu_gamma_habitat,sigma_gamma_habitat); // effect of habitat on colonization
   mu_gamma_habitat ~ normal(0,2); // community mean
-  sigma_gamma_habitat ~ normal(0,1); // species variation
+  sigma_gamma_habitat ~ normal(0,0.5); // species variation
   // persistence
-  phi0 ~ normal(0,2); // global persistence intercept
+  phi0 ~ normal(0,1); // global persistence intercept
   phi_species ~ normal(phi0, sigma_phi_species); // species-specific intercepts (centered on global)
   sigma_phi_species ~ normal(0, 1); // variation in species-specific intercepts
   phi_habitat ~ normal(mu_phi_habitat, sigma_phi_habitat); // effect of habitat on persistence
   mu_phi_habitat ~ normal(0,2); // community mean
-  sigma_phi_habitat ~ normal(0,1); // species variation
+  sigma_phi_habitat ~ normal(0,0.5); // species variation
   
   // detection
-  p0 ~ normal(0,2); // global intercept
+  p0 ~ normal(0,1); // global intercept
   p_species ~ normal(p0, sigma_p_species); // species-specific intercepts (centered on global)
   sigma_p_species ~ normal(0, 1); // variation in species-specific intercepts
   p_site ~ normal(0, sigma_p_site); // site-specific intercepts
@@ -198,7 +198,52 @@ model {
 
 generated quantities{
   
+  // Diversity estimation
+  // number of species at each site in each year
+  int z_simmed[n_species, n_sites, n_years]; // simulate occurrence
+  int species_richness[n_sites, n_years]; // site/year species richness
+  vector[n_years] avg_species_richness_enhanced; // average across sites
+  vector[n_years] avg_species_richness_control; // average across sites
+  
+  // equilibrium occupancy rate (for average species)  
+  real psi_eq_habitat0; // control sites
+  real psi_eq_habitat1; // enhanced sites
+  
+  for(i in 1:n_species){
+    for(j in 1:n_sites){
+      for(k in 1:n_years){
+          z_simmed[i,j,k] = bernoulli_rng(psi[i,j,k]); 
+      }    
+    }
+  }
+  
+  // summed number of species occurring in site/year
+  for(j in 1:n_sites){
+    for(k in 1:n_years){
+      
+      // first calc site/year specific species richness
+      species_richness[j,k] = sum(z_simmed[,j,k]);
+      
+      // average species richness by habitat type across all j within each year k 
+      if(habitat_type[j] == 0){
+        avg_species_richness_control[k] = avg_species_richness_control[k] + species_richness[j,k];
+      } else{
+        avg_species_richness_enhanced[k] = avg_species_richness_enhanced[k] + species_richness[j,k];
+      }
+      
+    }
+  }
+  
+  // average out species richness by number of sites (1/2 of total sites were in each category)
+  avg_species_richness_control = avg_species_richness_control / n_sites / 2;
+  avg_species_richness_enhanced = avg_species_richness_enhanced / n_sites / 2;
+  
+  psi_eq_habitat0 = inv_logit(gamma0) / (inv_logit(gamma0)+(1-inv_logit(phi0))); // equilibrium occupancy rate 
+  psi_eq_habitat1 = inv_logit(gamma0 + mu_gamma_habitat) / (inv_logit(gamma0 + mu_gamma_habitat)+(1-inv_logit(phi0 + mu_phi_habitat))); // equilibrium occupancy rate
+  
+  //
   // posterior predictive check (Freeman-Tukey posterior pred check, binned by species)
+  //
   
   // estimate expected values (occurrence is a partially latent variable so when we don't observe the species, we don't actually know the expected values)
   // create replicated data using the paramter estimates and stochastic process defined by the model
