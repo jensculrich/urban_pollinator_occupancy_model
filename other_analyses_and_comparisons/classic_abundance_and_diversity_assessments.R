@@ -1,8 +1,15 @@
-library(reshape2)
 library(tidyverse)
+library(lubridate)
 
 # read data
 mydata <- read.csv("./data/pollinator_data.csv")
+
+## --------------------------------------------------
+## Operation Functions
+## predictor center scaling function
+center_scale <- function(x) {
+  (x - mean(x)) / sd(x)
+}
 
 # perform some initial filters on the unfinished prelim data
 mydata_filtered <- mydata %>% 
@@ -17,164 +24,357 @@ mydata_filtered <- mydata %>%
   filter(!SPECIES %in% c("Apis mellifera","undetermined", "undetermined/unconfirmed ID"))  %>%
   
   # Reduce sampling rounds in year 1 by 1 (they start at 2 since we did a weird prelim survey first)
-  mutate(SAMPLING_ROUND = as.integer(ifelse(YEAR==1, as.integer(SAMPLING_ROUND) - 1, as.integer(SAMPLING_ROUND)))) 
+  mutate(SAMPLING_ROUND = as.integer(ifelse(YEAR==1, as.integer(SAMPLING_ROUND) - 1, as.integer(SAMPLING_ROUND))))%>%
+  
+  filter(!is.na(NO_ID_RESOLUTION))
 
 ## --------------------------------------------------
-## Transform into detection non detection data
+## Let's compare abundances
 
-# rbind data from different years
-df <- mydata_filtered %>%
+abundance_df <- mydata_filtered %>%
   
-  # convert to binary detections
-  group_by(SPECIES, SITE, YEAR, SAMPLING_ROUND) %>%
-  slice(1) %>%
-  ungroup() %>%
-  
-  # remove species detected on < 2 unique occassions
-  group_by(SPECIES) %>%
+  # calculate abundance per site/visit
+  group_by(SITE, YEAR, SAMPLING_ROUND) %>%
   add_tally() %>%
-  rename(unique_detections = n) %>%
-  filter(unique_detections > 1) %>%
-  ungroup() %>%
+  rename("abundance" = "n") %>%
   
   # change SITE to factor for left_join with HABITAT_CATEGORY created below
   mutate(SITE = as.factor(SITE))
 
-# add habitat_category of sites
-# make a new dataframe with site names and cats
-SITE <- levels(as.factor(df$SITE))
-HABITAT_CATEGORY <- c(0,0,1,1,0,0,1,1,1, # 9 mowed sites 
-                      0,1,1,1,0,0,0,1,0) # and 9 meadow sites
-
-habitats_df <- as.data.frame(cbind(SITE, HABITAT_CATEGORY))
-
-# join HABITAT_CATEGORY of sites with df by SITE
-df_joined <- left_join(df, habitats_df, by = "SITE")
-
 ## Get unique species and sites
 # create an alphabetized list of all species encountered across all sites*intervals*visits
-species_list <- df_joined %>%
+species_list <- abundance_df %>%
   group_by(SPECIES) %>%
   slice(1) %>% # take one row per species (the name of each species)
   ungroup() %>%
   select(SPECIES) # extract species names column as vector
 
 # create an alphabetized list of all sites
-site_list <- df_joined %>%
+site_list <- abundance_df %>%
   group_by(SITE) %>%
   slice(1) %>% # take one row per species (the name of each species)
   ungroup() %>%
-  select(SITE) # extract species names column as vector
+  select(SITE)
 
-# get vectors of species, sites, intervals, and visits 
-species_vector <- species_list %>%
-  pull(SPECIES)
-
-site_vector <- site_list %>%
-  pull(SITE)
-
-year_vector <- as.vector(levels(as.factor(df$YEAR)))
-
-visit_vector <- as.vector(levels(as.factor(df$SAMPLING_ROUND)))
 
 # find study dimensions from the pooled data
-n_species <- length(species_vector)
+n_species <- length(levels(as.factor(abundance_df$SPECIES)))
 
-n_sites <- length(site_vector)
+n_sites <- length(levels(as.factor(abundance_df$SITE)))
 
-n_years <- length(levels(as.factor(df$YEAR)))
+n_years <- length(levels(as.factor(abundance_df$YEAR)))
 
-n_visits <- length(levels(as.factor(df$SAMPLING_ROUND)))
+n_visits <- length(levels(as.factor(abundance_df$SAMPLING_ROUND)))
+
+
+# add habitat_category of sites
+# make a new dataframe with site names and cats
+SITE <- levels(as.factor(abundance_df$SITE))
+HABITAT_CATEGORY <- c(0,0,1,1,0,0,1,1,1, # 9 mowed sites 
+                      0,1,1,1,0,0,0,1,0) # and 9 meadow sites
+
+habitats_df <- as.data.frame(cbind(SITE, HABITAT_CATEGORY, seq(1:n_sites))) %>%
+  rename("SITE_NUMBER" = "V3")
+
+# join HABITAT_CATEGORY of sites with df by SITE
+abundance_df_joined <- left_join(abundance_df, habitats_df, by = "SITE")
+
+
+# for analysis and plotting just want one row per site/year/visit/
+abundance_df_reduced <- abundance_df_joined %>%
+  group_by(SITE, YEAR, SAMPLING_ROUND) %>%
+  slice(1) %>%
+  select(YEAR, SAMPLING_ROUND, SITE, SITE_NUMBER, DATE, HABITAT_CATEGORY, abundance) %>%
+  ungroup()
+
+p <- ggplot(abundance_df_reduced, aes(x=HABITAT_CATEGORY, y=abundance, fill=HABITAT_CATEGORY)) + 
+  geom_boxplot() +
+  stat_summary(fun=mean, geom="point", shape=23, size=6) +
+  geom_jitter(shape=16, position=position_jitter(0.2)) +
+  scale_fill_brewer(palette="Blues") + theme_classic() +
+  labs(title="",x="", y = "Pollinator abundance") +
+  theme(legend.position = "none",
+        axis.title.y = element_text(size=16),
+        axis.title.x = element_text(size=16),
+        axis.text.y = element_text(size=14),
+        axis.text.x = element_text(size=14)) +
+  scale_x_discrete(labels = c("Control","Enhanced")) 
+
+  #geom_hline(yintercept = 10) +
+  #geom_hline(yintercept = 14)
+
+p
 
 ## --------------------------------------------------
-## Now we are ready to create the detection matrix, V
+## Model abundance
+
+abundance_df_reduced <- abundance_df_reduced %>%
+  mutate(SAMPLING_ROUND = as.factor(SAMPLING_ROUND),
+         YEAR = as.factor(YEAR),
+         SITE = as.factor(SITE),
+         HABITAT_CATEGORY = as.factor(HABITAT_CATEGORY)) %>%
+  # need to convert dates to julian day of year
+  mutate(DATE = lubridate::yday(as.Date(lubridate::mdy(DATE)))) %>%
+  # need to centre and scale the dates as a predictor variable (z-score)
+  mutate(SCALED_DATE = center_scale(DATE), 
+         SCALED_DATE_SQ = SCALED_DATE^2)
+
+library(lme4)
+
+(glm1 <- glm(abundance ~ HABITAT_CATEGORY, 
+              poisson(link = "log"),
+              data=abundance_df_reduced))
+
+(glm2 <- glmer(abundance ~ HABITAT_CATEGORY + YEAR + 
+                 SCALED_DATE + SCALED_DATE_SQ + (1|SITE), 
+               poisson(link = "log"),
+               data=abundance_df_reduced))
+
+library(rstanarm)
+
+(abundance_fit <- rstanarm::stan_glm(abundance ~ HABITAT_CATEGORY, 
+                                      poisson(link = "log"),
+                                      data=abundance_df_reduced))
+
+# the posterior predictive checks for poisson look REALLY BAD 
+plot(abundance_fit)
+
+pp_check(abundance_fit)
+
+posterior_vs_prior(abundance_fit)
+
+
+(abundance_fit1 <- rstanarm::stan_glm(abundance ~ HABITAT_CATEGORY, 
+                                      neg_binomial_2(link = "log"),
+                                      data=abundance_df_reduced))
+
+# posterior predictive checks for negative binomial look much better
+plot(abundance_fit1)
+
+pp_check(abundance_fit1)
+
+posterior_vs_prior(abundance_fit1)
+
+# with random effects
+(abundance_fit3 <- rstanarm::stan_glmer(abundance ~ HABITAT_CATEGORY + YEAR + 
+                                          SCALED_DATE + SCALED_DATE_SQ + (1|SITE),
+                                       neg_binomial_2(link = "log"), 
+                                       data=abundance_df_reduced)) 
+
+plot(abundance_fit3)
+
+pp_check(abundance_fit3)
+
+posterior_vs_prior(abundance_fit3, pars = c("(Intercept)", "HABITAT_CATEGORY1"))
 
 ## --------------------------------------------------
-## Now we are ready to create the detection matrix, V
+## Let's compare diversity
 
-df_joined <- df_joined %>%
-  mutate(y = 1) %>%
-  arrange(SAMPLING_ROUND, YEAR, SITE, SPECIES) %>% # arrange opposite to array fill 
-  # need numeric versions of species, site, year, and visit
-  mutate(SPECIES_numeric = as.numeric(as.factor(SPECIES)),
-         SITE_numeric = as.numeric(as.factor(SITE)),
-         YEAR_numeric = as.numeric(as.factor(YEAR)),
-         SAMPLING_ROUND_numeric = as.numeric(as.factor(SAMPLING_ROUND)))
+library(vegan)
 
-# prepare array and prefill with NA's
-V <- array(data = 0, dim = c(n_species, n_sites, n_years, n_visits))
+diversity_df <- mydata_filtered %>%
+  
+  # calculate abundance per site/visit
+  group_by(SITE, YEAR, SAMPLING_ROUND) %>%
+  mutate(species_richness = n_distinct(SPECIES)) %>%
+  mutate(sample_id = cur_group_id()) %>% 
+  mutate(SITE = as.factor(SITE)) %>%
+  ungroup() %>%
+  
+  group_by(SITE, YEAR, SAMPLING_ROUND, SPECIES) %>%
+  add_tally() %>%
+  ungroup() %>%
+  
+  group_by(SITE, YEAR, SAMPLING_ROUND) %>%
+  mutate(shannon_index = vegan::diversity(n, "shannon")) %>%
+  mutate(simpsons_index = vegan::diversity(n, "simpson")) 
 
-# fill array with detection / nondetection data
-for(i in 1:nrow(df_joined)){
-  V[df_joined$SPECIES_numeric[i], df_joined$SITE_numeric[i], 
-    df_joined$YEAR_numeric[i], df_joined$SAMPLING_ROUND_numeric[i]] <- df_joined$y[i]
-}
+# add habitat_category of sites
+# make a new dataframe with site names and cats
+SITE <- levels(as.factor(diversity_df$SITE))
+HABITAT_CATEGORY <- c(0,0,1,1,0,0,1,1,1, # 9 mowed sites 
+                      0,1,1,1,0,0,0,1,0) # and 9 meadow sites
 
-array_fill_check <- sum(V) - nrow(df_joined) # quick check that they're identical # should be 0
+habitats_df <- as.data.frame(cbind(SITE, HABITAT_CATEGORY, seq(1:n_sites))) %>%
+  rename("SITE_NUMBER" = "V3")
 
-if(array_fill_check != 0){
-  print("WARNING: filled array is inconsistent with number of detections in the 2D datasheet!")
-}
+# join HABITAT_CATEGORY of sites with df by SITE
+diversity_df_joined <- left_join(diversity_df, habitats_df, by = "SITE")
 
-# visualize the real detection matrix (number of detections per species/site/year)
-V2 <- array(data = 0, dim = c(n_species, n_sites, n_years))
+# for analysis and plotting just want one row per site/year/visit/
+diversity_df_reduced <- diversity_df_joined %>%
+  group_by(SITE, YEAR, SAMPLING_ROUND) %>%
+  slice(1) %>%
+  select(YEAR, SAMPLING_ROUND, SITE, SITE_NUMBER, DATE, 
+         HABITAT_CATEGORY, species_richness, shannon_index, simpsons_index) %>%
+  ungroup()
 
-for(i in 1:n_species){
-  for(j in 1:n_sites){
-    for(k in 1:n_years){
-      V2[i,j,k] = sum(V[i,j,k,1:n_visits])
-    }
-  }
-}
-
-df_melted_year1 <- melt(V2[1:n_species,1:n_sites,1])
-colnames(df_melted_year1)[1] <- "species"
-colnames(df_melted_year1)[2] <- "site"
-colnames(df_melted_year1)[3] <- "detections"
-
-df_melted_year2 <- melt(V2[1:n_species,1:n_sites,2])
-colnames(df_melted_year2)[1] <- "species"
-colnames(df_melted_year2)[2] <- "site"
-colnames(df_melted_year2)[3] <- "detections"
-
-df_melted_year3 <- melt(V2[1:n_species,1:n_sites,3])
-colnames(df_melted_year3)[1] <- "species"
-colnames(df_melted_year3)[2] <- "site"
-colnames(df_melted_year3)[3] <- "detections"
-
-detections_heatmap_plot_year1 <-
-  ggplot(df_melted_year1, aes(as.factor(site), as.factor(species))) +
-  geom_tile(aes(fill = detections), colour = "white") +
-  scale_fill_gradient(low = "white", high = "black") +
-  labs(x = "site number", y = "species number") +
-  theme_bw() +
+q <- ggplot(diversity_df_reduced, aes(x=HABITAT_CATEGORY, y=species_richness, fill=HABITAT_CATEGORY)) + 
+  geom_boxplot() +
+  stat_summary(fun=mean, geom="point", shape=23, size=6) +
+  geom_jitter(shape=16, position=position_jitter(0.2)) +
+  scale_fill_brewer(palette="Blues") + theme_classic() +
+  labs(title="",x="", y = "Pollinator diversity (species richness)") +
   theme(legend.position = "none",
-        panel.border = element_blank(), panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
-  ggtitle("Total detections per species/site 2021")
+        axis.title.y = element_text(size=16),
+        axis.title.x = element_text(size=16),
+        axis.text.y = element_text(size=14),
+        axis.text.x = element_text(size=14)) +
+  scale_x_discrete(labels = c("Control","Enhanced")) 
 
-detections_heatmap_plot_year2 <-
-  ggplot(df_melted_year2, aes(as.factor(site), as.factor(species))) +
-  geom_tile(aes(fill = detections), colour = "white") +
-  scale_fill_gradient(low = "white", high = "black") +
-  labs(x = "site number", y = "species number") +
-  theme_bw() +
-  theme(legend.position = "none",
-        panel.border = element_blank(), panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
-  ggtitle("Total detections per species/site 2022")
+q
 
-detections_heatmap_plot_year3 <-
-  ggplot(df_melted_year3, aes(as.factor(site), as.factor(species))) +
-  geom_tile(aes(fill = detections), colour = "white") +
-  scale_fill_gradient(low = "white", high = "black") +
-  labs(x = "site number", y = "species number") +
-  theme_bw() +
+r <- ggplot(diversity_df_reduced, aes(x=HABITAT_CATEGORY, y=shannon_index, fill=HABITAT_CATEGORY)) + 
+  geom_boxplot() +
+  stat_summary(fun=mean, geom="point", shape=23, size=6) +
+  geom_jitter(shape=16, position=position_jitter(0.2)) +
+  scale_fill_brewer(palette="Blues") + theme_classic() +
+  labs(title="",x="", y = "Pollinator diversity (Shannon index)") +
   theme(legend.position = "none",
-        panel.border = element_blank(), panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
-  ggtitle("Total detections per species/site 2021")
+        axis.title.y = element_text(size=16),
+        axis.title.x = element_text(size=16),
+        axis.text.y = element_text(size=14),
+        axis.text.x = element_text(size=14)) +
+  scale_x_discrete(labels = c("Control","Enhanced")) 
+
+r
+
+s <- ggplot(diversity_df_reduced, aes(x=HABITAT_CATEGORY, y=simpsons_index, fill=HABITAT_CATEGORY)) + 
+  geom_boxplot() +
+  stat_summary(fun=mean, geom="point", shape=23, size=6) +
+  geom_jitter(shape=16, position=position_jitter(0.2)) +
+  scale_fill_brewer(palette="Blues") + theme_classic() +
+  labs(title="",x="", y = "Pollinator diversity (Simpson's index)") +
+  theme(legend.position = "none",
+        axis.title.y = element_text(size=16),
+        axis.title.x = element_text(size=16),
+        axis.text.y = element_text(size=14),
+        axis.text.x = element_text(size=14)) +
+  scale_x_discrete(labels = c("Control","Enhanced")) 
+
+s
 
 gridExtra::grid.arrange(
-  detections_heatmap_plot_year1, detections_heatmap_plot_year2, detections_heatmap_plot_year3,
+  p, q, r, s,
   nrow=1)
+
+## --------------------------------------------------
+## Model diversity
+
+diversity_df_reduced <- diversity_df_reduced %>%
+  mutate(SAMPLING_ROUND = as.factor(SAMPLING_ROUND),
+         YEAR = as.factor(YEAR),
+         SITE = as.factor(SITE),
+         HABITAT_CATEGORY = as.factor(HABITAT_CATEGORY)) %>%
+  # need to convert dates to julian day of year
+  mutate(DATE = lubridate::yday(as.Date(lubridate::mdy(DATE)))) %>%
+  # need to centre and scale the dates as a predictor variable (z-score)
+  mutate(SCALED_DATE = center_scale(DATE), 
+         SCALED_DATE_SQ = SCALED_DATE^2)
+
+## --------------------------------------------------
+## Model species richness 
+
+library(lme4)
+
+(glm1 <- glm(species_richness ~ HABITAT_CATEGORY, 
+             poisson(link = "log"),
+             data=diversity_df_reduced))
+
+(glm2 <- glmer(species_richness ~ HABITAT_CATEGORY + YEAR + 
+                 SCALED_DATE + SCALED_DATE_SQ + (1|SITE), 
+               poisson(link = "log"),
+               data=diversity_df_reduced))
+
+library(rstanarm)
+
+(richness_fit <- rstanarm::stan_glm(species_richness ~ HABITAT_CATEGORY, 
+                                     poisson(link = "log"),
+                                     data=diversity_df_reduced))
+
+# the posterior predictive checks for poisson look REALLY BAD 
+plot(richness_fit)
+
+pp_check(richness_fit)
+
+posterior_vs_prior(richness_fit)
+
+
+(richness_fit1 <- rstanarm::stan_glm(species_richness ~ HABITAT_CATEGORY, 
+                                      neg_binomial_2(link = "log"),
+                                      data=diversity_df_reduced))
+
+# posterior predictive checks for negative binomial look much better
+plot(richness_fit1)
+
+pp_check(richness_fit1)
+
+posterior_vs_prior(richness_fit1)
+
+# with random effects
+(richness_fit2 <- rstanarm::stan_glmer(species_richness ~ HABITAT_CATEGORY + YEAR + 
+                                          SCALED_DATE + SCALED_DATE_SQ + (1|SITE),
+                                        neg_binomial_2(link = "log"), 
+                                        data=diversity_df_reduced)) 
+
+plot(richness_fit2)
+
+pp_check(richness_fit2)
+
+posterior_vs_prior(richness_fit2, pars = c("(Intercept)", "HABITAT_CATEGORY1"))
+
+
+
+## --------------------------------------------------
+## Model species diversity (shannon index)  - gaussian error
+
+(shannon_fit <- rstanarm::stan_glm(shannon_index ~ HABITAT_CATEGORY, 
+                                    data=diversity_df_reduced))
+
+# the posterior predictive checks for poisson look REALLY BAD 
+plot(shannon_fit)
+
+pp_check(shannon_fit)
+
+posterior_vs_prior(shannon_fit)
+
+
+# with random effects
+(shannon_fit2 <- rstanarm::stan_glmer(shannon_index ~ HABITAT_CATEGORY + YEAR + 
+                                         SCALED_DATE + SCALED_DATE_SQ + (1|SITE),
+                                       data=diversity_df_reduced)) 
+
+plot(shannon_fit2)
+
+pp_check(shannon_fit2)
+
+posterior_vs_prior(shannon_fit2, pars = c("(Intercept)", "HABITAT_CATEGORY1"))
+
+
+## --------------------------------------------------
+## Model species diversity (simpsons index)- beta regression
+
+temp <- diversity_df_reduced %>%
+  mutate(simpsons_index2 = simpsons_index + 0.001) # there are some issues with the zeros being "negative"?
+
+(simpsons_fit <- rstanarm::stan_betareg(simpsons_index2 ~ HABITAT_CATEGORY,
+                                   data=temp))
+
+# the posterior predictive checks for poisson look REALLY BAD 
+plot(simpsons_fit)
+
+pp_check(simpsons_fit) # NOT VERY GOOD
+
+posterior_vs_prior(simpsons_fit)
+
+
+# how to add random effects to betareg?
+(simpsons_fit2 <- rstanarm::stan_betareg(simpsons_index2 ~ HABITAT_CATEGORY + YEAR + 
+                                        SCALED_DATE + SCALED_DATE_SQ,
+                                      data=temp)) 
+
+plot(simpsons_fit2)
+
+pp_check(simpsons_fit2)
+
+posterior_vs_prior(simpsons_fit2, pars = c("(Intercept)", "HABITAT_CATEGORY1"))

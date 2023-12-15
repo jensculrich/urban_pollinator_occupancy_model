@@ -49,7 +49,9 @@ process_raw_data <- function() {
   
   # Species I had to fix by hand: 
   # Lasioglossum cressonii; Lasioglossum brunnieventre, Bombus melanopygus, Bombus vosnesenskii, Eumerus sp.
-  # Merodon equestris, Syrphus opinator
+  # Merodon equestris, Syrphus opinator, Eupeodes sp. (need to drop), Bombus impatiens, Bombus sp. (need to drop),
+  # Nomada (should all be Nomada sp. for now), Platycheirus sp. (stegnus morph), Platycheirus sp. (trichopus morph),
+  # Sphaerophoria sp. (need to drop), 
   
   ggplot(mydata_filtered, aes(x=fct_infreq(SPECIES))) +
     geom_bar(stat = "count") +
