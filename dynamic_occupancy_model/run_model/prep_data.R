@@ -1,7 +1,7 @@
 library(tidyverse)
 library(lubridate)
 
-process_raw_data <- function() {
+process_raw_data <- function(min_unique_detections) {
 
   ## --------------------------------------------------
   ## Operation Functions
@@ -11,7 +11,7 @@ process_raw_data <- function() {
   }
   
   # read data
-  mydata <- read.csv("./data/pollinator_data.csv")
+  mydata <- read.csv("./data/pollinator_data_Copy.csv")
   
   # perform some initial filters on the unfinished prelim data
   mydata_filtered <- mydata %>% 
@@ -24,6 +24,10 @@ process_raw_data <- function() {
     # Filter by SPECIES
     # Remove honeybees from our preliminary analysis
     filter(!SPECIES %in% c("Apis mellifera","undetermined", "undetermined/unconfirmed ID"))  %>%
+    
+    # Filter by SPECIES
+    # Remove some others until resolved for final analyses
+    filter(!SPECIES %in% c("Bombus sp.","Eupeodes sp.", "Sphaerophoria sp."))  %>%
     
     # Reduce sampling rounds in year 1 by 1 (they start at 2 since we did a weird prelim survey first)
     mutate(SAMPLING_ROUND = as.integer(ifelse(YEAR==1, as.integer(SAMPLING_ROUND) - 1, as.integer(SAMPLING_ROUND))))
@@ -45,25 +49,36 @@ process_raw_data <- function() {
     group_by(SPECIES) %>%
     add_tally() %>%
     rename(unique_detections = n) %>%
-    filter(unique_detections > 1)
+    filter(unique_detections >= min_unique_detections)
   
-  # Species I had to fix by hand: 
-  # Lasioglossum cressonii; Lasioglossum brunnieventre, Bombus melanopygus, Bombus vosnesenskii, Eumerus sp.
-  # Merodon equestris, Syrphus opinator, Eupeodes sp. (need to drop), Bombus impatiens, Bombus sp. (need to drop),
-  # Nomada (should all be Nomada sp. for now), Platycheirus sp. (stegnus morph), Platycheirus sp. (trichopus morph),
-  # Sphaerophoria sp. (need to drop), 
+  species_2_or_more <- unique(mydata_filtered_2_plus_unique$SPECIES)
+  temp <- mydata_filtered %>%
+    filter(SPECIES %in% species_2_or_more)
   
+  # total detections all species
   ggplot(mydata_filtered, aes(x=fct_infreq(SPECIES))) +
     geom_bar(stat = "count") +
-    labs(x = "Species") +
-    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+    labs(x = "", y = "Total detections") +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+          axis.text.y = element_text(size = 11)) +
     ggtitle("Total detections per species")
   
+  # total detections (species detected 2 or more unique occasions)
+  ggplot(temp, aes(x=fct_infreq(SPECIES))) +
+    geom_bar(stat = "count") +
+    labs(x = "", y = "Total detections") +
+    theme(axis.text.x = element_text(size = 11, angle = 65, vjust = 1, hjust=1.1),
+          axis.text.y = element_text(size = 11)) +
+    ggtitle(paste0("Total detections per species (for species detected ", min_unique_detections, " or more unique visits)"))
+  
+  # unique detections (species detected 2 or more unique occasions)
   ggplot(mydata_filtered_2_plus_unique, aes(x=fct_infreq(SPECIES))) +
     geom_bar(stat = "count") +
-    labs(x = "Species") +
-    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
-    ggtitle("Unique site/year/visit detections per species (for species detected >1 unique visits)")
+    labs(x = "", y = "Unique detections") +
+    theme(axis.text.x = element_text(size = 11, angle = 65, vjust = 1, hjust=1.1),
+          axis.text.y = element_text(size = 11)) +
+    ggtitle(paste0("Unique site/year/visit detections per species (for species detected ", min_unique_detections, " or more unique visits)"))
+  
   
   
   ## --------------------------------------------------
@@ -81,7 +96,7 @@ process_raw_data <- function() {
     group_by(SPECIES) %>%
     add_tally() %>%
     rename(unique_detections = n) %>%
-    filter(unique_detections > 1) %>%
+    filter(unique_detections >= min_unique_detections) %>%
     ungroup() %>%
     
     # change SITE to factor for left_join with HABITAT_CATEGORY created below

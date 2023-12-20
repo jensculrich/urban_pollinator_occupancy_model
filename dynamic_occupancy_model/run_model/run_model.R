@@ -4,8 +4,8 @@
 library(rstan)
 
 source("./dynamic_occupancy_model/run_model/prep_data.R")
-
-my_data <- process_raw_data()
+min_unique_detections = 1 # >=
+my_data <- process_raw_data(min_unique_detections)
 
 ## --------------------------------------------------
 ### Prepare data for model
@@ -43,6 +43,17 @@ params <- c("psi1_0",  "sigma_psi1_species", "mu_psi1_habitat", "sigma_psi1_habi
             "psi_eq_habitat0", "psi_eq_habitat1",
             "T_rep", "T_obs", "P_species")
 
+## Parameters monitored (multinormal model)
+params <- c("rho", "sigma_species", "species_intercepts",
+            "psi1_0",  "mu_psi1_habitat", "sigma_psi1_habitat",
+            "gamma0",  "sigma_gamma_species", "mu_gamma_habitat", "sigma_gamma_habitat", 
+            "phi0", "sigma_phi_species", "mu_phi_habitat", "sigma_phi_habitat", 
+            "p0", "p_habitat", # "sigma_p_site", 
+            "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq",
+            "species_richness", "avg_species_richness_control", "avg_species_richness_enhanced", 
+            "psi_eq_habitat0", "psi_eq_habitat1",
+            "T_rep", "T_obs", "P_species")
+
 # MCMC settings
 n_iterations <- 400
 n_thin <- 1
@@ -57,7 +68,7 @@ delta = 0.95
 inits <- lapply(1:n_chains, function(i)
   
   list(psi1_0 = runif(1, -1, 1),
-       sigma_psi1_species = runif(1, 0, 1),
+       #sigma_psi1_species = runif(1, 0, 1),
        mu_psi1_habitat = runif(1, -1, 1),
        sigma_psi1_habitat = runif(1, 0, 1),
        gamma0 = runif(1, -1, 1),
@@ -69,7 +80,7 @@ inits <- lapply(1:n_chains, function(i)
        mu_phi_habitat = runif(1, 0, 1), # persistence rates are usually greater than 50%
        sigma_phi_habitat = runif(1, 0, 1),
        p0 = runif(1, -1, 1),
-       sigma_p_species = runif(1, 0, 1),
+       #sigma_p_species = runif(1, 0, 1),
        #sigma_p_site = runif(1, 0, 1),
        p_habitat = runif(1, -1, 1),
        mu_p_species_date = runif(1, -1, 1),
@@ -83,7 +94,8 @@ inits <- lapply(1:n_chains, function(i)
 ### Run model
 
 # stan_model <- "./dynamic_occupancy_model/models/dynocc_model_with_year_effects.stan"
-stan_model <- "./dynamic_occupancy_model/models/dynocc_model.stan"
+# stan_model <- "./dynamic_occupancy_model/models/dynocc_model.stan"
+stan_model <- "./dynamic_occupancy_model/models/dynocc_model_multinormal.stan"
 
 ## Call Stan from R
 stan_out <- stan(stan_model,
@@ -97,7 +109,7 @@ stan_out <- stan(stan_model,
                      open_progress = FALSE,
                      cores = n_cores)
 
-saveRDS(stan_out, "./dynamic_occupancy_model/model_outputs/stan_out.rds")
+saveRDS(stan_out, "./dynamic_occupancy_model/model_outputs/stan_out_multinormal.rds")
 stan_out <- readRDS("./dynamic_occupancy_model/model_outputs/stan_out.rds")
 
 
@@ -122,9 +134,15 @@ print(stan_out, digits = 3,
       ))
 
 traceplot(stan_out, pars = c(
-  "psi1_0",  "sigma_psi1_species", "mu_psi1_habitat", "sigma_psi1_habitat",
+  "psi1_0",  #"sigma_psi1_species", 
+  "mu_psi1_habitat", "sigma_psi1_habitat",
   "gamma0",  "sigma_gamma_species", "mu_gamma_habitat", "sigma_gamma_habitat",
   "phi0", "sigma_phi_species", "mu_phi_habitat", "sigma_phi_habitat"
+))
+
+
+traceplot(stan_out, pars = c(
+  "rho",  "sigma_species"
 ))
 
 traceplot(stan_out, pars = c(
@@ -132,8 +150,13 @@ traceplot(stan_out, pars = c(
 ))
 
 traceplot(stan_out, pars = c(
-  "p0", "sigma_p_species", "sigma_p_site", "p_habitat", 
+  "p0", #"sigma_p_species", 
+  "sigma_p_site", "p_habitat", 
   "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq" 
 ))
+
+traceplot(stan_out,  
+      pars = c("avg_species_richness_control", "avg_species_richness_enhanced"
+      ))
 
 print(stan_out, digits = 3, pars = c("P_species"))

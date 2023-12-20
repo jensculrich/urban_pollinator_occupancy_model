@@ -2,7 +2,7 @@ library(reshape2)
 library(tidyverse)
 
 max_unique_detections = 500 # can lower this to filter off the top if too many species to plot in one page
-min_unique_detections = 1
+min_unique_detections = 2
 
 # read data
 mydata <- read.csv("./data/pollinator_data.csv")
@@ -22,7 +22,7 @@ mydata_filtered <- mydata %>%
   # Reduce sampling rounds in year 1 by 1 (they start at 2 since we did a weird prelim survey first)
   mutate(SAMPLING_ROUND = as.integer(ifelse(YEAR==1, as.integer(SAMPLING_ROUND) - 1, as.integer(SAMPLING_ROUND)))) %>%
   
-  filter(!is.na(NO_ID_RESOLUTION))
+  filter(is.na(NO_ID_RESOLUTION))
 
 
 
@@ -184,7 +184,7 @@ detections_heatmap_plot_year1 <-
   labs(x = "Site", y = "Species") +
   theme_bw() +
   geom_vline(xintercept = 9.5, linewidth = 1, colour="goldenrod", linetype = "longdash") +
-  geom_hline(yintercept = 51.5, linewidth = 1, colour="orange3", linetype = "longdash") +
+  geom_hline(yintercept = 54.5, linewidth = 1, colour="orange3", linetype = "longdash") +
   theme(#legend.position = "bottom",
         legend.position = "none",
         axis.text.x = element_text(angle = 45, hjust=1),
@@ -203,7 +203,7 @@ detections_heatmap_plot_year2 <-
   labs(x = "Site", y = "Species") +
   theme_bw() +
   geom_vline(xintercept = 9.5, linewidth = 1, colour="goldenrod", linetype = "longdash") +
-  geom_hline(yintercept = 51.5, linewidth = 1, colour="orange3", linetype = "longdash") +
+  geom_hline(yintercept = 54.5, linewidth = 1, colour="orange3", linetype = "longdash") +
   theme(legend.position = "none",
         axis.text.x = element_text(angle = 45, hjust=1),
         axis.text.y = element_text(size=5),
@@ -219,7 +219,7 @@ detections_heatmap_plot_year3 <-
   labs(x = "Site", y = "Species") +
   theme_bw() +
   geom_vline(xintercept = 9.5, linewidth = 1, colour="goldenrod", linetype = "longdash") +
-  geom_hline(yintercept = 51.5, linewidth = 1, colour="orange3", linetype = "longdash") +
+  geom_hline(yintercept = 54.5, linewidth = 1, colour="orange3", linetype = "longdash") +
   theme(legend.position = "none",
         axis.text.x = element_text(angle = 45, hjust=1),
         axis.text.y = element_text(size=5),
