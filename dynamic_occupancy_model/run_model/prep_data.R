@@ -11,7 +11,7 @@ process_raw_data <- function(min_unique_detections) {
   }
   
   # read data
-  mydata <- read.csv("./data/pollinator_data_Copy.csv")
+  mydata <- read.csv("./data/pollinator_data.csv")
   
   # perform some initial filters on the unfinished prelim data
   mydata_filtered <- mydata %>% 

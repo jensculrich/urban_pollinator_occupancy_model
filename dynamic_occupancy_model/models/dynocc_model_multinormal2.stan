@@ -9,25 +9,47 @@
 // year == k
 // visit == l
 
-// multinormal species effects for correlations in psi1 and detection ONLY
+// multinormal model with correlated species effects for all 4 levels
 
 functions {
   
   // covariance matrix for detection rates from different data sources
   matrix custom_cov_matrix(vector sigma, real rho) {
-    matrix[2,2] Sigma;
+    matrix[4,4] Sigma;
+    
     Sigma[1,1] = square(sigma[1]); // species variation in occurrence1 rates
-    Sigma[2,2] = square(sigma[2]); // species variation in detection rates
-    Sigma[1,2] = sigma[1] * sigma[2] * rho; // correlation between species-specific detection and occurrence1 rates
-    Sigma[2,1] = Sigma[1,2]; // correlation between species-specific detection and occurrence1 rates
+    Sigma[2,2] = square(sigma[2]); // species variation in gamma rates
+    Sigma[3,3] = square(sigma[2]); // species variation in phi rates
+    Sigma[4,4] = square(sigma[2]); // species variation in detection rates
+    
+    Sigma[1,2] = sigma[1] * sigma[2] * rho; // correlation between species-specific occurrence1 and gamma rates
+    Sigma[2,1] = Sigma[1,2];    
+    
+    Sigma[1,3] = sigma[1] * sigma[3] * rho; // correlation between species-specific occurrence1 and phi rates
+    Sigma[3,1] = Sigma[1,3];    
+    
+    Sigma[1,4] = sigma[1] * sigma[4] * rho; // correlation between species-specific occurrence1 and detection rates
+    Sigma[4,1] = Sigma[1,4]; 
+    
+    Sigma[2,3] = sigma[2] * sigma[3] * rho; // correlation between species-specific gamma and phi rates
+    Sigma[3,2] = Sigma[2,3]; 
+    
+    Sigma[2,4] = sigma[2] * sigma[4] * rho; // correlation between species-specific gamma and detection rates
+    Sigma[4,2] = Sigma[2,4]; 
+    
+    Sigma[3,4] = sigma[3] * sigma[4] * rho; // correlation between species-specific phi and detection rates
+    Sigma[4,3] = Sigma[3,4]; 
+    
     return Sigma;
   }
   
   // mean values for multivariate normal distribution (center species on global intercepts)
-  vector mu(real psi1_0, real p0){
-    vector[2] global_intercepts;
+  vector mu(real psi1_0, real gamma0, real phi0, real p0){
+    vector[4] global_intercepts;
     global_intercepts[1] = psi1_0;
-    global_intercepts[2] = p0;
+    global_intercepts[2] = gamma0;
+    global_intercepts[3] = phi0;
+    global_intercepts[4] = p0;
     return global_intercepts;
   }
   
@@ -53,11 +75,8 @@ parameters {
   
     // Covararying Parameters
   real<lower=-1,upper=1> rho;  // correlation of (community science and research collections detection)
-  vector<lower=0>[2] sigma_species; // variance in species-specific detection rates 
-    // (sigma_species_detection[1] == community science and sigma_species_detection[2] == research collections detection)
-  vector[2] species_intercepts[n_species];// species-level detection intercepts
-    // (species_intercepts_detection[1] == community science and species_intercepts_detection[2] == research collections detection)
-
+  vector<lower=0>[4] sigma_species; // variance in species-specific detection rates 
+  vector[4] species_intercepts[n_species];// species-level detection intercepts
   
   real psi1_0;
   //vector[n_species] psi1_species;
@@ -66,14 +85,14 @@ parameters {
   real mu_psi1_habitat;
   real sigma_psi1_habitat;
   real gamma0;
-  vector[n_species] gamma_species;
-  real sigma_gamma_species;
+  //vector[n_species] gamma_species;
+  //real sigma_gamma_species;
   vector[n_species] gamma_habitat;
   real mu_gamma_habitat;
   real sigma_gamma_habitat;
   real phi0;
-  vector[n_species] phi_species;
-  real sigma_phi_species;
+  //vector[n_species] phi_species;
+  //real sigma_phi_species;
   vector[n_species] phi_habitat;
   real mu_phi_habitat;
   real sigma_phi_habitat;
@@ -111,12 +130,14 @@ transformed parameters {
           ); // end phi[j,k]
         
         gamma[i,j,k] = inv_logit( // probability (0-1) of colonization is equal to..
-          gamma_species[species[i]] + // a species specific intercept
+          //gamma_species[species[i]] + // a species specific intercept
+          species_intercepts[species[i],2] + // species random effect
           gamma_habitat[species[i]] * habitat_type[j] // a spatial effect
           ); // end phi[j,k]
         
         phi[i,j,k] = inv_logit( // probability (0-1) of persistence is equal to..
-          phi_species[species[i]] + // a species specific intercept
+          //phi_species[species[i]] + // a species specific intercept
+          species_intercepts[species[i],3] + // species random effect
           phi_habitat[species[i]] * habitat_type[j] // a spatial effect
           ); // end phi[j,k]
              
@@ -154,7 +175,7 @@ transformed parameters {
           
           p[i,j,k,l] = inv_logit( // probability (0-1) of detection is equal to..
             //p_species[species[i]] + // a species-specific intercept
-            species_intercepts[species[i],2] + // species random effect
+            species_intercepts[species[i],4] + // species random effect
             //p_site[sites[j]] + // a site-specific intercept
             p_habitat * habitat_type[j] + // a spatial detection effect
             p_date[species[i]] * date_scaled[j,k,l] + // a species-specific phenological detection effect (peak)
@@ -175,13 +196,15 @@ model {
   
   // correlated params:
   // correlated species effects
-  sigma_species[1] ~ normal(0, 2);
-  sigma_species[2] ~ normal(0, 2);
+  sigma_species[1] ~ normal(0, 2); // initial occurrence
+  sigma_species[2] ~ normal(0, 1); // colonization
+  sigma_species[3] ~ normal(0, 1); // persistence
+  sigma_species[4] ~ normal(0, 2); // detection
   (rho + 1) / 2 ~ beta(2, 2);
   
   // correlated species-specific detection rates
   // will send the mean (mu), variance and correlation to the covariance matrix
-  species_intercepts ~ multi_normal(mu(psi1_0, p0), 
+  species_intercepts ~ multi_normal(mu(psi1_0, gamma0, phi0, p0), 
     custom_cov_matrix(sigma_species, rho));
   
   // occupancy
@@ -194,18 +217,18 @@ model {
   sigma_psi1_habitat ~ normal(0,1); // species variation
   // colonization
   gamma0 ~ normal(0,1); // colonization rate
-  gamma_species ~ normal(gamma0, sigma_gamma_species); // species-specific intercepts (centered on global)
-  sigma_gamma_species ~ normal(0, 0.5); // variation in species-specific intercepts
+  //gamma_species ~ normal(gamma0, sigma_gamma_species); // species-specific intercepts (centered on global)
+  //sigma_gamma_species ~ normal(0, 1); // variation in species-specific intercepts
   gamma_habitat ~ normal(mu_gamma_habitat,sigma_gamma_habitat); // effect of habitat on colonization
   mu_gamma_habitat ~ normal(0,2); // community mean
-  sigma_gamma_habitat ~ normal(0,0.5); // species variation
+  sigma_gamma_habitat ~ normal(0,1); // species variation
   // persistence
   phi0 ~ normal(0,1); // global persistence intercept
-  phi_species ~ normal(phi0, sigma_phi_species); // species-specific intercepts (centered on global)
-  sigma_phi_species ~ normal(0, 0.5); // variation in species-specific intercepts
+  //phi_species ~ normal(phi0, sigma_phi_species); // species-specific intercepts (centered on global)
+  //sigma_phi_species ~ normal(0, 1); // variation in species-specific intercepts
   phi_habitat ~ normal(mu_phi_habitat, sigma_phi_habitat); // effect of habitat on persistence
   mu_phi_habitat ~ normal(0,2); // community mean
-  sigma_phi_habitat ~ normal(0,0.5); // species variation
+  sigma_phi_habitat ~ normal(0,1); // species variation
   
   // detection
   p0 ~ normal(0,1); // global intercept

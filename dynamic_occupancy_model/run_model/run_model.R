@@ -44,10 +44,11 @@ params <- c("psi1_0",  "sigma_psi1_species", "mu_psi1_habitat", "sigma_psi1_habi
             "T_rep", "T_obs", "P_species")
 
 ## Parameters monitored (multinormal model)
-params <- c("rho", "sigma_species", "species_intercepts",
-            "psi1_0",  "mu_psi1_habitat", "sigma_psi1_habitat",
-            "gamma0",  "sigma_gamma_species", "mu_gamma_habitat", "sigma_gamma_habitat", 
-            "phi0", "sigma_phi_species", "mu_phi_habitat", "sigma_phi_habitat", 
+params <- c("rho", 
+            "sigma_species", "species_intercepts",
+            "psi1_0",  "mu_psi1_habitat", "sigma_psi1_habitat", "sigma_psi1_site",
+            "gamma0", "mu_gamma_habitat", "sigma_gamma_habitat", "sigma_gamma_species",  "sigma_gamma_site",
+            "phi0", "mu_phi_habitat", "sigma_phi_habitat", "sigma_phi_species", "sigma_phi_site",
             "p0", "p_habitat", # "sigma_p_site", 
             "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq",
             "species_richness", "avg_species_richness_control", "avg_species_richness_enhanced", 
@@ -72,11 +73,11 @@ inits <- lapply(1:n_chains, function(i)
        mu_psi1_habitat = runif(1, -1, 1),
        sigma_psi1_habitat = runif(1, 0, 1),
        gamma0 = runif(1, -1, 1),
-       sigma_gamma_species = runif(1, 0, 1),
+       #sigma_gamma_species = runif(1, 0, 1),
        mu_gamma_habitat = runif(1, -2, -1), # colonization rates are usually low
        sigma_gamma_habitat = runif(1, 0, 1),
        phi0 = runif(1, -1, 1),
-       sigma_phi_species = runif(1, 0, 1),
+       #sigma_phi_species = runif(1, 0, 1),
        mu_phi_habitat = runif(1, 0, 1), # persistence rates are usually greater than 50%
        sigma_phi_habitat = runif(1, 0, 1),
        p0 = runif(1, -1, 1),
@@ -95,7 +96,7 @@ inits <- lapply(1:n_chains, function(i)
 
 # stan_model <- "./dynamic_occupancy_model/models/dynocc_model_with_year_effects.stan"
 # stan_model <- "./dynamic_occupancy_model/models/dynocc_model.stan"
-stan_model <- "./dynamic_occupancy_model/models/dynocc_model_multinormal.stan"
+stan_model <- "./dynamic_occupancy_model/models/dynocc_model_multinormal_w_site_REs.stan"
 
 ## Call Stan from R
 stan_out <- stan(stan_model,
@@ -135,14 +136,17 @@ print(stan_out, digits = 3,
 
 traceplot(stan_out, pars = c(
   "psi1_0",  #"sigma_psi1_species", 
-  "mu_psi1_habitat", "sigma_psi1_habitat",
-  "gamma0",  "sigma_gamma_species", "mu_gamma_habitat", "sigma_gamma_habitat",
-  "phi0", "sigma_phi_species", "mu_phi_habitat", "sigma_phi_habitat"
+  "mu_psi1_habitat", "sigma_psi1_habitat", "sigma_psi1_site",
+  "gamma0",  "sigma_gamma_species", 
+  "mu_gamma_habitat", "sigma_gamma_habitat", "sigma_gamma_site",
+  "phi0", "sigma_phi_species", 
+  "mu_phi_habitat", "sigma_phi_habitat", "sigma_phi_site"
 ))
 
 
 traceplot(stan_out, pars = c(
-  "rho",  "sigma_species"
+  "rho", 
+  "sigma_species"
 ))
 
 traceplot(stan_out, pars = c(
@@ -151,7 +155,8 @@ traceplot(stan_out, pars = c(
 
 traceplot(stan_out, pars = c(
   "p0", #"sigma_p_species", 
-  "sigma_p_site", "p_habitat", 
+  #"sigma_p_site", 
+  "p_habitat", 
   "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq" 
 ))
 
@@ -160,3 +165,8 @@ traceplot(stan_out,
       ))
 
 print(stan_out, digits = 3, pars = c("P_species"))
+
+# get an "average" P value
+fit_summary <- rstan::summary(stan_out)
+View(cbind(1:nrow(fit_summary$summary), fit_summary$summary)) # View to see which row corresponds to the parameter of interest
+(mean_FTP <- mean(fit_summary$summary[478:575,1]))

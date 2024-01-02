@@ -62,21 +62,27 @@ parameters {
   real psi1_0;
   //vector[n_species] psi1_species;
   //real sigma_psi1_species;
+  vector[n_sites] psi1_site;
+  real<lower=0> sigma_psi1_site;
   vector[n_species] psi1_habitat;
   real mu_psi1_habitat;
-  real sigma_psi1_habitat;
+  real<lower=0> sigma_psi1_habitat;
   real gamma0;
+  vector[n_sites] gamma_site;
+  real<lower=0> sigma_gamma_site;
   vector[n_species] gamma_species;
-  real sigma_gamma_species;
+  real<lower=0> sigma_gamma_species;
   vector[n_species] gamma_habitat;
   real mu_gamma_habitat;
-  real sigma_gamma_habitat;
+  real<lower=0> sigma_gamma_habitat;
   real phi0;
+  vector[n_sites] phi_site;
+  real<lower=0> sigma_phi_site;
   vector[n_species] phi_species;
-  real sigma_phi_species;
+  real<lower=0> sigma_phi_species;
   vector[n_species] phi_habitat;
   real mu_phi_habitat;
-  real sigma_phi_habitat;
+  real<lower=0> sigma_phi_habitat;
   
   real p0;
   //vector[n_species] p_species;
@@ -86,9 +92,9 @@ parameters {
   real p_habitat;
   vector[n_species] p_date;
   real mu_p_species_date;
-  real sigma_p_species_date;
+  real<lower=0> sigma_p_species_date;
   vector[n_species] p_date_sq;
-  real sigma_p_species_date_sq;
+  real<lower=0> sigma_p_species_date_sq;
   real mu_p_species_date_sq;
 
 } // end parameters
@@ -107,16 +113,19 @@ transformed parameters {
         psi1[i,j] = inv_logit( // probability (0-1) of occurrence in year 1 is equal to..
           //psi1_species[species[i]] + // a species specific intercept
           species_intercepts[species[i],1] + // species random effect
+          psi1_site[sites[j]] + // site random effect
           psi1_habitat[species[i]] * habitat_type[j] // a spatial effect
           ); // end phi[j,k]
         
         gamma[i,j,k] = inv_logit( // probability (0-1) of colonization is equal to..
           gamma_species[species[i]] + // a species specific intercept
+          gamma_site[sites[j]] + // site random effect
           gamma_habitat[species[i]] * habitat_type[j] // a spatial effect
           ); // end phi[j,k]
         
         phi[i,j,k] = inv_logit( // probability (0-1) of persistence is equal to..
           phi_species[species[i]] + // a species specific intercept
+          phi_site[sites[j]] + // site random effect
           phi_habitat[species[i]] * habitat_type[j] // a spatial effect
           ); // end phi[j,k]
              
@@ -187,6 +196,8 @@ model {
   // occupancy
   // initial state
   psi1_0 ~ normal(0,1); // initial occupancy rate
+  psi1_site ~ normal(0, sigma_psi1_site); // site-specific intercepts
+  sigma_psi1_site ~ normal(0,0.5); // variation in site-specific intercepts
   //psi1_species ~ normal(psi1_0, sigma_psi1_species); // species-specific intercepts (centered on global)
   //sigma_psi1_species ~ normal(0, 1); // variation in species-specific intercepts
   psi1_habitat ~ normal(mu_psi1_habitat,sigma_psi1_habitat); // effect of habitat on occurrence
@@ -194,6 +205,8 @@ model {
   sigma_psi1_habitat ~ normal(0,1); // species variation
   // colonization
   gamma0 ~ normal(0,1); // colonization rate
+  gamma_site ~ normal(0, sigma_gamma_site); // site-specific intercepts
+  sigma_gamma_site ~ normal(0,0.5); // variation in site-specific intercepts
   gamma_species ~ normal(gamma0, sigma_gamma_species); // species-specific intercepts (centered on global)
   sigma_gamma_species ~ normal(0, 0.5); // variation in species-specific intercepts
   gamma_habitat ~ normal(mu_gamma_habitat,sigma_gamma_habitat); // effect of habitat on colonization
@@ -201,6 +214,8 @@ model {
   sigma_gamma_habitat ~ normal(0,0.5); // species variation
   // persistence
   phi0 ~ normal(0,1); // global persistence intercept
+  phi_site ~ normal(0, sigma_phi_site); // site-specific intercepts
+  sigma_phi_site ~ normal(0,0.5); // variation in site-specific intercepts
   phi_species ~ normal(phi0, sigma_phi_species); // species-specific intercepts (centered on global)
   sigma_phi_species ~ normal(0, 0.5); // variation in species-specific intercepts
   phi_habitat ~ normal(mu_phi_habitat, sigma_phi_habitat); // effect of habitat on persistence
@@ -337,19 +352,19 @@ generated quantities{
           // else the site could be occupied or not
           } else {
             
-            Z[i,j,k] = bernoulli_logit_rng(psi[i,j,k]);
+            //Z[i,j,k] = bernoulli_logit_rng(psi[i,j,k]);
             
             // occupancy but never observed by either dataset
-            //real ulo = inv_logit(psi[i,j,k]) * 
-              // ((1 - inv_logit(p[j,k]))^n_visits) // for no visit heterogeneity in p
-              //(1 - inv_logit(p[i,j,k,1])) * (1 - inv_logit(p[i,j,k,2])) *
-              //(1 - inv_logit(p[i,j,k,3])) * (1 - inv_logit(p[i,j,k,4])) *
-              //(1 - inv_logit(p[i,j,k,5])) * (1 - inv_logit(p[i,j,k,6]));
+            real ulo = inv_logit(psi[i,j,k]) * 
+               //((1 - inv_logit(p[j,k]))^n_visits) // for no visit heterogeneity in p
+              (1 - inv_logit(p[i,j,k,1])) * (1 - inv_logit(p[i,j,k,2])) *
+              (1 - inv_logit(p[i,j,k,3])) * (1 - inv_logit(p[i,j,k,4])) *
+              (1 - inv_logit(p[i,j,k,5])) * (1 - inv_logit(p[i,j,k,6]));
             // non-occupancy
-           //real uln = (1 - inv_logit(psi[i,j,k]));
+           real uln = (1 - inv_logit(psi[i,j,k]));
             
             // outcome of occupancy given the likelihood associated with both possibilities
-            //Z[i,j,k] = bernoulli_rng(ulo / (ulo + uln));
+            Z[i,j,k] = bernoulli_rng(ulo / (ulo + uln));
             
           } // end else uncertain occupancy state
         
