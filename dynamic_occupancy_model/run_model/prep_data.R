@@ -1,5 +1,6 @@
-library(tidyverse)
-library(lubridate)
+library(tidyverse) # organization tools
+library(lubridate) # prep survey date data 
+library(bipartite) # calculate species interaction metrics
 
 process_raw_data <- function(min_unique_detections) {
 
@@ -41,8 +42,8 @@ process_raw_data <- function(min_unique_detections) {
     count() %>%
     rename(total_detections = n) 
   
-  # remove species detected fewer than 2 unique occassions (site/year/visit) for figure
-  mydata_filtered_2_plus_unique <- mydata_filtered %>%  
+  # remove species detected fewer than min unique occassions (site/year/visit) for figure
+  mydata_filtered_min_unique <- mydata_filtered %>%  
     group_by(SPECIES, SITE, YEAR, SAMPLING_ROUND) %>%
     slice(1) %>%
     ungroup() %>%
@@ -51,9 +52,9 @@ process_raw_data <- function(min_unique_detections) {
     rename(unique_detections = n) %>%
     filter(unique_detections >= min_unique_detections)
   
-  species_2_or_more <- unique(mydata_filtered_2_plus_unique$SPECIES)
+  species_min_or_more <- unique(mydata_filtered_min_unique$SPECIES)
   temp <- mydata_filtered %>%
-    filter(SPECIES %in% species_2_or_more)
+    filter(SPECIES %in% species_min_or_more)
   
   # total detections all species
   ggplot(mydata_filtered, aes(x=fct_infreq(SPECIES))) +
@@ -72,7 +73,7 @@ process_raw_data <- function(min_unique_detections) {
     ggtitle(paste0("Total detections per species (for species detected ", min_unique_detections, " or more unique visits)"))
   
   # unique detections (species detected 2 or more unique occasions)
-  ggplot(mydata_filtered_2_plus_unique, aes(x=fct_infreq(SPECIES))) +
+  ggplot(mydata_filtered_min_unique, aes(x=fct_infreq(SPECIES))) +
     geom_bar(stat = "count") +
     labs(x = "", y = "Unique detections") +
     theme(axis.text.x = element_text(size = 11, angle = 65, vjust = 1, hjust=1.1),
@@ -212,6 +213,61 @@ process_raw_data <- function(min_unique_detections) {
   }
   
   ## --------------------------------------------------
+  ## Species interaction frequency data to be used for model
+  
+  # group by species, and calculate number of plants per species
+  interactions_df <- mydata_filtered %>% 
+    rename("pollinator_species" = "SPECIES",
+           "plant_species" = "PLANT_NETTED_FROM_SCI_NAME")  %>% 
+    select(pollinator_species, plant_species) %>%
+    group_by(pollinator_species, plant_species) %>% 
+    add_tally() %>%
+    rename("connection_strength" = "n") %>%
+    slice(1) %>%
+    ungroup() 
+  
+  # get all of the plant species that pollinators were recorded to interact with
+  plant_species <- mydata_filtered %>%
+    group_by(PLANT_NETTED_FROM_SCI_NAME) %>%
+    slice(1) %>% # take one row per species (the name of each species)
+    ungroup() %>%
+    select(PLANT_NETTED_FROM_SCI_NAME) # extract species names column as vector
+  
+  # plant names
+  plant_species_vector <- plant_species %>%
+    pull(PLANT_NETTED_FROM_SCI_NAME)
+  
+  # number of plant names
+  n_plant_species <- nrow(plant_species)
+  
+  # get all possible interactions so that we can fill undetected inteactions with zeroes
+  all_possible_interactions <- as.data.frame(cbind(rep(species_vector, each = n_plant_species),
+                                                   rep(plant_species_vector, times = n_species))) %>%
+    rename("pollinator_species" = "V1",
+           "plant_species" = "V2")
+  # join all possible interactions with observed interactions
+  interactions_df <- left_join(all_possible_interactions, interactions_df) 
+  # replace missing interactions with zeroes instead of NA
+  interactions_df$connection_strength <- interactions_df$connection_strength %>% replace_na(0)
+  
+  # prep an interaction frequency matrix
+  A <- matrix(data = 0, nrow = n_species, ncol=n_plant_species,
+              dimnames = list(species_vector, plant_species_vector))
+  # fill matrix with observed interaction strengths
+  for(i in 1:nrow(interactions_df)){
+    A[interactions_df$pollinator_species[i], interactions_df$plant_species[i]] <- 
+      interactions_df$connection_strength[i]
+  }
+  
+  # calculate species level interaction metrics
+  species_interaction_metrics <- bipartite::specieslevel(A, level="lower", index=c("degree", "normalised degree", "d"), PDI.normalise=F)
+  
+  species_interaction_metrics <- species_interaction_metrics %>%
+    mutate(degree_scaled = center_scale(degree),
+           normalised.degree_scaled = center_scale(normalised.degree),
+           d_scaled = center_scale(d))
+  
+  ## --------------------------------------------------
   ## Return stuff
   return(list(
     
@@ -225,7 +281,8 @@ process_raw_data <- function(min_unique_detections) {
     years = year_vector, # ordered vector of intervals
     visits = visit_vector, # ordered vector of visits
     date_scaled = scaled_date_array, # detection covariate (array of scaled julian date of visit)
-    habitat_category = HABITAT_CATEGORY # occupancy and detection covariate (sites mowed or meadow)
+    habitat_category = HABITAT_CATEGORY, # occupancy and detection covariate (sites mowed or meadow)
+    species_interaction_metrics = species_interaction_metrics
     
   ))
   

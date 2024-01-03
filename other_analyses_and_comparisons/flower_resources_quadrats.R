@@ -423,6 +423,11 @@ ggplot(plants_visited, aes(x=PLANT_NETTED_FROM_SCI_NAME, y=log_n)) +
 mydata_subset <- mydata %>%
   filter(SPECIES %in% plants_visited$PLANT_NETTED_FROM_SCI_NAME)
 
+# create an alphabetized list of all species encountered across all sites*intervals*visits
+species_list_reduced <- plants_visited %>%
+  select(PLANT_NETTED_FROM_SCI_NAME) # extract species names column as vector
+
+
 ## --------------------------------------------------
 ## Abundance
 

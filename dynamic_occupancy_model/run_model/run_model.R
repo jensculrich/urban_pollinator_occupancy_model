@@ -22,7 +22,8 @@ sites <- seq(1, n_sites, by=1)
 years <- seq(1, n_years_minus1, by=1)
 date_scaled <- my_data$date_scaled
 habitat_type <- my_data$habitat_category
-
+species_interaction_metrics <- my_data$species_interaction_metrics
+d <- species_interaction_metrics$d_scaled
 species_names <- my_data$species
 site_names <- my_data$sites
 
@@ -31,7 +32,7 @@ site_names <- my_data$sites
 
 stan_data <- c("V", "species", "sites", "years",
                "n_species", "n_sites", "n_years", "n_years_minus1", "n_visits",
-               "habitat_type", "date_scaled") 
+               "habitat_type", "date_scaled", "d") 
 
 ## Parameters monitored
 params <- c("psi1_0",  "sigma_psi1_species", "mu_psi1_habitat", "sigma_psi1_habitat",
@@ -46,9 +47,12 @@ params <- c("psi1_0",  "sigma_psi1_species", "mu_psi1_habitat", "sigma_psi1_habi
 ## Parameters monitored (multinormal model)
 params <- c("rho", 
             "sigma_species", "species_intercepts",
-            "psi1_0",  "mu_psi1_habitat", "sigma_psi1_habitat", "sigma_psi1_site",
-            "gamma0", "mu_gamma_habitat", "sigma_gamma_habitat", "sigma_gamma_species",  "sigma_gamma_site",
-            "phi0", "mu_phi_habitat", "sigma_phi_habitat", "sigma_phi_species", "sigma_phi_site",
+            "psi1_0",  "mu_psi1_habitat", "sigma_psi1_habitat",
+            "gamma0", "mu_gamma_habitat", "sigma_gamma_habitat", "sigma_gamma_species",  
+            #"phi0",  "sigma_phi_habitat", # "mu_phi_habitat", 
+            "sigma_phi_species", "sigma_phi_habitat",
+            "delta0_phi0", "delta1_phi0",
+            "delta0_phi_habitat", "delta1_phi_habitat",
             "p0", "p_habitat", # "sigma_p_site", 
             "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq",
             "species_richness", "avg_species_richness_control", "avg_species_richness_enhanced", 
@@ -68,7 +72,9 @@ delta = 0.95
 # otherwise sometimes they have a hard time starting to sample
 inits <- lapply(1:n_chains, function(i)
   
-  list(psi1_0 = runif(1, -1, 1),
+  list(rho = runif(1, 0, 1),
+       #sigma_species = runif(1, 0, 1),
+       psi1_0 = runif(1, -1, 1),
        #sigma_psi1_species = runif(1, 0, 1),
        mu_psi1_habitat = runif(1, -1, 1),
        sigma_psi1_habitat = runif(1, 0, 1),
@@ -78,7 +84,7 @@ inits <- lapply(1:n_chains, function(i)
        sigma_gamma_habitat = runif(1, 0, 1),
        phi0 = runif(1, -1, 1),
        #sigma_phi_species = runif(1, 0, 1),
-       mu_phi_habitat = runif(1, 0, 1), # persistence rates are usually greater than 50%
+       #mu_phi_habitat = runif(1, 0, 1), # persistence rates are usually greater than 50%
        sigma_phi_habitat = runif(1, 0, 1),
        p0 = runif(1, -1, 1),
        #sigma_p_species = runif(1, 0, 1),
@@ -96,7 +102,7 @@ inits <- lapply(1:n_chains, function(i)
 
 # stan_model <- "./dynamic_occupancy_model/models/dynocc_model_with_year_effects.stan"
 # stan_model <- "./dynamic_occupancy_model/models/dynocc_model.stan"
-stan_model <- "./dynamic_occupancy_model/models/dynocc_model_multinormal_w_site_REs.stan"
+stan_model <- "./dynamic_occupancy_model/models/dynocc_model_multinormal_w_species_d.stan"
 
 ## Call Stan from R
 stan_out <- stan(stan_model,
@@ -134,13 +140,20 @@ print(stan_out, digits = 3,
       pars = c("gamma_year", "phi_year"
       ))
 
+print(stan_out, digits = 3, 
+      pars = c("delta0_phi0", "delta1_phi0",
+               "delta0_phi_habitat", "delta1_phi_habitat"
+      ))
+
 traceplot(stan_out, pars = c(
   "psi1_0",  #"sigma_psi1_species", 
-  "mu_psi1_habitat", "sigma_psi1_habitat", "sigma_psi1_site",
+  "mu_psi1_habitat", "sigma_psi1_habitat", 
   "gamma0",  "sigma_gamma_species", 
-  "mu_gamma_habitat", "sigma_gamma_habitat", "sigma_gamma_site",
-  "phi0", "sigma_phi_species", 
-  "mu_phi_habitat", "sigma_phi_habitat", "sigma_phi_site"
+  "mu_gamma_habitat", "sigma_gamma_habitat", 
+  #"phi0", "mu_phi_habitat",  
+  "delta0_phi0", "delta1_phi0",
+  "delta0_phi_habitat", "delta1_phi_habitat",
+  "sigma_phi_habitat", "sigma_phi_species"
 ))
 
 
@@ -169,4 +182,4 @@ print(stan_out, digits = 3, pars = c("P_species"))
 # get an "average" P value
 fit_summary <- rstan::summary(stan_out)
 View(cbind(1:nrow(fit_summary$summary), fit_summary$summary)) # View to see which row corresponds to the parameter of interest
-(mean_FTP <- mean(fit_summary$summary[478:575,1]))
+(mean_FTP <- mean(fit_summary$summary[476:573,1]))
