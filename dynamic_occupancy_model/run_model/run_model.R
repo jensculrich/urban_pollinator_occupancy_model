@@ -4,7 +4,7 @@
 library(rstan)
 
 source("./dynamic_occupancy_model/run_model/prep_data.R")
-min_unique_detections = 1 # >=
+min_unique_detections = 2 # >=
 my_data <- process_raw_data(min_unique_detections)
 
 ## --------------------------------------------------
@@ -47,16 +47,16 @@ params <- c("psi1_0",  "sigma_psi1_species", "mu_psi1_habitat", "sigma_psi1_habi
 ## Parameters monitored (multinormal model)
 params <- c("rho", 
             "sigma_species", "species_intercepts",
-            "psi1_0",  "mu_psi1_habitat", "sigma_psi1_habitat",
-            "gamma0", "mu_gamma_habitat", "sigma_gamma_habitat", "sigma_gamma_species",  
-            #"phi0",  "sigma_phi_habitat", # "mu_phi_habitat", 
-            "sigma_phi_species", "sigma_phi_habitat",
-            "delta0_phi0", "delta1_phi0",
-            "delta0_phi_habitat", "delta1_phi_habitat",
-            "p0", "p_habitat", # "sigma_p_site", 
+            "psi1_0",  "delta0_psi1_habitat", "delta1_psi1_habitat", "sigma_psi1_habitat",
+            "gamma0", "delta1_gamma0", "delta0_gamma_habitat", "delta1_gamma_habitat",
+            "sigma_gamma_species",  "epsilon0_gamma_habitat", "epsilon1_gamma_habitat",
+            "phi0", "delta1_phi0", "delta0_phi_habitat", "delta1_phi_habitat",
+            "sigma_phi_species", "epsilon0_phi_habitat", "epsilon1_phi_habitat",
+            "p0", "p_habitat", 
             "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq",
             "species_richness", "avg_species_richness_control", "avg_species_richness_enhanced", 
-            "psi_eq_habitat0", "psi_eq_habitat1",
+            #"turnover_control", "turnover_enhanced",
+            #"psi_eq_habitat0", "psi_eq_habitat1",
             "T_rep", "T_obs", "P_species")
 
 # MCMC settings
@@ -65,27 +65,31 @@ n_thin <- 1
 n_burnin <- 200
 n_chains <- 4
 n_cores <- n_chains
-delta = 0.95
+delta = 0.99
 
 ## Initial values
 # given the number of parameters, the chains need some decent initial values
 # otherwise sometimes they have a hard time starting to sample
 inits <- lapply(1:n_chains, function(i)
   
-  list(rho = runif(1, 0, 1),
+  list(rho = runif(1, 0.5, 1),
        #sigma_species = runif(1, 0, 1),
        psi1_0 = runif(1, -1, 1),
        #sigma_psi1_species = runif(1, 0, 1),
        mu_psi1_habitat = runif(1, -1, 1),
        sigma_psi1_habitat = runif(1, 0, 1),
        gamma0 = runif(1, -1, 1),
-       #sigma_gamma_species = runif(1, 0, 1),
-       mu_gamma_habitat = runif(1, -2, -1), # colonization rates are usually low
-       sigma_gamma_habitat = runif(1, 0, 1),
+       sigma_gamma_species = runif(1, 1, 1.5),
+       #mu_gamma_habitat = runif(1, -2, -1), # colonization rates are usually low
+       #sigma_gamma_habitat = runif(1, 0.5, 1),
+       epsilon0_gamma_habitat = runif(1, 0.5, 1),
+       epsilon1_gamma_habitat = runif(1, 0, 0.25),
        phi0 = runif(1, -1, 1),
-       #sigma_phi_species = runif(1, 0, 1),
+       sigma_phi_species = runif(1, 1, 1.5),
        #mu_phi_habitat = runif(1, 0, 1), # persistence rates are usually greater than 50%
-       sigma_phi_habitat = runif(1, 0, 1),
+       #sigma_phi_habitat = runif(1, 0.5, 1),
+       epsilon0_phi_habitat = runif(1, 0.5, 1),
+       epsilon1_phi_habitat = runif(1, 0, 0.25),
        p0 = runif(1, -1, 1),
        #sigma_p_species = runif(1, 0, 1),
        #sigma_p_site = runif(1, 0, 1),
@@ -146,14 +150,18 @@ print(stan_out, digits = 3,
       ))
 
 traceplot(stan_out, pars = c(
-  "psi1_0",  #"sigma_psi1_species", 
-  "mu_psi1_habitat", "sigma_psi1_habitat", 
-  "gamma0",  "sigma_gamma_species", 
-  "mu_gamma_habitat", "sigma_gamma_habitat", 
-  #"phi0", "mu_phi_habitat",  
-  "delta0_phi0", "delta1_phi0",
+  "psi1_0",  
+  "delta0_psi1_habitat", "delta1_psi1_habitat",
+  "sigma_psi1_habitat", 
+  "gamma0", "delta1_gamma0",
+  "delta0_gamma_habitat", "delta1_gamma_habitat",
+  "epsilon0_gamma_habitat", "epsilon1_gamma_habitat",
+  "sigma_gamma_species", #"sigma_gamma_habitat", 
+  "phi0", "delta1_phi0",
   "delta0_phi_habitat", "delta1_phi_habitat",
-  "sigma_phi_habitat", "sigma_phi_species"
+  "epsilon0_phi_habitat", "epsilon1_phi_habitat",
+  #"sigma_phi_habitat" , 
+  "sigma_phi_species"
 ))
 
 
@@ -182,4 +190,4 @@ print(stan_out, digits = 3, pars = c("P_species"))
 # get an "average" P value
 fit_summary <- rstan::summary(stan_out)
 View(cbind(1:nrow(fit_summary$summary), fit_summary$summary)) # View to see which row corresponds to the parameter of interest
-(mean_FTP <- mean(fit_summary$summary[476:573,1]))
+(mean_FTP <- mean(fit_summary$summary[406:485,1]))

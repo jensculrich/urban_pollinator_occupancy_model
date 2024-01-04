@@ -46,7 +46,7 @@ data {
   // covariate data
   int<lower=0, upper=1> habitat_type[n_sites]; // categorical habitat type (0 or 1)
   real date_scaled[n_sites, n_years, n_visits]; // scaled day of year on which each visit was conducted
-  vector[n_species] d; // species specialization metric
+  vector[n_species] d; // species specialization metric ('Bluthgen's d', but can be reset to 'degree' based on data prep)
   
 } // end data
 
@@ -61,35 +61,33 @@ parameters {
 
   // initial state
   real psi1_0;
-  //vector[n_species] psi1_species;
-  //real sigma_psi1_species;
   vector[n_species] psi1_habitat;
-  real mu_psi1_habitat;
+  real delta0_psi1_habitat;
+  real delta1_psi1_habitat;
   real sigma_psi1_habitat;
   // colonization
   real gamma0;
   vector[n_species] gamma_species;
+  real delta1_gamma0;
   real sigma_gamma_species;
   vector[n_species] gamma_habitat;
-  real mu_gamma_habitat;
-  real sigma_gamma_habitat;
+  real delta0_gamma_habitat;
+  real delta1_gamma_habitat;
+  real<lower=0> epsilon0_gamma_habitat;
+  real epsilon1_gamma_habitat;
   // persistence
-  // real phi0; // is now a transformed vector in this model
+  real phi0; 
   vector[n_species] phi_species;
-  real delta0_phi0;
   real delta1_phi0;
   real sigma_phi_species;
   vector[n_species] phi_habitat;
   real delta0_phi_habitat;
   real delta1_phi_habitat;
-  //real mu_phi_habitat; // is now a transformed vector in this model 
-  real sigma_phi_habitat;
+  real<lower=0> epsilon0_phi_habitat;
+  real epsilon1_phi_habitat;
   
   real p0;
-  //vector[n_species] p_species;
-  //real sigma_p_species;
-  //vector[n_sites] p_site;
-  //real sigma_p_site;
+  // species effects captured in covarying params above
   real p_habitat;
   vector[n_species] p_date;
   real mu_p_species_date;
@@ -103,17 +101,39 @@ parameters {
 transformed parameters {
    
   // expected values given species specialization
+  vector[n_species] mu_psi1_habitat; // expected value for species specific slopes
+  vector[n_species] mu_gamma0; // expected value for species specific slopes
+  vector[n_species] mu_gamma_habitat; // expected value for species specific slopes
+  vector[n_species] sigma_gamma_habitat; // expected value for species specific slopes
   vector[n_species] mu_phi0; // expected value for species specific slopes
   vector[n_species] mu_phi_habitat; // expected value for species specific slopes
-
-  // model the expected value for baseline persistence rate
-  for(i in 1:n_species){
-    mu_phi0[i] = delta0_phi0 + delta1_phi0*d[i]; // where d is the species specialization index
-  }
+  vector[n_species] sigma_phi_habitat; // expected value for species specific slopes
   
-  // model the expected value for the effect of habitat using a linear predictor
+  // hard prior to disallow negative variance
+  real<lower=0> epsilon_sum_gamma_min;
+  epsilon_sum_gamma_min = epsilon0_gamma_habitat + epsilon1_gamma_habitat*min(d);
+  real<lower=0> epsilon_sum_gamma_max;
+  epsilon_sum_gamma_max = epsilon0_gamma_habitat + epsilon1_gamma_habitat*max(d);
+  
+  real<lower=0> epsilon_sum_phi_min;
+  epsilon_sum_phi_min = epsilon0_phi_habitat + epsilon1_phi_habitat*min(d);
+  real<lower=0> epsilon_sum_phi_max;
+  epsilon_sum_phi_max = epsilon0_phi_habitat + epsilon1_phi_habitat*max(d);
+
+  // model the expected value for species-specific random effects using a linear predictor
+  // where d is the species specialization index
   for(i in 1:n_species){
-    mu_phi_habitat[i] = delta0_phi_habitat + delta1_phi_habitat*d[i]; // where d is the species specialization index
+    
+    mu_psi1_habitat[i] = delta0_psi1_habitat + delta1_psi1_habitat*d[i]; // effect of habitat on initial occurrence
+    
+    mu_gamma0[i] = delta1_gamma0*d[i]; // baseline colonization rate (centered on 0)
+    mu_gamma_habitat[i] = delta0_gamma_habitat + delta1_gamma_habitat*d[i]; // effect of habitat on colonization rate
+    sigma_gamma_habitat[i] = epsilon0_gamma_habitat + epsilon1_gamma_habitat*d[i]; // effect specialization on interspecific variability to habitat response 
+    
+    mu_phi0[i] = delta1_phi0*d[i]; // baseline persistence rate (centered on 0)
+    mu_phi_habitat[i] = delta0_phi_habitat + delta1_phi_habitat*d[i]; // effect of specialization on effect of habitat on persistence rate
+    sigma_phi_habitat[i] = epsilon0_phi_habitat + epsilon1_phi_habitat*d[i]; // effect specialization on interspecific variability to habitat response 
+    
   }
   
   // logit scale psi1, gamma, phi
@@ -126,17 +146,18 @@ transformed parameters {
       for(k in 1:n_years){ // loop across all years
   
         psi1[i,j] = inv_logit( // probability (0-1) of occurrence in year 1 is equal to..
-          //psi1_species[species[i]] + // a species specific intercept
-          species_intercepts[species[i],1] + // species random effect
+          species_intercepts[species[i],1] + // species random effect // these are centered on an intercept psi1_0
           psi1_habitat[species[i]] * habitat_type[j] // a spatial effect
           ); // end phi[j,k]
         
         gamma[i,j,k] = inv_logit( // probability (0-1) of colonization is equal to..
+          gamma0 +
           gamma_species[species[i]] + // a species specific intercept
           gamma_habitat[species[i]] * habitat_type[j] // a spatial effect
           ); // end phi[j,k]
         
         phi[i,j,k] = inv_logit( // probability (0-1) of persistence is equal to..
+          phi0 +
           phi_species[species[i]] + // a species specific intercept
           phi_habitat[species[i]] * habitat_type[j] // a spatial effect
           ); // end phi[j,k]
@@ -207,44 +228,46 @@ model {
   
   // occupancy
   // initial state
-  psi1_0 ~ normal(0,1); // initial occupancy rate
-  //psi1_species ~ normal(psi1_0, sigma_psi1_species); // species-specific intercepts (centered on global)
-  //sigma_psi1_species ~ normal(0, 1); // variation in species-specific intercepts
-  psi1_habitat ~ normal(mu_psi1_habitat,sigma_psi1_habitat); // effect of habitat on occurrence
-  mu_psi1_habitat ~ normal(0,2); // community mean
-  sigma_psi1_habitat ~ normal(0,1); // species variation
+  psi1_0 ~ normal(0, 1); // initial occupancy rate
+  // species effects on the intercept captured in multinormal() above
+  psi1_habitat ~ normal(mu_psi1_habitat, sigma_psi1_habitat); // effect of habitat on occurrence
+  delta0_psi1_habitat ~ normal(0, 1); // baseline effect of habitat 
+  delta1_psi1_habitat ~ normal(0, 1); // effect of specialization on response to habitat
+  sigma_psi1_habitat ~ normal(0, 1); // species variation in response to habitat
   // colonization
-  gamma0 ~ normal(0,1); // colonization rate
-  gamma_species ~ normal(gamma0, sigma_gamma_species); // species-specific intercepts (centered on global)
+  gamma0 ~ normal(0, 1); // colonization intercept
+  gamma_species ~ normal(mu_gamma0, sigma_gamma_species); // species-specific intercepts (centered on global)
+  delta1_gamma0 ~ normal(0, 1); // effect of specialization on intercept
   sigma_gamma_species ~ normal(0, 0.5); // variation in species-specific intercepts
-  gamma_habitat ~ normal(mu_gamma_habitat,sigma_gamma_habitat); // effect of habitat on colonization
-  mu_gamma_habitat ~ normal(0,1); // community mean
-  sigma_gamma_habitat ~ normal(0,0.5); // species variation
+  gamma_habitat ~ normal(mu_gamma_habitat, sigma_gamma_habitat); // effect of habitat on colonization
+  delta0_gamma_habitat ~ normal(0, 1); // baseline effect of habitat 
+  delta1_gamma_habitat ~ normal(0, 1); // effect of specialization on response to habitat
+  epsilon0_gamma_habitat ~ normal(0, 0.5); // species variation in response to habitat
+  epsilon1_gamma_habitat ~ normal(0, 0.5); // species variation in response to habitat
   // persistence
-  //phi0 ~ normal(0,1); // global persistence intercept
+  phi0 ~ normal(0,1); // persistence intercept
   phi_species ~ normal(mu_phi0, sigma_phi_species); // species-specific intercepts (centered on global)
-  delta0_phi0 ~ normal(0, 1); // community mean
-  delta1_phi0 ~ normal(0, 1); // effect of specialization
+  delta1_phi0 ~ normal(0, 1); // effect of specialization on intercept
   sigma_phi_species ~ normal(0, 0.5); // variation in species-specific intercepts
   phi_habitat ~ normal(mu_phi_habitat, sigma_phi_habitat); // effect of habitat on persistence
-  delta0_phi_habitat ~ normal(0, 1); // community mean
-  delta1_phi_habitat ~ normal(0, 1); // effect of specialization
-  //mu_phi_habitat ~ normal(0,2); // community mean
-  sigma_phi_habitat ~ normal(0,0.5); // species variation
+  delta0_phi_habitat ~ normal(0, 1); // baseline effect of habitat 
+  delta1_phi_habitat ~ normal(0, 1); // effect of specialization on response to habitat
+  epsilon0_phi_habitat ~ normal(0, 0.5); // species variation in response to habitat
+  epsilon1_phi_habitat ~ normal(0, 0.5); // species variation in response to habitat
   
   // detection
-  p0 ~ normal(0,1); // global intercept
+  p0 ~ normal(0, 1); // global intercept
   //p_species ~ normal(p0, sigma_p_species); // species-specific intercepts (centered on global)
   //sigma_p_species ~ normal(0, 1); // variation in species-specific intercepts
   //p_site ~ normal(0, sigma_p_site); // site-specific intercepts
   //sigma_p_site ~ normal(0,1); // variation in site-specific intercepts
-  p_habitat ~ normal(0,2); // effect of habitat on detection
+  p_habitat ~ normal(0, 2); // effect of habitat on detection
   // phenology X detection
   p_date ~ normal(mu_p_species_date, sigma_p_species_date); // species-specific phenology (peak)
-  mu_p_species_date ~ normal(0,2); // mean
+  mu_p_species_date ~ normal(0, 2); // mean
   sigma_p_species_date ~ normal(0, 1); // variation
   p_date_sq ~ normal(mu_p_species_date_sq, sigma_p_species_date_sq); // species-specific phenology (decay)
-  mu_p_species_date_sq ~ normal(0,2); // mean
+  mu_p_species_date_sq ~ normal(0, 2); // mean
   sigma_p_species_date_sq ~ normal(0, 1); // variation
   
   // LIKELIHOOD
@@ -270,8 +293,7 @@ model {
 generated quantities{
   
   // Could also add: 
-  // effects on persistence across a range of specialization bins
-  // annual turnover rates
+  // effects on init occupancy, colonization, and persistence across a range of specialization bins
   
   // Diversity estimation
   // number of species at each site in each year
@@ -318,8 +340,18 @@ generated quantities{
     avg_species_richness_enhanced[k] = avg_species_richness_enhanced[k] / (n_sites / 2.0);
   }
   
-  psi_eq_habitat0 = inv_logit(gamma0) / (inv_logit(gamma0)+(1-inv_logit(delta0_phi0))); // equilibrium occupancy rate 
-  psi_eq_habitat1 = inv_logit(gamma0 + mu_gamma_habitat) / (inv_logit(gamma0 + mu_gamma_habitat)+(1-inv_logit(delta0_phi0 + delta0_phi_habitat))); // equilibrium occupancy rate
+  //psi_eq_habitat0 = inv_logit(gamma0) / (inv_logit(gamma0)+(1-inv_logit(delta0_phi0))); // equilibrium occupancy rate 
+  //psi_eq_habitat1 = inv_logit(gamma0 + mu_gamma_habitat) / (inv_logit(gamma0 + mu_gamma_habitat)+(1-inv_logit(delta0_phi0 + delta0_phi_habitat))); // equilibrium occupancy rate
+  
+  // annual turnover rates
+  // need to figure out how to fix this for spatially and species varying psi and gamma
+  //real turnover_control[n_years-1]; // average across sites
+  //real turnover_enhanced[n_years-1]; // average across sites
+  
+  //for(k in 2:n_years){
+  //  turnover_control[k-1] = (1 - psi[,,k-1]) *  gamma[,,k-1])/psi[,,k];
+  //  turnover_enhanced[k-1] = (1 - psi[,,k-1]) * gamma[,,k-1])/psi[,,k];
+  //}
   
   //
   // posterior predictive check (Freeman-Tukey posterior pred check, binned by species)
