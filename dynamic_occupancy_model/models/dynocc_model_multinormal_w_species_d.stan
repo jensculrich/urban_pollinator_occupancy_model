@@ -228,14 +228,14 @@ model {
   
   // occupancy
   // initial state
-  psi1_0 ~ normal(0, 1); // initial occupancy rate
+  psi1_0 ~ normal(0, 0.5); // initial occupancy rate
   // species effects on the intercept captured in multinormal() above
   psi1_habitat ~ normal(mu_psi1_habitat, sigma_psi1_habitat); // effect of habitat on occurrence
   delta0_psi1_habitat ~ normal(0, 1); // baseline effect of habitat 
   delta1_psi1_habitat ~ normal(0, 1); // effect of specialization on response to habitat
   sigma_psi1_habitat ~ normal(0, 1); // species variation in response to habitat
   // colonization
-  gamma0 ~ normal(0, 1); // colonization intercept
+  gamma0 ~ normal(0, 0.5); // colonization intercept
   gamma_species ~ normal(mu_gamma0, sigma_gamma_species); // species-specific intercepts (centered on global)
   delta1_gamma0 ~ normal(0, 1); // effect of specialization on intercept
   sigma_gamma_species ~ normal(0, 0.5); // variation in species-specific intercepts
@@ -245,7 +245,7 @@ model {
   epsilon0_gamma_habitat ~ normal(0, 0.5); // species variation in response to habitat
   epsilon1_gamma_habitat ~ normal(0, 0.5); // species variation in response to habitat
   // persistence
-  phi0 ~ normal(0,1); // persistence intercept
+  phi0 ~ normal(0, 0.5); // persistence intercept
   phi_species ~ normal(mu_phi0, sigma_phi_species); // species-specific intercepts (centered on global)
   delta1_phi0 ~ normal(0, 1); // effect of specialization on intercept
   sigma_phi_species ~ normal(0, 0.5); // variation in species-specific intercepts

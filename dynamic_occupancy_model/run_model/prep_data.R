@@ -267,6 +267,127 @@ process_raw_data <- function(min_unique_detections) {
            normalised.degree_scaled = center_scale(normalised.degree),
            d_scaled = center_scale(d))
   
+  
+  ## --------------------------------------------------
+  ## Get site X year flowering plant abundance data (herbaceous plants in quadrats)
+  
+  # read data
+  plant_data <- read.csv("./data/flower_resources_quadrats.csv")
+  
+  # perform some initial filters on the unfinished prelim data
+  plant_data <- plant_data %>% 
+    
+    # Reduce sampling rounds in year 1 by 1 (they start at 2 since we did a weird prelim survey first)
+    mutate(SAMPLING_ROUND = as.integer(ifelse(YEAR==1, as.integer(SAMPLING_ROUND) - 1, as.integer(SAMPLING_ROUND)))) %>%
+    
+    # NA's indicate NO FLOWERS WERE IN BLOOM 
+    mutate(NUM_FLORAL_UNITS = replace_na(NUM_FLORAL_UNITS, 0))
+  
+  # read pollinator data
+  plants_visited <- mydata_filtered %>%
+    group_by(PLANT_NETTED_FROM_SCI_NAME) %>%
+    add_tally() %>%
+    slice(1) %>% # take one row per species (the name of each species)
+    ungroup() %>%
+    select(PLANT_NETTED_FROM_SCI_NAME, n) %>% 
+    mutate(log_n = log(n)) %>%
+    filter(PLANT_NETTED_FROM_SCI_NAME != "") %>%
+    mutate(PLANT_NETTED_FROM_SCI_NAME = fct_reorder(PLANT_NETTED_FROM_SCI_NAME, desc(n))) %>%
+    filter(n >= 5)
+  
+  ggplot(plants_visited, aes(x=PLANT_NETTED_FROM_SCI_NAME, y=log_n)) +
+    geom_col() +
+    labs(x = "Plant species", y="log(number of detected interactions)") +
+    theme(axis.text.x = element_text(angle = 45, hjust=1)) +
+    ggtitle("Total interactions per species")
+  
+  # now filter out plants that were never visited by pollinators (considered not to be of high value for pollinators)
+  plant_data_subset <- plant_data %>%
+    filter(SPECIES %in% plants_visited$PLANT_NETTED_FROM_SCI_NAME)
+  
+  # create an alphabetized list of all species encountered across all sites*intervals*visits
+  plant_species_list_reduced <- plants_visited %>%
+    select(PLANT_NETTED_FROM_SCI_NAME) # extract species names column as vector
+  
+  plant_abundance_df <- plant_data_subset %>%
+    
+    # calculate abundance per site visit
+    group_by(SITE, YEAR, SAMPLING_ROUND) %>%
+    mutate(total_flower_abundance = sum(NUM_FLORAL_UNITS),
+           log_total_flower_abundance = log(total_flower_abundance + 1)) %>%
+    
+    # take one row per site visit
+    slice(1) %>%
+    ungroup() %>%
+    
+    # there could be multiple ways to group and calculate plant data
+    # here grouping by average abundance per year
+    group_by(SITE, YEAR) %>%
+    mutate(mean_annual_plant_abundance = mean(log_total_flower_abundance)) %>%
+    slice(1) %>%
+    ungroup() %>%
+  
+    # scale the variable
+    mutate(plant_abundance_scaled = center_scale(mean_annual_plant_abundance)) %>%
+    select(SITE, YEAR, plant_abundance_scaled) %>%
+    pivot_wider(names_from = YEAR, values_from = plant_abundance_scaled)
+  
+  herbaceous_flowers_scaled <- as.matrix(plant_abundance_df[2:(n_years+1)])
+  
+  ## --------------------------------------------------
+  ## Get site X year flowering plant abundance data (woody plants within survey area)
+  
+  # read data
+  woody_plant_data <- read.csv("./data/flower_resources_woody.csv")
+  
+  # perform some initial filters on the unfinished prelim data
+  woody_plant_data <- woody_plant_data %>% 
+    
+    # Reduce sampling rounds in year 1 by 1 (they start at 2 since we did a weird prelim survey first)
+    mutate(SAMPLING_ROUND = as.integer(ifelse(YEAR==1, as.integer(SAMPLING_ROUND) - 1, as.integer(SAMPLING_ROUND)))) %>%
+    
+    # NA's indicate NO FLOWERS WERE IN BLOOM 
+    mutate(SPECIES = replace_na(SPECIES, "No woody flowers"),
+           NUM_FLORAL_UNITS = replace_na(NUM_FLORAL_UNITS, 0)) %>%
+
+    filter(SHRUB_OR_TREE == "y") 
+  
+  site_visits <- as.data.frame(cbind(
+    rep(site_vector, each=3*6), rep(1:6, times=18*3), rep(1:3, each = 6, times=3), 
+    rep("no flowering species", 324), 
+    rep(0, 324))) %>%
+    rename("SITE" = "V1",
+           "SAMPLING_ROUND" = "V2",
+           "YEAR" = "V3",
+           "SPECIES" = "V4",
+           "NUM_FLORAL_UNITS" = "V5") %>%
+    mutate(YEAR = as.integer(YEAR),
+           SAMPLING_ROUND = as.integer(SAMPLING_ROUND), 
+           NUM_FLORAL_UNITS = as.integer(NUM_FLORAL_UNITS))
+  
+  # now filter out plants that were never visited by pollinators (considered not to be of high value for pollinators)
+  # we already created this list above when looking at the quadrat data
+  woody_plant_data_subset <- woody_plant_data %>%
+    filter(SPECIES %in% plants_visited$PLANT_NETTED_FROM_SCI_NAME)
+  
+  # join all possible site visits back in to add zeros
+  woody_plant_data_subset <- full_join(woody_plant_data_subset, site_visits) 
+  
+  # get mean per site X year
+  woody_plant_data_subset <- woody_plant_data_subset %>%
+    mutate(log_NUM_FLORAL_UNITS = log(NUM_FLORAL_UNITS + 1)) %>%
+    group_by(SITE, YEAR) %>%
+    mutate(mean_annual_woody_plant_abundance = mean(log_NUM_FLORAL_UNITS)) %>%
+    slice(1) %>%
+    ungroup() %>%
+    
+    # scale the variable
+    mutate(woody_plant_abundance_scaled = center_scale(mean_annual_woody_plant_abundance)) %>%
+    select(SITE, YEAR, woody_plant_abundance_scaled) %>%
+    pivot_wider(names_from = YEAR, values_from = woody_plant_abundance_scaled)
+  
+  woody_flowers_scaled <- as.matrix(woody_plant_data_subset[2:(n_years+1)])
+  
   ## --------------------------------------------------
   ## Return stuff
   return(list(
@@ -282,7 +403,9 @@ process_raw_data <- function(min_unique_detections) {
     visits = visit_vector, # ordered vector of visits
     date_scaled = scaled_date_array, # detection covariate (array of scaled julian date of visit)
     habitat_category = HABITAT_CATEGORY, # occupancy and detection covariate (sites mowed or meadow)
-    species_interaction_metrics = species_interaction_metrics
+    species_interaction_metrics = species_interaction_metrics,
+    herbaceous_flowers_scaled = herbaceous_flowers_scaled,
+    woody_flowers_scaled = woody_flowers_scaled
     
   ))
   
