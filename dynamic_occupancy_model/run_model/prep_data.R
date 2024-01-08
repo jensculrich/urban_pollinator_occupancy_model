@@ -31,7 +31,10 @@ process_raw_data <- function(min_unique_detections) {
     filter(!SPECIES %in% c("Bombus sp.","Eupeodes sp.", "Sphaerophoria sp."))  %>%
     
     # Reduce sampling rounds in year 1 by 1 (they start at 2 since we did a weird prelim survey first)
-    mutate(SAMPLING_ROUND = as.integer(ifelse(YEAR==1, as.integer(SAMPLING_ROUND) - 1, as.integer(SAMPLING_ROUND))))
+    mutate(SAMPLING_ROUND = as.integer(ifelse(YEAR==1, as.integer(SAMPLING_ROUND) - 1, as.integer(SAMPLING_ROUND)))) %>%
+  
+    # for now we will filter out survey round 7 in year 2 (6 / 18 sites visited a 7th time)
+    filter(SAMPLING_ROUND <7)
   
   # number of unique species
   (length(unique(mydata_filtered$SPECIES)))
@@ -81,11 +84,9 @@ process_raw_data <- function(min_unique_detections) {
     ggtitle(paste0("Unique site/year/visit detections per species (for species detected ", min_unique_detections, " or more unique visits)"))
   
   
-  
   ## --------------------------------------------------
   ## Transform into detection non detection data
   
-  # rbind data from different years
   df <- mydata_filtered %>%
     
     # convert to binary detections
@@ -93,7 +94,7 @@ process_raw_data <- function(min_unique_detections) {
     slice(1) %>%
     ungroup() %>%
     
-    # remove species detected on < 2 unique occassions
+    # remove species detected on < min_unique_detections unique occassions
     group_by(SPECIES) %>%
     add_tally() %>%
     rename(unique_detections = n) %>%
@@ -177,6 +178,30 @@ process_raw_data <- function(min_unique_detections) {
   }
   
   ## --------------------------------------------------
+  ## make an matrix (site by year) containing the number of total surveys that occurred
+  # this will allow us to have a variable likelihood function that takes 7 visits for site X year combos visited 7 times
+  # or 6 visits for site X year combos visited only 6 times (most of the combos are 6 annual visits)
+  
+  temp <- mydata %>%
+    group_by(SITE, YEAR, SAMPLING_ROUND) %>%
+    slice(1) %>%
+    ungroup() %>%
+    select(SITE, YEAR, SAMPLING_ROUND) %>%
+    
+    # Reduce sampling rounds in year 1 by 1 (they start at 2 since we did a weird prelim survey first)
+    mutate(SAMPLING_ROUND = as.integer(ifelse(YEAR==1, as.integer(SAMPLING_ROUND) - 1, as.integer(SAMPLING_ROUND))))  %>%
+    group_by(SITE, YEAR) %>%
+    mutate(num_surveys = max(SAMPLING_ROUND)) %>%
+    slice(1) %>%
+    ungroup() %>%
+    
+    pivot_wider(., names_from = YEAR, values_from = num_surveys) 
+    
+  site_year_visit_count <- as.matrix(temp[1:n_sites, 3:(3 + n_years - 1)])
+  
+  rm(temp)
+  
+  ## --------------------------------------------------
   ## make an array of the scaled visit dates which will be used as a detection covariate
   
   # need to get all dates from all sites not just those with detections
@@ -204,7 +229,24 @@ process_raw_data <- function(min_unique_detections) {
       select(SITE, YEAR, SCALED_DATE) %>%
       pivot_wider(names_from = YEAR, values_from = SCALED_DATE)
     
-    scaled_date_array[,,i] <- as.matrix(temp[,2:(n_years + 1)])
+    if(i %in% 1:6){ # if there were six visits in the year:
+      scaled_date_array[,,i] <- as.matrix(temp[,2:(n_years + 1)])
+    
+      } else{ # we didnt survey all sites 7 times in all years so we need to handle differently
+      
+      temp2 <- left_join(site_list, temp) 
+      
+      # stan can't handle NA's
+      # instead we will pick an unfeasible number so that we don't get confused
+      # and then later tell stan to just pass over these values (do not evaluate likelihood)
+      temp2[is.na(temp2)] <- -99
+      
+      temp3 <- pull(temp2[,2])
+      
+      scaled_date_array[,2,i] <- temp3
+      scaled_date_array[,1,i] <- rep(-99, times=n_sites)
+      scaled_date_array[,3,i] <- rep(-99, times=n_sites)
+    }
     
   }
   
@@ -253,6 +295,7 @@ process_raw_data <- function(min_unique_detections) {
   # prep an interaction frequency matrix
   A <- matrix(data = 0, nrow = n_species, ncol=n_plant_species,
               dimnames = list(species_vector, plant_species_vector))
+  
   # fill matrix with observed interaction strengths
   for(i in 1:nrow(interactions_df)){
     A[interactions_df$pollinator_species[i], interactions_df$plant_species[i]] <- 
@@ -389,6 +432,11 @@ process_raw_data <- function(min_unique_detections) {
   woody_flowers_scaled <- as.matrix(woody_plant_data_subset[2:(n_years+1)])
   
   ## --------------------------------------------------
+  ## Get visit specific flowering plant abundance data (for detection covariate)
+  
+  # fill this in later
+  
+  ## --------------------------------------------------
   ## Return stuff
   return(list(
     
@@ -401,6 +449,7 @@ process_raw_data <- function(min_unique_detections) {
     sites = site_vector, # alphabetized site names
     years = year_vector, # ordered vector of intervals
     visits = visit_vector, # ordered vector of visits
+    site_year_visit_count = site_year_visit_count, # matrix containing number of visits per site X year 
     date_scaled = scaled_date_array, # detection covariate (array of scaled julian date of visit)
     habitat_category = HABITAT_CATEGORY, # occupancy and detection covariate (sites mowed or meadow)
     species_interaction_metrics = species_interaction_metrics,

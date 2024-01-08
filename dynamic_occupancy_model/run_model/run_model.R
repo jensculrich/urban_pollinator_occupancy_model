@@ -20,6 +20,7 @@ n_years_minus1 <- n_years - 1
 species <- seq(1, n_species, by=1)
 sites <- seq(1, n_sites, by=1)
 years <- seq(1, n_years_minus1, by=1)
+site_year_visit_count <- my_data$site_year_visit_count
 date_scaled <- my_data$date_scaled
 habitat_type <- my_data$habitat_category
 species_interaction_metrics <- my_data$species_interaction_metrics
@@ -33,7 +34,7 @@ woody_flowers_scaled <- my_data$woody_flowers_scaled
 ### Prep data and tweak model options
 
 stan_data <- c("V", "species", "sites", "years",
-               "n_species", "n_sites", "n_years", "n_years_minus1", "n_visits",
+               "n_species", "n_sites", "n_years", "n_years_minus1", "site_year_visit_count", "n_visits",
                "habitat_type", "date_scaled", "d", "herbaceous_flowers_scaled", "woody_flowers_scaled") 
 
 ## Parameters monitored
@@ -75,15 +76,15 @@ params <- c("rho",
             "delta0_phi_woody", "delta1_phi_woody", "sigma_phi_woody",
             "p0", #"p_habitat", 
             "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq",
-            #"species_richness", "avg_species_richness_control", "avg_species_richness_enhanced", 
+            "species_richness", "avg_species_richness_control", "avg_species_richness_enhanced", 
             #"turnover_control", "turnover_enhanced",
             #"psi_eq_habitat0", "psi_eq_habitat1",
             "T_rep", "T_obs", "P_species")
 
 # MCMC settings
-n_iterations <- 500
+n_iterations <- 400
 n_thin <- 1
-n_burnin <- 300
+n_burnin <- 200
 n_chains <- 4
 n_cores <- n_chains
 delta = 0.97
@@ -265,4 +266,4 @@ print(stan_out, digits = 3, pars = c("P_species"))
 # get an "average" P value
 fit_summary <- rstan::summary(stan_out)
 View(cbind(1:nrow(fit_summary$summary), fit_summary$summary)) # View to see which row corresponds to the parameter of interest
-(mean_FTP <- mean(fit_summary$summary[422:518,1]))
+(mean_FTP <- mean(fit_summary$summary[502:603,1]))

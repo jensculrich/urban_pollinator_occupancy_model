@@ -42,6 +42,7 @@ data {
   int<lower=0> n_years;
   int<lower=0> n_visits;
   int<lower=0,upper=1> V[n_species, n_sites, n_years, n_visits];
+  int<lower=0> site_year_visit_count[n_sites, n_years]; // number of suverys per site X year
    
   // covariate data
   int<lower=0, upper=1> habitat_type[n_sites]; // categorical habitat type (0 or 1)
@@ -242,8 +243,8 @@ model {
   delta1_psi1_herbaceous ~ normal(0, 1); // effect of specialization on response to habitat
   delta0_psi1_woody ~ normal(0, 1); // baseline effect of habitat 
   delta1_psi1_woody ~ normal(0, 1); // effect of specialization on response to habitat
-  sigma_psi1_herbaceous ~ normal(0, 0.25); // species variation in response to habitat
-  sigma_psi1_woody ~ normal(0, 0.25); // species variation in response to habitat
+  sigma_psi1_herbaceous ~ normal(0, 0.5); // species variation in response to habitat
+  sigma_psi1_woody ~ normal(0, 0.5); // species variation in response to habitat
   // colonization
   gamma0 ~ normal(0, 1); // colonization intercept
   gamma_species ~ normal(mu_gamma0, sigma_gamma_species); // species-specific intercepts (centered on global)
@@ -255,8 +256,8 @@ model {
   delta1_gamma_herbaceous ~ normal(0, 1); // effect of specialization on response to habitat
   delta0_gamma_woody ~ normal(0, 1); // baseline effect of habitat 
   delta1_gamma_woody ~ normal(0, 1); // effect of specialization on response to habitat
-  sigma_gamma_herbaceous ~ normal(0, 0.25); // species variation in response to habitat
-  sigma_gamma_woody ~ normal(0, 0.25); // species variation in response to habitat
+  sigma_gamma_herbaceous ~ normal(0, 0.5); // species variation in response to habitat
+  sigma_gamma_woody ~ normal(0, 0.5); // species variation in response to habitat
   // persistence
   phi0 ~ normal(0, 1); // persistence intercept
   phi_species ~ normal(mu_phi0, sigma_phi_species); // species-specific intercepts (centered on global)
@@ -268,8 +269,8 @@ model {
   delta1_phi_herbaceous ~ normal(0, 1); // effect of specialization on response to habitat
   delta0_phi_woody ~ normal(0, 1); // baseline effect of habitat 
   delta1_phi_woody ~ normal(0, 1); // effect of specialization on response to habitat
-  sigma_phi_herbaceous ~ normal(0, 0.25); // species variation in response to habitat
-  sigma_phi_woody ~ normal(0, 0.25); // species variation in response to habitat
+  sigma_phi_herbaceous ~ normal(0, 0.5); // species variation in response to habitat
+  sigma_phi_woody ~ normal(0, 0.5); // species variation in response to habitat
   
   // detection
   p0 ~ normal(0, 1); // global intercept
@@ -299,7 +300,7 @@ model {
                                                     log1m(p[i,j,k,5]) + log1m(p[i,j,k,6]),
                                           log1m(psi[i,j,k])));
           } // end if/else
-          
+  
       } // end loop across all years
     } // end loop across all sites   
   } // end loop across all species
@@ -313,48 +314,48 @@ generated quantities{
   
   // Diversity estimation
   // number of species at each site in each year
-  //int z_simmed[n_species, n_sites, n_years]; // simulate occurrence
-  //int species_richness[n_sites, n_years]; // site/year species richness
-  //real avg_species_richness_enhanced[n_years]; // average across sites
-  //real avg_species_richness_control[n_years]; // average across sites
+  int z_simmed[n_species, n_sites, n_years]; // simulate occurrence
+  int species_richness[n_sites, n_years]; // site/year species richness
+  real avg_species_richness_enhanced[n_years]; // average across sites
+  real avg_species_richness_control[n_years]; // average across sites
   
   // equilibrium occupancy rate (for average species)  
   //real psi_eq_habitat0; // control sites
   //real psi_eq_habitat1; // enhanced sites
   
-  //for(i in 1:n_species){
-   //for(j in 1:n_sites){
-     //for(k in 1:n_years){
-          //z_simmed[i,j,k] = bernoulli_rng(psi[i,j,k]); 
-      //}    
-    //}
-  //}
+  for(i in 1:n_species){
+   for(j in 1:n_sites){
+     for(k in 1:n_years){
+          z_simmed[i,j,k] = bernoulli_rng(psi[i,j,k]); 
+      }    
+    }
+  }
   
   // Initialize avg_species_richness
-  //for(k in 1:n_years){
-    //avg_species_richness_control[k] = 0;
-    //avg_species_richness_enhanced[k] = 0;
-  //}
+  for(k in 1:n_years){
+    avg_species_richness_control[k] = 0;
+    avg_species_richness_enhanced[k] = 0;
+  }
   
   // summed number of species occurring in site/year
-  //for(j in 1:n_sites){
-    //for(k in 1:n_years){
+  for(j in 1:n_sites){
+    for(k in 1:n_years){
       
       // first calc site/year specific species richness
-      //species_richness[j,k] = sum(z_simmed[,j,k]);
+      species_richness[j,k] = sum(z_simmed[,j,k]);
       
       // use habitat type as a switch for whether or not you will add it to the species richness group
-      //avg_species_richness_control[k] = avg_species_richness_control[k] + ((1 - habitat_type[j]) *  species_richness[j,k]);
-      //avg_species_richness_enhanced[k] = avg_species_richness_enhanced[k] + (habitat_type[j] *  species_richness[j,k]);
+      avg_species_richness_control[k] = avg_species_richness_control[k] + ((1 - habitat_type[j]) *  species_richness[j,k]);
+      avg_species_richness_enhanced[k] = avg_species_richness_enhanced[k] + (habitat_type[j] *  species_richness[j,k]);
       
-    //}
-  //}
+    }
+  }
   
-  //for(k in 1:n_years){
+  for(k in 1:n_years){
     // average out species richness by number of sites (1/2 of total sites were in each category)
-    //avg_species_richness_control[k] = avg_species_richness_control[k] / (n_sites / 2.0);
-    //avg_species_richness_enhanced[k] = avg_species_richness_enhanced[k] / (n_sites / 2.0);
-  //}
+    avg_species_richness_control[k] = avg_species_richness_control[k] / (n_sites / 2.0);
+    avg_species_richness_enhanced[k] = avg_species_richness_enhanced[k] / (n_sites / 2.0);
+  }
   
   //psi_eq_habitat0 = inv_logit(gamma0) / (inv_logit(gamma0)+(1-inv_logit(delta0_phi0))); // equilibrium occupancy rate 
   //psi_eq_habitat1 = inv_logit(gamma0 + mu_gamma_habitat) / (inv_logit(gamma0 + mu_gamma_habitat)+(1-inv_logit(delta0_phi0 + delta0_phi_habitat))); // equilibrium occupancy rate
