@@ -50,6 +50,7 @@ data {
   vector[n_species] d; // species specialization metric ('Bluthgen's d', but can be reset to 'degree' based on data prep)
   real herbaceous_flowers_scaled[n_sites, n_years]; // herbaceous flower abundance in quadrats
   real woody_flowers_scaled[n_sites, n_years]; // woody flower abundance in survey area
+  real flowers_any_by_survey[n_sites, n_years, n_visits]; // flower abundance per survey visit
   
 } // end data
 
@@ -109,6 +110,7 @@ parameters {
   vector[n_species] p_date_sq;
   real sigma_p_species_date_sq;
   real mu_p_species_date_sq;
+  real p_flower_abundance_any;
 
 } // end parameters
 
@@ -205,9 +207,10 @@ transformed parameters {
             //p_species[species[i]] + // a species-specific intercept
             species_intercepts[species[i],2] + // species random effect
             //p_site[sites[j]] + // a site-specific intercept
-            //p_habitat * habitat_type[j] + // a spatial detection effect
+            p_flower_abundance * survey_flower_abundance[j,k,l] + // a spatial detection effect
             p_date[species[i]] * date_scaled[j,k,l] + // a species-specific phenological detection effect (peak)
-            p_date_sq[species[i]] * (date_scaled[j,k,l])^2 // a species-specific phenological detection effect (decay)
+            p_date_sq[species[i]] * (date_scaled[j,k,l])^2 + // a species-specific phenological detection effect (decay)
+            p_flower_abundance_any * flowers_any_by_survey[j,k,l]
             ); // end p[j,k,l]
              
         } // end loop across all visits
@@ -286,6 +289,7 @@ model {
   p_date_sq ~ normal(mu_p_species_date_sq, sigma_p_species_date_sq); // species-specific phenology (decay)
   mu_p_species_date_sq ~ normal(0, 2); // mean
   sigma_p_species_date_sq ~ normal(0, 1); // variation
+  p_flower_abundance_any ~ normal(0,2); // effect of survey visit flower abundance on detection
   
   // LIKELIHOOD
   for(i in 1:n_species){

@@ -344,13 +344,13 @@ process_raw_data <- function(min_unique_detections) {
     theme(axis.text.x = element_text(angle = 45, hjust=1)) +
     ggtitle("Total interactions per species")
   
-  # now filter out plants that were never visited by pollinators (considered not to be of high value for pollinators)
-  plant_data_subset <- plant_data %>%
-    filter(SPECIES %in% plants_visited$PLANT_NETTED_FROM_SCI_NAME)
-  
   # create an alphabetized list of all species encountered across all sites*intervals*visits
   plant_species_list_reduced <- plants_visited %>%
     select(PLANT_NETTED_FROM_SCI_NAME) # extract species names column as vector
+  
+  # now filter out plants that were never visited by pollinators (considered not to be of high value for pollinators)
+  plant_data_subset <- plant_data %>%
+    filter(SPECIES %in% plants_visited$PLANT_NETTED_FROM_SCI_NAME)
   
   plant_abundance_df <- plant_data_subset %>%
     
@@ -433,8 +433,70 @@ process_raw_data <- function(min_unique_detections) {
   
   ## --------------------------------------------------
   ## Get visit specific flowering plant abundance data (for detection covariate)
+  # survey_flower_abundance should be an array of size [1:n_sites, 1:n_years, 1:n_visits]
   
-  # fill this in later
+  woody_plant_data_subset <- woody_plant_data %>%
+    filter(SPECIES %in% plants_visited$PLANT_NETTED_FROM_SCI_NAME)
+  
+  # join all possible site visits back in to add zeros
+  woody_plant_data_subset <- full_join(woody_plant_data_subset, site_visits)
+  
+  # get site X year X sampling round
+  woody_plant_data_subset <- woody_plant_data_subset %>%
+    mutate(log_NUM_FLORAL_UNITS = log(NUM_FLORAL_UNITS + 1)) %>%
+    group_by(SITE, YEAR, SAMPLING_ROUND) %>%
+    mutate(survey_woody_plant_abundance = sum(log_NUM_FLORAL_UNITS)) %>%
+    slice(1) %>%
+    ungroup() %>%
+    
+    # scale the variable
+    mutate(survey_woody_plant_abundance_scaled = center_scale(survey_woody_plant_abundance)) %>%
+    select(SITE, YEAR, SAMPLING_ROUND, survey_woody_plant_abundance_scaled) %>%
+    mutate(SITE_NUMBER = rep(1:n_sites, each = n_years*n_visits))
+    
+  woody_flowers_by_survey = array(NA, dim = c(n_sites,n_years,n_visits))
+  
+  for(i in 1:nrow(woody_plant_data_subset)){
+
+    woody_flowers_by_survey[woody_plant_data_subset$SITE_NUMBER[i], 
+                          woody_plant_data_subset$YEAR[i],
+                          woody_plant_data_subset$SAMPLING_ROUND[i]] <- 
+      woody_plant_data_subset$survey_woody_plant_abundance_scaled[i]
+
+  }
+  
+  # now do the same for the herbaceous plants
+  herabceous_plant_data_subset <- full_join(plant_data_subset, site_visits)
+
+  # get site X year X sampling round
+  herabceous_plant_data_subset <- herabceous_plant_data_subset %>%
+    mutate(log_NUM_FLORAL_UNITS = log(NUM_FLORAL_UNITS + 1)) %>%
+    group_by(SITE, YEAR, SAMPLING_ROUND) %>%
+    mutate(survey_herbaceous_plant_abundance = sum(log_NUM_FLORAL_UNITS)) %>%
+    slice(1) %>%
+    ungroup() %>%
+    
+    # scale the variable
+    mutate(survey_herbaceous_plant_abundance_scaled = center_scale(survey_herbaceous_plant_abundance)) %>%
+    select(SITE, YEAR, SAMPLING_ROUND, survey_herbaceous_plant_abundance_scaled) %>%
+    mutate(SITE_NUMBER = rep(1:n_sites, each = n_years*n_visits))
+  
+  herbaceous_flowers_by_survey = array(NA, dim = c(n_sites,n_years,n_visits))
+  
+  for(i in 1:nrow(herabceous_plant_data_subset)){
+    
+    herbaceous_flowers_by_survey[herabceous_plant_data_subset$SITE_NUMBER[i], 
+                          herabceous_plant_data_subset$YEAR[i],
+                          herabceous_plant_data_subset$SAMPLING_ROUND[i]] <- 
+      herabceous_plant_data_subset$survey_herbaceous_plant_abundance_scaled[i]
+    
+  }
+  
+  # now make a composite average deviation from average abundance
+  # across woody and herbaceous plants (in case we want to only model single parameter for effects of all flowers)
+  flowers_any_by_survey = array(NA, dim = c(n_sites,n_years,n_visits))
+  
+  flowers_any_by_survey = (woody_flowers_by_survey + herbaceous_flowers_by_survey) / 2
   
   ## --------------------------------------------------
   ## Return stuff
@@ -454,7 +516,10 @@ process_raw_data <- function(min_unique_detections) {
     habitat_category = HABITAT_CATEGORY, # occupancy and detection covariate (sites mowed or meadow)
     species_interaction_metrics = species_interaction_metrics,
     herbaceous_flowers_scaled = herbaceous_flowers_scaled,
-    woody_flowers_scaled = woody_flowers_scaled
+    woody_flowers_scaled = woody_flowers_scaled,
+    herbaceous_flowers_by_survey = herbaceous_flowers_by_survey,
+    woody_flowers_by_survey = woody_flowers_by_survey,
+    flowers_any_by_survey = flowers_any_by_survey
     
   ))
   

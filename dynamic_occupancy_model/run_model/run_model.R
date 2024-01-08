@@ -29,13 +29,16 @@ species_names <- my_data$species
 site_names <- my_data$sites
 herbaceous_flowers_scaled <- my_data$herbaceous_flowers_scaled
 woody_flowers_scaled <- my_data$woody_flowers_scaled
+herbaceous_flowers_by_survey <- my_data$herbaceous_flowers_by_survey
+woody_flowers_by_survey <- my_data$woody_flowers_by_survey
+flowers_any_by_survey <- my_data$flowers_any_by_survey
 
 ## --------------------------------------------------
 ### Prep data and tweak model options
 
 stan_data <- c("V", "species", "sites", "years",
                "n_species", "n_sites", "n_years", "n_years_minus1", "site_year_visit_count", "n_visits",
-               "habitat_type", "date_scaled", "d", "herbaceous_flowers_scaled", "woody_flowers_scaled") 
+               "habitat_type", "date_scaled", "d", "herbaceous_flowers_scaled", "woody_flowers_scaled", "flowers_any_by_survey") 
 
 ## Parameters monitored
 params <- c("psi1_0",  "sigma_psi1_species", "mu_psi1_habitat", "sigma_psi1_habitat",
@@ -74,7 +77,7 @@ params <- c("rho",
             "phi0", "delta1_phi0", "sigma_phi_species",
             "delta0_phi_herbaceous", "delta1_phi_herbaceous", "sigma_phi_herbaceous",
             "delta0_phi_woody", "delta1_phi_woody", "sigma_phi_woody",
-            "p0", #"p_habitat", 
+            "p0", "p_flower_abundance_any", 
             "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq",
             "species_richness", "avg_species_richness_control", "avg_species_richness_enhanced", 
             #"turnover_control", "turnover_enhanced",
