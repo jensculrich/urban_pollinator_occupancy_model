@@ -4,7 +4,7 @@ source("./dynamic_occupancy_model/run_model/prep_data.R")
 min_unique_detections = 1 # >=
 my_data <- process_raw_data(min_unique_detections)
 
-stan_out <- readRDS("./dynamic_occupancy_model/model_outputs/stan_out.rds")
+stan_out <- readRDS("./dynamic_occupancy_model/model_outputs/stan_out2.rds")
 
 fit_summary <- rstan::summary(stan_out)
 View(cbind(1:nrow(fit_summary$summary), fit_summary$summary)) # View to see which row corresponds to the parameter of interest
@@ -52,15 +52,18 @@ logit <- function(x) log(x/(1-x))
 library(viridis)
 n_bins = 16
 my_palette <- palette(viridis(n = n_bins, option = "C"))
-seq <- seq(-2, 5, 0.45)
+#seq <- seq(-2, 5, 0.45)
+seq <- seq(-2.5, 3.5, 0.4)
 
 ## --------------------------------------------------
 ### Make a histogram of species specialization. Colour the bins.
 
 hist(d)
 # scaled values
-hist(d, axes = TRUE, xlim = c(-2, 5), ylab = "Frequency", xlab = "Species specialization (Bluthgen's d) (scaled)", main = "", 
-     col = my_palette, breaks = seq, freq=TRUE, right = FALSE)
+hist(d, axes = TRUE, xlim = c(-2.5, 3.5), 
+     ylab = "Frequency", xlab = "Species specialization (Bluthgen's d) (scaled)", main = "", 
+     col = my_palette, breaks = seq, 
+     freq=TRUE, right = FALSE)
 # make one with actual values of d
 # unscale
 hist(d, axes = TRUE, xlim = c(-2, 5), ylab = "Frequency", xlab = "Species specialization (Bluthgen's d) (scaled)", main = "", 

@@ -47,13 +47,11 @@ parameters {
   vector[n_species] psi1_herbaceous_flowers;
   real delta0_psi1_herbaceous;
   real delta1_psi1_herbaceous;
-  real<lower=0> epsilon0_psi1_herbaceous;
-  real epsilon1_psi1_herbaceous;
+  real sigma_psi1_herbaceous;
   vector[n_species] psi1_woody_flowers;
   real delta0_psi1_woody;
   real delta1_psi1_woody;
-  real<lower=0> epsilon0_psi1_woody;
-  real epsilon1_psi1_woody;
+  real sigma_psi1_woody;
   // colonization
   real gamma0;
   vector[n_species] gamma_species;
@@ -62,13 +60,11 @@ parameters {
   vector[n_species] gamma_herbaceous_flowers;
   real delta0_gamma_herbaceous;
   real delta1_gamma_herbaceous;
-  real<lower=0> epsilon0_gamma_herbaceous;
-  real epsilon1_gamma_herbaceous;
+  real sigma_gamma_herbaceous;
   vector[n_species] gamma_woody_flowers;
   real delta0_gamma_woody;
   real delta1_gamma_woody;
-  real<lower=0> epsilon0_gamma_woody;
-  real epsilon1_gamma_woody;
+  real sigma_gamma_woody;
   // persistence
   real phi0; 
   vector[n_species] phi_species;
@@ -77,13 +73,11 @@ parameters {
   vector[n_species] phi_herbaceous_flowers;
   real delta0_phi_herbaceous;
   real delta1_phi_herbaceous;
-  real<lower=0> epsilon0_phi_herbaceous;
-  real epsilon1_phi_herbaceous;
+  real sigma_phi_herbaceous;
   vector[n_species] phi_woody_flowers;
   real delta0_phi_woody;
   real delta1_phi_woody;
-  real<lower=0> epsilon0_phi_woody;
-  real epsilon1_phi_woody;
+  real sigma_phi_woody;
   
   // detection
   real p0;
@@ -106,50 +100,13 @@ transformed parameters {
   vector[n_species] mu_psi1_0; // expected value for species specific slopes
   vector[n_species] mu_psi1_herbaceous_flowers; // expected value for species specific slopes
   vector[n_species] mu_psi1_woody_flowers; // expected value for species specific slopes
-  vector[n_species] sigma_psi1_herbaceous; // expected value for species specific slopes
-  vector[n_species] sigma_psi1_woody; // expected value for species specific slopesvector[n_species] mu_gamma0; // expected value for species specific slopes
   vector[n_species] mu_gamma0; // expected value for species specific slopes
   vector[n_species] mu_gamma_herbaceous_flowers; // expected value for species specific slopes
   vector[n_species] mu_gamma_woody_flowers; // expected value for species specific slopes
-  vector[n_species] sigma_gamma_herbaceous; // expected value for species specific slopes
-  vector[n_species] sigma_gamma_woody; // expected value for species specific slopesvector[n_species] mu_phi0; // expected value for species specific slopes
   vector[n_species] mu_phi0; // expected value for species specific slopes
   vector[n_species] mu_phi_herbaceous_flowers; // expected value for species specific slopes
   vector[n_species] mu_phi_woody_flowers; // expected value for species specific slopes
-  vector[n_species] sigma_phi_herbaceous; // expected value for species specific slopes
-  vector[n_species] sigma_phi_woody; // expected value for species specific slopes
   vector[n_species] mu_p0; // expected value for species specific slopes
-  
-  // hard prior to disallow negative variance
-  real<lower=0> epsilon_sum_psi1_min;
-  epsilon_sum_psi1_min = epsilon0_psi1_herbaceous + epsilon1_psi1_herbaceous*min(d);
-  real<lower=0> epsilon_sum_psi1_max;
-  epsilon_sum_psi1_max = epsilon0_psi1_herbaceous + epsilon1_psi1_herbaceous*max(d);
-  
-  real<lower=0> epsilon_sum_psi1_min2;
-  epsilon_sum_psi1_min2 = epsilon0_psi1_woody + epsilon1_psi1_woody*min(d);
-  real<lower=0> epsilon_sum_psi1_max2;
-  epsilon_sum_psi1_max2 = epsilon0_psi1_woody + epsilon1_psi1_woody*max(d);
-  
-  real<lower=0> epsilon_sum_gamma_min;
-  epsilon_sum_gamma_min = epsilon0_gamma_herbaceous + epsilon1_gamma_herbaceous*min(d);
-  real<lower=0> epsilon_sum_gamma_max;
-  epsilon_sum_gamma_max = epsilon0_gamma_herbaceous + epsilon1_gamma_herbaceous*max(d);
-  
-  real<lower=0> epsilon_sum_gamma_min2;
-  epsilon_sum_gamma_min2 = epsilon0_gamma_woody + epsilon1_gamma_woody*min(d);
-  real<lower=0> epsilon_sum_gamma_max2;
-  epsilon_sum_gamma_max2 = epsilon0_gamma_woody + epsilon1_gamma_woody*max(d);
-  
-  real<lower=0> epsilon_sum_phi_min;
-  epsilon_sum_phi_min = epsilon0_phi_herbaceous + epsilon1_phi_herbaceous*min(d);
-  real<lower=0> epsilon_sum_phi_max;
-  epsilon_sum_phi_max = epsilon0_phi_herbaceous + epsilon1_phi_herbaceous*max(d);
-  
-  real<lower=0> epsilon_sum_phi_min2;
-  epsilon_sum_phi_min2 = epsilon0_phi_woody + epsilon1_phi_woody*min(d);
-  real<lower=0> epsilon_sum_phi_max2;
-  epsilon_sum_phi_max2 = epsilon0_phi_woody + epsilon1_phi_woody*max(d);
   
   // model the expected value for species-specific random effects using a linear predictor
   // where d is the species specialization index
@@ -158,21 +115,15 @@ transformed parameters {
     mu_psi1_0[i] = delta1_psi1_0*d[i]; // baseline initial occ rate (centered on 0)
     mu_psi1_herbaceous_flowers[i] = delta0_psi1_herbaceous + delta1_psi1_herbaceous*d[i]; // effect of specialization on effect of habitat on persistence rate
     mu_psi1_woody_flowers[i] = delta0_psi1_woody + delta1_psi1_woody*d[i]; // effect of specialization on effect of habitat on persistence rate
-    sigma_psi1_herbaceous[i] = epsilon0_psi1_herbaceous + epsilon1_psi1_herbaceous*d[i]; // effect specialization on interspecific variability to habitat response 
-    sigma_psi1_woody[i] = epsilon0_psi1_woody + epsilon1_psi1_woody*d[i]; // effect specialization on interspecific variability to habitat response 
-    
+
     mu_gamma0[i] = delta1_gamma0*d[i]; // baseline colonization rate (centered on 0)
     mu_gamma_herbaceous_flowers[i] = delta0_gamma_herbaceous + delta1_gamma_herbaceous*d[i]; // effect of specialization on effect of habitat on persistence rate
     mu_gamma_woody_flowers[i] = delta0_gamma_woody + delta1_gamma_woody*d[i]; // effect of specialization on effect of habitat on persistence rate
-    sigma_gamma_herbaceous[i] = epsilon0_gamma_herbaceous + epsilon1_gamma_herbaceous*d[i]; // effect specialization on interspecific variability to habitat response 
-    sigma_gamma_woody[i] = epsilon0_gamma_woody + epsilon1_gamma_woody*d[i]; // effect specialization on interspecific variability to habitat response 
     
     mu_phi0[i] = delta1_phi0*d[i]; // baseline persistence rate (centered on 0)
     mu_phi_herbaceous_flowers[i] = delta0_phi_herbaceous + delta1_phi_herbaceous*d[i]; // effect of specialization on effect of habitat on persistence rate
     mu_phi_woody_flowers[i] = delta0_phi_woody + delta1_phi_woody*d[i]; // effect of specialization on effect of habitat on persistence rate
-    sigma_phi_herbaceous[i] = epsilon0_phi_herbaceous + epsilon1_phi_herbaceous*d[i]; // effect specialization on interspecific variability to habitat response 
-    sigma_phi_woody[i] = epsilon0_phi_woody + epsilon1_phi_woody*d[i]; // effect specialization on interspecific variability to habitat response 
-    
+  
     mu_p0[i] = delta1_p0*degree[i]; // baseline colonization rate (centered on 0)
   }
   
@@ -270,10 +221,8 @@ model {
   delta1_psi1_herbaceous ~ normal(0, 1); // effect of specialization on response to habitat
   delta0_psi1_woody ~ normal(0, 1); // baseline effect of habitat 
   delta1_psi1_woody ~ normal(0, 1); // effect of specialization on response to habitat
-  epsilon0_psi1_herbaceous ~ normal(0, 0.5); // species variation in response to habitat
-  epsilon1_psi1_herbaceous ~ normal(0, 0.5); // species variation in response to habitat
-  epsilon0_psi1_woody ~ normal(0, 0.5); // species variation in response to habitat
-  epsilon1_psi1_woody ~ normal(0, 0.5); // species variation in response to habitat
+  sigma_psi1_herbaceous ~ normal(0, 0.5); // species variation in response to habitat
+  sigma_psi1_woody ~ normal(0, 0.5); // species variation in response to habitat
   // colonization
   gamma0 ~ normal(0, 1); // colonization intercept
   gamma_species ~ normal(mu_gamma0, sigma_gamma_species); // species-specific intercepts (centered on global)
@@ -285,10 +234,8 @@ model {
   delta1_gamma_herbaceous ~ normal(0, 1); // effect of specialization on response to habitat
   delta0_gamma_woody ~ normal(0, 1); // baseline effect of habitat 
   delta1_gamma_woody ~ normal(0, 1); // effect of specialization on response to habitat
-  epsilon0_gamma_herbaceous ~ normal(0, 0.5); // species variation in response to habitat
-  epsilon1_gamma_herbaceous ~ normal(0, 0.5); // species variation in response to habitat
-  epsilon0_gamma_woody ~ normal(0, 0.5); // species variation in response to habitat
-  epsilon1_gamma_woody ~ normal(0, 0.5); // species variation in response to habitat
+  sigma_gamma_herbaceous ~ normal(0, 0.5); // species variation in response to habitat
+  sigma_gamma_woody ~ normal(0, 0.5); // species variation in response to habitat
   // persistence
   phi0 ~ normal(0, 1); // persistence intercept
   phi_species ~ normal(mu_phi0, sigma_phi_species); // species-specific intercepts (centered on global)
@@ -300,10 +247,8 @@ model {
   delta1_phi_herbaceous ~ normal(0, 1); // effect of specialization on response to habitat
   delta0_phi_woody ~ normal(0, 1); // baseline effect of habitat 
   delta1_phi_woody ~ normal(0, 1); // effect of specialization on response to habitat
-  epsilon0_phi_herbaceous ~ normal(0, 0.5); // species variation in response to habitat
-  epsilon1_phi_herbaceous ~ normal(0, 0.5); // species variation in response to habitat
-  epsilon0_phi_woody ~ normal(0, 0.5); // species variation in response to habitat
-  epsilon1_phi_woody ~ normal(0, 0.5); // species variation in response to habitat
+  sigma_phi_herbaceous ~ normal(0, 0.5); // species variation in response to habitat
+  sigma_phi_woody ~ normal(0, 0.5); // species variation in response to habitat
   
   // detection
   p0 ~ normal(0, 1); // global intercept
