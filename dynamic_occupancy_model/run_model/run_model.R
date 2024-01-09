@@ -4,7 +4,7 @@
 library(rstan)
 
 source("./dynamic_occupancy_model/run_model/prep_data.R")
-min_unique_detections = 3 # >=
+min_unique_detections = 1 # >=
 my_data <- process_raw_data(min_unique_detections)
 
 ## --------------------------------------------------
@@ -195,8 +195,7 @@ stan_out <- stan(stan_model,
                      open_progress = FALSE,
                      cores = n_cores)
 
-saveRDS(stan_out, "./dynamic_occupancy_model/model_outputs/stan_out.rds")
-stan_out <- readRDS("./dynamic_occupancy_model/model_outputs/stan_out.rds")
+saveRDS(stan_out, "./dynamic_occupancy_model/model_outputs/stan_out2.rds")
 
 
 print(stan_out, digits = 3, 
@@ -251,18 +250,22 @@ traceplot(stan_out, pars = c(
   "psi1_0", "delta1_psi1_0", "sigma_psi1_species",   
   "delta0_psi1_herbaceous", "delta1_psi1_herbaceous",
   "delta0_psi1_woody", "delta1_psi1_woody",
-  "sigma_psi1_herbaceous", "sigma_psi1_woody", 
+  #"sigma_psi1_herbaceous", "sigma_psi1_woody", 
   "gamma0", "delta1_gamma0", "sigma_gamma_species",
   "delta0_gamma_herbaceous", "delta1_gamma_herbaceous",
   "delta0_gamma_woody", "delta1_gamma_woody",
-  "sigma_gamma_herbaceous", "sigma_gamma_woody", 
+  #"sigma_gamma_herbaceous", "sigma_gamma_woody", 
   "phi0", "delta1_phi0", "sigma_phi_species",
   "delta0_phi_herbaceous", "delta1_phi_herbaceous",
-  "delta0_phi_woody", "delta1_phi_woody",
-  "sigma_phi_herbaceous", "sigma_phi_woody"
+  "delta0_phi_woody", "delta1_phi_woody"#,
+  #"sigma_phi_herbaceous", "sigma_phi_woody"
 ))
 
-
+pairs(stan_out, pars = c(
+  "psi1_0", "delta1_psi1_0", "sigma_psi1_species",   
+  "delta0_psi1_herbaceous", "delta1_psi1_herbaceous",
+  "delta0_psi1_woody", "delta1_psi1_woody"
+))
 
 traceplot(stan_out, pars = c(
   "rho", 
