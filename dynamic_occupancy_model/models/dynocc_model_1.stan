@@ -69,12 +69,12 @@ parameters {
   //real delta1_phi_herbaceous;
   //real sigma_phi_herbaceous;
   //vector[n_species] phi_woody_flowers;
-  //real delta0_phi_woody;
-  //real delta1_phi_woody;
+  real delta0_phi_woody;
+  real delta1_phi_woody;
   //real sigma_phi_woody;
   
   // where [3] is for: intercept, slope herbaceous, slope woody
-  vector[3] beta_phi; // effects
+  vector[2] beta_phi; // effects
   vector<lower = 0>[3] sigma_phi_species; // SDs for random effects for persistence
   cholesky_factor_corr[3] L_phi_species; // Correlation matrix for random intercepts and slopes for persistence
   matrix[3,n_species] z_phi_species; // Random effects for persistence
@@ -105,11 +105,11 @@ transformed parameters {
   vector[n_species] mu_gamma_woody_flowers; // expected value for species specific slopes
   //vector[n_species] mu_phi0; // expected value for species specific slopes
   //vector[n_species] mu_phi_herbaceous_flowers; // expected value for species specific slopes
-  //vector[n_species] mu_phi_woody_flowers; // expected value for species specific slopes
+  vector[n_species] mu_phi_woody_flowers; // expected value for species specific slopes
   vector[n_species] mu_p0; // expected value for species specific slopes
   
   matrix[n_species,3] phi_species;
-  phi_species = (diag_pre_multiply(sigma_phi_species,L_phi_species)*z_phi_species)'; // not sure why the dash is here
+  phi_species = (diag_pre_multiply(sigma_phi_species,L_phi_species)*z_phi_species)'; // the dash indicates transposition
 
   //vector[n_species] phi0_species;
   //vector[n_species] phi_herbaceous_flowers_species;
@@ -136,7 +136,7 @@ transformed parameters {
     
     //mu_phi0[i] = delta1_phi0*d[i]; // baseline persistence rate (centered on 0)
     //mu_phi_herbaceous_flowers[i] = delta0_phi_herbaceous + delta1_phi_herbaceous*d[i]; // effect of specialization on effect of habitat on persistence rate
-    //mu_phi_woody_flowers[i] = delta0_phi_woody + delta1_phi_woody*d[i]; // effect of specialization on effect of habitat on persistence rate
+    mu_phi_woody_flowers[i] = delta0_phi_woody + delta1_phi_woody*d[i]; // effect of specialization on effect of habitat on persistence rate
   
     mu_p0[i] = delta1_p0*degree[i]; // baseline colonization rate (centered on 0)
   }
@@ -167,7 +167,8 @@ transformed parameters {
         phi[i,j,k] = inv_logit( // probability (0-1) of persistence is equal to..
           (beta_phi[1] + phi_species[species[i],1]) +
           (beta_phi[2] + phi_species[species[i],2]) * herbaceous_flowers_scaled[j,k] +
-          (beta_phi[3] + phi_species[species[i],3]) * woody_flowers_scaled[j,k] 
+          //(beta_phi[3] + phi_species[species[i],3]) * woody_flowers_scaled[j,k]
+          (phi_species[species[i],3]) * woody_flowers_scaled[j,k] 
           //phi0 +
           //phi_species[species[i]] + // a species specific intercept
           //phi_herbaceous_flowers[species[i]] * herbaceous_flowers_scaled[j,k] + // a spatial effect
@@ -268,9 +269,16 @@ model {
   //sigma_phi_woody ~ normal(0, 0.5); // species variation in response to habitat
   beta_phi[1] ~ normal(0, 1);  
   beta_phi[2] ~ normal(0, 1);  
-  beta_phi[3] ~ normal(0, 1);  
-  L_phi_species ~ lkj_corr_cholesky(2);           // Ranef prior
-  to_vector(z_phi_species) ~ normal(0, 1);
+  //beta_phi[3] ~ normal(0, 1);  
+  L_phi_species ~ lkj_corr_cholesky(2); // Ranef prior
+  z_phi_species[1,] ~ normal(0, 1);
+  z_phi_species[2,] ~ normal(0, 1);
+  z_phi_species[3,] ~ normal(mu_phi_woody_flowers, 1);
+  delta0_phi_woody ~ normal(0, 1); // baseline effect of habitat 
+  delta1_phi_woody ~ normal(0, 1); // effect of specialization on response to habitat
+  //z_phi_species[1,] ~ normal(0, 1);
+  //z_phi_species[2,] ~ normal(0, 1);
+  //z_phi_species[3,] ~ normal(0, 1);
   
   // detection
   p0 ~ normal(0, 1); // global intercept

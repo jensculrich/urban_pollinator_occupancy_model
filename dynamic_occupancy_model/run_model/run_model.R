@@ -59,7 +59,7 @@ params <- c(
   "gamma0", "delta1_gamma0", "sigma_gamma_species",
   "delta0_gamma_herbaceous", "delta1_gamma_herbaceous", "sigma_gamma_herbaceous",
   "delta0_gamma_woody", "delta1_gamma_woody", "sigma_gamma_woody",
-  "beta_phi", "sigma_phi_species", "L_phi_species", 
+  "beta_phi", "sigma_phi_species", "L_phi_species", "delta0_phi_woody", "delta1_phi_woody",
   "p0", "delta1_p0", "sigma_p_species", 
   "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq", "p_flower_abundance_any", 
   "species_richness", "avg_species_richness_control", "avg_species_richness_enhanced", 
@@ -86,9 +86,9 @@ params <- c(
             "T_rep", "T_obs", "P_species")
 
 # MCMC settings
-n_iterations <- 400
+n_iterations <- 300
 n_thin <- 1
-n_burnin <- 200
+n_burnin <- 150
 n_chains <- 4
 n_cores <- n_chains
 delta = 0.95
@@ -259,16 +259,14 @@ traceplot(stan_out, pars = c(
   "gamma0", "delta1_gamma0", "sigma_gamma_species",
   "delta0_gamma_herbaceous", "delta1_gamma_herbaceous",
   "delta0_gamma_woody", "delta1_gamma_woody",
-  "sigma_gamma_herbaceous", "sigma_gamma_woody", 
+  "sigma_gamma_herbaceous", "sigma_gamma_woody"
   
 ))
 
 # for continuous model
-pairs(stan_out, pars = c(
-  "phi0", "delta1_phi0", "sigma_phi_species",
-  "delta0_phi_herbaceous", "delta1_phi_herbaceous",
-  "delta0_phi_woody", "delta1_phi_woody",
-  "sigma_phi_herbaceous", "sigma_phi_woody"
+traceplot(stan_out, pars = c(
+  "beta_phi", "sigma_phi_species", "L_phi_species",
+  "delta0_phi_woody", "delta1_phi_woody"
 ))
 
 traceplot(stan_out, pars = c(
@@ -301,4 +299,4 @@ print(stan_out, digits = 3, pars = c("P_species"))
 # get an "average" P value
 fit_summary <- rstan::summary(stan_out)
 View(cbind(1:nrow(fit_summary$summary), fit_summary$summary)) # View to see which row corresponds to the parameter of interest
-(mean_FTP <- mean(fit_summary$summary[242:314,1]))
+(mean_FTP <- mean(fit_summary$summary[248:320,1]))
