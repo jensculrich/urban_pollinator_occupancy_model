@@ -53,13 +53,18 @@ params <- c("psi1_0",  "sigma_psi1_species", "mu_psi1_habitat", "sigma_psi1_habi
 
 ## Parameters monitored (multinormal model)
 params <- c(
-  "psi1_0", "delta1_psi1_0", "sigma_psi1_species", 
-  "delta0_psi1_herbaceous", "delta1_psi1_herbaceous", "sigma_psi1_herbaceous",
-  "delta0_psi1_woody", "delta1_psi1_woody", "sigma_psi1_woody",
-  "gamma0", "delta1_gamma0", "sigma_gamma_species",
-  "delta0_gamma_herbaceous", "delta1_gamma_herbaceous", "sigma_gamma_herbaceous",
-  "delta0_gamma_woody", "delta1_gamma_woody", "sigma_gamma_woody",
-  "beta_phi", "sigma_phi_species", "L_phi_species", "delta0_phi_woody", "delta1_phi_woody",
+  "sigma_psi1_species", "L_psi1_species", 
+  "psi1_0",
+  "delta0_psi1_herbaceous", "delta1_psi1_herbaceous",
+  "delta0_psi1_woody", "delta1_psi1_woody",
+  "sigma_gamma_species", "L_gamma_species", 
+  "gamma0",
+  "delta0_gamma_herbaceous", "delta1_gamma_herbaceous",
+  "delta0_gamma_woody", "delta1_gamma_woody",
+  "sigma_phi_species", "L_phi_species", 
+  "phi0",
+  "delta0_phi_herbaceous", "delta1_phi_herbaceous",
+  "delta0_phi_woody", "delta1_phi_woody",
   "p0", "delta1_p0", "sigma_p_species", 
   "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq", "p_flower_abundance_any", 
   "species_richness", "avg_species_richness_control", "avg_species_richness_enhanced", 
@@ -86,9 +91,9 @@ params <- c(
             "T_rep", "T_obs", "P_species")
 
 # MCMC settings
-n_iterations <- 300
+n_iterations <- 400
 n_thin <- 1
-n_burnin <- 150
+n_burnin <- 200
 n_chains <- 4
 n_cores <- n_chains
 delta = 0.95
@@ -130,32 +135,22 @@ inits <- lapply(1:n_chains, function(i)
 # alternative inits for continuous model
 inits <- lapply(1:n_chains, function(i)
   
-  list(#rho = runif(1, 0.5, 1),
-       #sigma_species = runif(1, 0, 1),
+  list(
        psi1_0 = runif(1, -1, 1),
-       sigma_psi1_species = runif(1, 0, 1),
        delta0_psi1_herbaceous = runif(1, -1, 1),
        delta1_psi1_herbaceous = runif(1, -1, 1),
        delta0_psi1_woody = runif(1, -1, 1), 
        delta1_psi1_woody = runif(1, -1, 1),
-       sigma_psi1_herbaceous = runif(1, 1, 1.5),
-       sigma_psi1_woody = runif(1, 1, 1.5),
        gamma0 = runif(1, -1, 0),
-       sigma_gamma_species = runif(1, 1, 1.5),
        delta0_gamma_herbaceous = runif(1, -1, 1),
        delta1_gamma_herbaceous = runif(1, -1, 1),
        delta0_gamma_woody = runif(1, -1, 1), 
        delta1_gamma_woody = runif(1, -1, 1),
-       sigma_gamma_herbaceous = runif(1, 1, 1.5),
-       sigma_gamma_woody = runif(1, 1, 1.5),
-       #phi0 = runif(1, 0, 1),
-       #sigma_phi_species = runif(1, 1, 1.5),
-       #delta0_phi_herbaceous = runif(1, -1, 1),
-       #delta1_phi_herbaceous = runif(1, -1, 1),
-       #delta0_phi_woody = runif(1, -1, 1), 
-       #delta1_phi_woody = runif(1, -1, 1),
-       #sigma_phi_herbaceous = runif(1, 1, 1.5),
-       #sigma_phi_woody = runif(1, 1, 1.5),
+       phi0 = runif(1, 1, 3),
+       delta0_phi_herbaceous = runif(1, -1, 1),
+       delta1_phi_herbaceous = runif(1, -1, 1),
+       delta0_phi_woody = runif(1, -1, 1), 
+       delta1_phi_woody = runif(1, -1, 1),
        p0 = runif(1, -1, 0),
        sigma_p_species = runif(1, 0, 1),
        mu_p_species_date = runif(1, -1, 1),
@@ -265,8 +260,26 @@ traceplot(stan_out, pars = c(
 
 # for continuous model
 traceplot(stan_out, pars = c(
-  "beta_phi", "sigma_phi_species", "L_phi_species",
+  "sigma_phi_species", "L_phi_species",
+  "phi0",
+  "delta0_phi_herbaceous", "delta1_phi_herbaceous",
   "delta0_phi_woody", "delta1_phi_woody"
+))
+
+# for continuous model
+traceplot(stan_out, pars = c(
+  "sigma_gamma_species", "L_gamma_species",
+  "gamma0",
+  "delta0_gamma_herbaceous", "delta1_gamma_herbaceous",
+  "delta0_gamma_woody", "delta1_gamma_woody"
+))
+
+# for continuous model
+traceplot(stan_out, pars = c(
+  "sigma_psi1_species", "L_psi1_species",
+  "psi1_0",
+  "delta0_psi1_herbaceous", "delta1_psi1_herbaceous",
+  "delta0_psi1_woody", "delta1_psi1_woody"
 ))
 
 traceplot(stan_out, pars = c(
