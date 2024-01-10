@@ -260,7 +260,7 @@ traceplot(stan_out, pars = c(
   "delta0_gamma_herbaceous", "delta1_gamma_herbaceous",
   "delta0_gamma_woody", "delta1_gamma_woody",
   "sigma_gamma_herbaceous", "sigma_gamma_woody", 
-  "beta_phi", "sigma_phi_species", "L_phi_species"
+  
 ))
 
 # for continuous model
