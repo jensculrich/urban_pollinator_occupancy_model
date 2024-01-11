@@ -53,18 +53,15 @@ params <- c("psi1_0",  "sigma_psi1_species", "mu_psi1_habitat", "sigma_psi1_habi
 
 ## Parameters monitored (multinormal model)
 params <- c(
-  "sigma_psi1_species", "sigma_psi1_herbaceous", "sigma_psi1_woody",
-  "psi1_0",
-  "delta0_psi1_herbaceous", "delta1_psi1_herbaceous",
-  "delta0_psi1_woody", "delta1_psi1_woody",
+  "sigma_species_psi1", "rho_1_2_psi1", "rho_1_3_psi1", "rho_2_3_psi1",
+  "community_mean_psi1",
   
-  "sigma_species", "L_species",
-  "gamma0",
-  "delta0_gamma_herbaceous", "delta1_gamma_herbaceous",
-  "delta0_gamma_woody", "delta1_gamma_woody",
-  "phi0",
-  "delta0_phi_herbaceous", "delta1_phi_herbaceous",
-  "delta0_phi_woody", "delta1_phi_woody",
+  "gamma0", "delta1_gamma0", "sigma_gamma_species",
+  "delta0_gamma_herbaceous", "delta1_gamma_herbaceous", "sigma_gamma_herbaceous",
+  "delta0_gamma_woody", "delta1_gamma_woody", "sigma_gamma_woody",
+  "phi0", "delta1_phi0", "sigma_phi_species",
+  "delta0_phi_herbaceous", "delta1_phi_herbaceous", "sigma_phi_herbaceous",
+  "delta0_phi_woody", "delta1_phi_woody", "sigma_phi_woody",
   
   "p0", "delta1_p0", "sigma_p_species", 
   "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq", "p_flower_abundance_any", 
@@ -136,12 +133,14 @@ inits <- lapply(1:n_chains, function(i)
 # alternative inits for continuous model
 inits <- lapply(1:n_chains, function(i)
   
-  list(
-       psi1_0 = runif(1, -1, 1),
-       delta0_psi1_herbaceous = runif(1, -1, 1),
-       delta1_psi1_herbaceous = runif(1, -1, 1),
-       delta0_psi1_woody = runif(1, -1, 1), 
-       delta1_psi1_woody = runif(1, -1, 1),
+  list(rho_1_2_psi1 = runif(1, -0.25, 0),
+       rho_1_3_psi1 = runif(1, -0.25, 0),
+       rho_2_3_psi1 = runif(1, 0, 0.25),
+       #psi1_0 = runif(1, -1, 1),
+       #delta0_psi1_herbaceous = runif(1, -1, 1),
+       #delta1_psi1_herbaceous = runif(1, -1, 1),
+       #delta0_psi1_woody = runif(1, -1, 1), 
+       #delta1_psi1_woody = runif(1, -1, 1),
        gamma0 = runif(1, -1, 0),
        delta0_gamma_herbaceous = runif(1, -1, 1),
        delta1_gamma_herbaceous = runif(1, -1, 1),
@@ -166,7 +165,7 @@ inits <- lapply(1:n_chains, function(i)
 
 # stan_model <- "./dynamic_occupancy_model/models/dynocc_model_with_year_effects.stan"
 # stan_model <- "./dynamic_occupancy_model/models/dynocc_model.stan"
-stan_model <- "./dynamic_occupancy_model/models/dynocc_model_2.stan"
+stan_model <- "./dynamic_occupancy_model/models/dynocc_model_3.stan"
 
 ## Call Stan from R
 stan_out <- stan(stan_model,
@@ -248,14 +247,16 @@ traceplot(stan_out, pars = c(
 ))
 
 traceplot(stan_out, pars = c(
-  "psi1_0", #"delta1_psi1_0", "sigma_psi1_species",   
-  "delta0_psi1_herbaceous", "delta1_psi1_herbaceous",
-  "delta0_psi1_woody", "delta1_psi1_woody",
-  "sigma_psi1_herbaceous", "sigma_psi1_woody", 
-  "gamma0",# "delta1_gamma0", "sigma_gamma_species",
+  "sigma_species_psi1", "rho_1_2_psi1", "rho_1_3_psi1", "rho_2_3_psi1",
+  "community_mean_psi1",
+  "gamma0", "delta1_gamma0", "sigma_gamma_species",
   "delta0_gamma_herbaceous", "delta1_gamma_herbaceous",
   "delta0_gamma_woody", "delta1_gamma_woody",
-  "sigma_gamma_herbaceous", "sigma_gamma_woody"
+  "sigma_gamma_herbaceous", "sigma_gamma_woody",
+  "phi0",  "delta1_phi0", "sigma_phi_species",
+  "delta0_phi_herbaceous", "delta1_phi_herbaceous",
+  "delta0_phi_woody", "delta1_phi_woody",
+  "sigma_phi_herbaceous", "sigma_phi_woody"
   
 ))
 
