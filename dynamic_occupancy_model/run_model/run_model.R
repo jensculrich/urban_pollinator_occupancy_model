@@ -53,11 +53,11 @@ params <- c("psi1_0",  "sigma_psi1_species", "mu_psi1_habitat", "sigma_psi1_habi
 
 ## Parameters monitored (multinormal model)
 params <- c(
-  "sigma_psi1_species", "L_psi1_species", 
+  "sigma_psi1_species", "sigma_psi1_herbaceous", "sigma_psi1_woody",
   "psi1_0",
   "delta0_psi1_herbaceous", "delta1_psi1_herbaceous",
   "delta0_psi1_woody", "delta1_psi1_woody",
-  "sigma_gamma_species", "L_gamma_species", 
+  "sigma_gamma_species", "sigma_gamma_herbaceous", "sigma_gamma_woody",
   "gamma0",
   "delta0_gamma_herbaceous", "delta1_gamma_herbaceous",
   "delta0_gamma_woody", "delta1_gamma_woody",
@@ -91,9 +91,9 @@ params <- c(
             "T_rep", "T_obs", "P_species")
 
 # MCMC settings
-n_iterations <- 400
+n_iterations <- 300
 n_thin <- 1
-n_burnin <- 200
+n_burnin <- 150
 n_chains <- 4
 n_cores <- n_chains
 delta = 0.95
@@ -141,11 +141,11 @@ inits <- lapply(1:n_chains, function(i)
        delta1_psi1_herbaceous = runif(1, -1, 1),
        delta0_psi1_woody = runif(1, -1, 1), 
        delta1_psi1_woody = runif(1, -1, 1),
-       gamma0 = runif(1, -1, 0),
-       delta0_gamma_herbaceous = runif(1, -1, 1),
-       delta1_gamma_herbaceous = runif(1, -1, 1),
-       delta0_gamma_woody = runif(1, -1, 1), 
-       delta1_gamma_woody = runif(1, -1, 1),
+       #gamma0 = runif(1, -1, 0),
+       #delta0_gamma_herbaceous = runif(1, -1, 1),
+       #delta1_gamma_herbaceous = runif(1, -1, 1),
+       #delta0_gamma_woody = runif(1, -1, 1), 
+       #delta1_gamma_woody = runif(1, -1, 1),
        phi0 = runif(1, 1, 3),
        delta0_phi_herbaceous = runif(1, -1, 1),
        delta1_phi_herbaceous = runif(1, -1, 1),
