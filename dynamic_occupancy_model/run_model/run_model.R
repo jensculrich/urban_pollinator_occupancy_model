@@ -53,8 +53,10 @@ params <- c("psi1_0",  "sigma_psi1_species", "mu_psi1_habitat", "sigma_psi1_habi
 
 ## Parameters monitored (multinormal model)
 params <- c(
-  "sigma_species_psi1", "rho_1_2_psi1", "rho_1_3_psi1", "rho_2_3_psi1",
-  "community_mean_psi1",
+  "L_psi1_species", "sigma_psi1_species",
+  "delta0_psi1_herbaceous", "delta1_psi1_herbaceous", 
+  "delta0_psi1_woody", "delta1_psi1_woody", 
+  "psi1_0",
   
   "gamma0", "delta1_gamma0", "sigma_gamma_species",
   "delta0_gamma_herbaceous", "delta1_gamma_herbaceous", "sigma_gamma_herbaceous",
@@ -133,14 +135,12 @@ inits <- lapply(1:n_chains, function(i)
 # alternative inits for continuous model
 inits <- lapply(1:n_chains, function(i)
   
-  list(rho_1_2_psi1 = runif(1, -0.25, 0),
-       rho_1_3_psi1 = runif(1, -0.25, 0),
-       rho_2_3_psi1 = runif(1, 0, 0.25),
-       #psi1_0 = runif(1, -1, 1),
-       #delta0_psi1_herbaceous = runif(1, -1, 1),
-       #delta1_psi1_herbaceous = runif(1, -1, 1),
-       #delta0_psi1_woody = runif(1, -1, 1), 
-       #delta1_psi1_woody = runif(1, -1, 1),
+  list(
+       psi1_0 = runif(1, 0, 1),
+       delta0_psi1_herbaceous = runif(1, -1, 1),
+       delta1_psi1_herbaceous = runif(1, -1, 1),
+       delta0_psi1_woody = runif(1, -1, 1), 
+       delta1_psi1_woody = runif(1, -1, 1),
        gamma0 = runif(1, -1, 0),
        delta0_gamma_herbaceous = runif(1, -1, 1),
        delta1_gamma_herbaceous = runif(1, -1, 1),
@@ -165,7 +165,7 @@ inits <- lapply(1:n_chains, function(i)
 
 # stan_model <- "./dynamic_occupancy_model/models/dynocc_model_with_year_effects.stan"
 # stan_model <- "./dynamic_occupancy_model/models/dynocc_model.stan"
-stan_model <- "./dynamic_occupancy_model/models/dynocc_model_3.stan"
+stan_model <- "./dynamic_occupancy_model/models/dynocc_model_4.stan"
 
 ## Call Stan from R
 stan_out <- stan(stan_model,
@@ -247,8 +247,7 @@ traceplot(stan_out, pars = c(
 ))
 
 traceplot(stan_out, pars = c(
-  "sigma_species_psi1", "rho_1_2_psi1", "rho_1_3_psi1", "rho_2_3_psi1",
-  "community_mean_psi1",
+  "sigma_psi1_species", "L_psi1_species",
   "gamma0", "delta1_gamma0", "sigma_gamma_species",
   "delta0_gamma_herbaceous", "delta1_gamma_herbaceous",
   "delta0_gamma_woody", "delta1_gamma_woody",
@@ -262,10 +261,8 @@ traceplot(stan_out, pars = c(
 
 # for continuous model
 traceplot(stan_out, pars = c(
-  "sigma_phi_species", "L_phi_species",
-  "phi0",
-  "delta0_phi_herbaceous", "delta1_phi_herbaceous",
-  "delta0_phi_woody", "delta1_phi_woody"
+  "delta0_psi1_herbaceous", "delta1_psi1_herbaceous",
+  "delta0_psi1_woody", "delta1_psi1_woody", "psi1_0"
 ))
 
 # for continuous model
@@ -317,4 +314,4 @@ print(stan_out, digits = 3, pars = c("P_species"))
 # get an "average" P value
 fit_summary <- rstan::summary(stan_out)
 View(cbind(1:nrow(fit_summary$summary), fit_summary$summary)) # View to see which row corresponds to the parameter of interest
-(mean_FTP <- mean(fit_summary$summary[248:320,1]))
+(mean_FTP <- mean(fit_summary$summary[250:322,1]))
