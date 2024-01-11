@@ -57,14 +57,15 @@ params <- c(
   "psi1_0",
   "delta0_psi1_herbaceous", "delta1_psi1_herbaceous",
   "delta0_psi1_woody", "delta1_psi1_woody",
-  "sigma_gamma_species", "sigma_gamma_herbaceous", "sigma_gamma_woody",
+  
+  "sigma_species", "L_species",
   "gamma0",
   "delta0_gamma_herbaceous", "delta1_gamma_herbaceous",
   "delta0_gamma_woody", "delta1_gamma_woody",
-  "sigma_phi_species", "L_phi_species", 
   "phi0",
   "delta0_phi_herbaceous", "delta1_phi_herbaceous",
   "delta0_phi_woody", "delta1_phi_woody",
+  
   "p0", "delta1_p0", "sigma_p_species", 
   "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq", "p_flower_abundance_any", 
   "species_richness", "avg_species_richness_control", "avg_species_richness_enhanced", 
@@ -141,11 +142,11 @@ inits <- lapply(1:n_chains, function(i)
        delta1_psi1_herbaceous = runif(1, -1, 1),
        delta0_psi1_woody = runif(1, -1, 1), 
        delta1_psi1_woody = runif(1, -1, 1),
-       #gamma0 = runif(1, -1, 0),
-       #delta0_gamma_herbaceous = runif(1, -1, 1),
-       #delta1_gamma_herbaceous = runif(1, -1, 1),
-       #delta0_gamma_woody = runif(1, -1, 1), 
-       #delta1_gamma_woody = runif(1, -1, 1),
+       gamma0 = runif(1, -1, 0),
+       delta0_gamma_herbaceous = runif(1, -1, 1),
+       delta1_gamma_herbaceous = runif(1, -1, 1),
+       delta0_gamma_woody = runif(1, -1, 1), 
+       delta1_gamma_woody = runif(1, -1, 1),
        phi0 = runif(1, 1, 3),
        delta0_phi_herbaceous = runif(1, -1, 1),
        delta1_phi_herbaceous = runif(1, -1, 1),
@@ -165,7 +166,7 @@ inits <- lapply(1:n_chains, function(i)
 
 # stan_model <- "./dynamic_occupancy_model/models/dynocc_model_with_year_effects.stan"
 # stan_model <- "./dynamic_occupancy_model/models/dynocc_model.stan"
-stan_model <- "./dynamic_occupancy_model/models/dynocc_model_1.stan"
+stan_model <- "./dynamic_occupancy_model/models/dynocc_model_2.stan"
 
 ## Call Stan from R
 stan_out <- stan(stan_model,
@@ -247,11 +248,11 @@ traceplot(stan_out, pars = c(
 ))
 
 traceplot(stan_out, pars = c(
-  "psi1_0", "delta1_psi1_0", "sigma_psi1_species",   
+  "psi1_0", #"delta1_psi1_0", "sigma_psi1_species",   
   "delta0_psi1_herbaceous", "delta1_psi1_herbaceous",
   "delta0_psi1_woody", "delta1_psi1_woody",
   "sigma_psi1_herbaceous", "sigma_psi1_woody", 
-  "gamma0", "delta1_gamma0", "sigma_gamma_species",
+  "gamma0",# "delta1_gamma0", "sigma_gamma_species",
   "delta0_gamma_herbaceous", "delta1_gamma_herbaceous",
   "delta0_gamma_woody", "delta1_gamma_woody",
   "sigma_gamma_herbaceous", "sigma_gamma_woody"
@@ -276,10 +277,13 @@ traceplot(stan_out, pars = c(
 
 # for continuous model
 traceplot(stan_out, pars = c(
-  "sigma_psi1_species", "L_psi1_species",
+  "sigma_species", "L_species",
   "psi1_0",
   "delta0_psi1_herbaceous", "delta1_psi1_herbaceous",
-  "delta0_psi1_woody", "delta1_psi1_woody"
+  "delta0_psi1_woody", "delta1_psi1_woody",
+  "phi0",
+  "delta0_phi_herbaceous", "delta1_phi_herbaceous",
+  "delta0_phi_woody", "delta1_phi_woody"
 ))
 
 traceplot(stan_out, pars = c(
