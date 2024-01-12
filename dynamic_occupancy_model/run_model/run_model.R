@@ -58,9 +58,11 @@ params <- c(
   "delta0_psi1_woody", "delta1_psi1_woody", 
   "psi1_0",
   
-  "gamma0", "delta1_gamma0", "sigma_gamma_species",
-  "delta0_gamma_herbaceous", "delta1_gamma_herbaceous", "sigma_gamma_herbaceous",
-  "delta0_gamma_woody", "delta1_gamma_woody", "sigma_gamma_woody",
+  "L_gamma_species", "sigma_gamma_species",
+  "delta0_gamma_herbaceous", "delta1_gamma_herbaceous", 
+  "delta0_gamma_woody", "delta1_gamma_woody", 
+  "gamma0",
+  
   "phi0", "delta1_phi0", "sigma_phi_species",
   "delta0_phi_herbaceous", "delta1_phi_herbaceous", "sigma_phi_herbaceous",
   "delta0_phi_woody", "delta1_phi_woody", "sigma_phi_woody",
@@ -96,43 +98,12 @@ n_thin <- 1
 n_burnin <- 150
 n_chains <- 4
 n_cores <- n_chains
-delta = 0.95
+delta = 0.9
 
 ## Initial values
 # given the number of parameters, the chains need some decent initial values
 # otherwise sometimes they have a hard time starting to sample
-inits <- lapply(1:n_chains, function(i)
-  
-  list(rho = runif(1, 0.5, 1),
-       #sigma_species = runif(1, 0, 1),
-       psi1_0 = runif(1, -1, 1),
-       #sigma_psi1_species = runif(1, 0, 1),
-       mu_psi1_habitat = runif(1, -1, 1),
-       sigma_psi1_habitat = runif(1, 0.5, 1),
-       gamma0 = runif(1, -1, 0),
-       sigma_gamma_species = runif(1, 1, 1.5),
-       #mu_gamma_habitat = runif(1, -2, -1), # colonization rates are usually low
-       #sigma_gamma_habitat = runif(1, 0.5, 1),
-       epsilon0_gamma_habitat = runif(1, 0.5, 1),
-       epsilon1_gamma_habitat = runif(1, 0, 0.25), # must give good inits here
-       phi0 = runif(1, 0, 1),
-       sigma_phi_species = runif(1, 1, 1.5),
-       #mu_phi_habitat = runif(1, 0, 1), # persistence rates are usually greater than 50%
-       #sigma_phi_habitat = runif(1, 0.5, 1),
-       epsilon0_phi_habitat = runif(1, 0.5, 1),
-       epsilon1_phi_habitat = runif(1, 0, 0.25), # must give good inits here
-       p0 = runif(1, -1, 0),
-       #sigma_p_species = runif(1, 0, 1),
-       #sigma_p_site = runif(1, 0, 1),
-       p_habitat = runif(1, -1, 1),
-       mu_p_species_date = runif(1, -1, 1),
-       sigma_p_species_date = runif(1, 0, 1),
-       mu_p_species_date_sq = runif(1, -1, 1),
-       sigma_p_species_date_sq = runif(1, 0, 1)
-  )
-)
 
-# alternative inits for continuous model
 inits <- lapply(1:n_chains, function(i)
   
   list(

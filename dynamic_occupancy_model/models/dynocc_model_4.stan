@@ -214,8 +214,8 @@ model {
   // initial state
   L_psi1_species ~ lkj_corr_cholesky(2); // Ranef prior
   z_psi1_species[1,] ~ normal(0, 1);
-  z_psi1_species[2,] ~ normal(mu_phi_herbaceous_flowers, 1);
-  z_psi1_species[3,] ~ normal(mu_phi_woody_flowers, 1);
+  z_psi1_species[2,] ~ normal(mu_psi1_herbaceous_flowers, 1);
+  z_psi1_species[3,] ~ normal(mu_psi1_woody_flowers, 1);
   psi1_0 ~ normal(0, 1); // baseline intercept
   delta0_psi1_herbaceous ~ normal(0, 1); // baseline effect of habitat 
   delta1_psi1_herbaceous ~ normal(0, 1); // effect of specialization on response to habitat
