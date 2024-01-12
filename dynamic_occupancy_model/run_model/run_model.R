@@ -76,15 +76,18 @@ params <- c(
 
 ## Parameters monitored (multinormal model with species effects and continuous flower plant data)
 params <- c(
-            "psi1_0", "delta1_psi1_0", "sigma_psi1_species", 
-            "delta0_psi1_herbaceous", "delta1_psi1_herbaceous", "sigma_psi1_herbaceous",
-            "delta0_psi1_woody", "delta1_psi1_woody", "sigma_psi1_woody",
-            "gamma0", "delta1_gamma0", "sigma_gamma_species",
-            "delta0_gamma_herbaceous", "delta1_gamma_herbaceous", "sigma_gamma_herbaceous",
-            "delta0_gamma_woody", "delta1_gamma_woody", "sigma_gamma_woody",
-            "phi0", "delta1_phi0", "sigma_phi_species",
-            "delta0_phi_herbaceous", "delta1_phi_herbaceous", "sigma_phi_herbaceous",
-            "delta0_phi_woody", "delta1_phi_woody", "sigma_phi_woody",
+            "psi1_0", "sigma_psi1_species",
+            "psi1_herbaceous_flowers", "psi1_woody_flowers", "psi1_specialization",
+            "psi1_interaction_1", "psi1_interaction_2",
+  
+            "gamma0", "sigma_gamma_species",
+            "gamma_herbaceous_flowers", "gamma_woody_flowers", "gamma_specialization",
+            "gamma_interaction_1", "gamma_interaction_2",
+            
+            "phi0", "sigma_phi_species",
+            "phi_herbaceous_flowers", "phi_woody_flowers", "phi_specialization",
+            "phi_interaction_1", "phi_interaction_2",
+            
             "p0", "delta1_p0", "sigma_p_species", 
             "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq", "p_flower_abundance_any", 
             "species_richness", "avg_species_richness_control", "avg_species_richness_enhanced", 
@@ -93,9 +96,9 @@ params <- c(
             "T_rep", "T_obs", "P_species")
 
 # MCMC settings
-n_iterations <- 300
+n_iterations <- 400
 n_thin <- 1
-n_burnin <- 150
+n_burnin <- 200
 n_chains <- 4
 n_cores <- n_chains
 delta = 0.9
@@ -141,7 +144,7 @@ stan_model <- "./dynamic_occupancy_model/models/dynocc_model_4.stan"
 ## Call Stan from R
 stan_out <- stan(stan_model,
                      data = stan_data, 
-                     init = inits, 
+                     #init = inits, 
                      pars = params,
                      chains = n_chains, iter = n_iterations, 
                      warmup = n_burnin, thin = n_thin,
@@ -246,13 +249,17 @@ traceplot(stan_out, pars = c(
 
 # for continuous model
 traceplot(stan_out, pars = c(
-  "sigma_species", "L_species",
-  "psi1_0",
-  "delta0_psi1_herbaceous", "delta1_psi1_herbaceous",
-  "delta0_psi1_woody", "delta1_psi1_woody",
-  "phi0",
-  "delta0_phi_herbaceous", "delta1_phi_herbaceous",
-  "delta0_phi_woody", "delta1_phi_woody"
+  "psi1_0", "sigma_psi1_species",
+  "psi1_herbaceous_flowers", "psi1_woody_flowers", "psi1_specialization",
+  "psi1_interaction_1", "psi1_interaction_2",
+  
+  "gamma0", "sigma_gamma_species",
+  "gamma_herbaceous_flowers", "gamma_woody_flowers", "gamma_specialization",
+  "gamma_interaction_1", "gamma_interaction_2",
+  
+  "phi0", "sigma_phi_species",
+  "phi_herbaceous_flowers", "phi_woody_flowers", "phi_specialization",
+  "phi_interaction_1", "phi_interaction_2"
 ))
 
 traceplot(stan_out, pars = c(
@@ -265,7 +272,7 @@ traceplot(stan_out, pars = c(
 ))
 
 traceplot(stan_out, pars = c(
-  "p0", "delta1_psi1_0", "sigma_p_species", 
+  "p0", "delta1_p0", "sigma_p_species", 
   #"sigma_p_site", 
   #"p_habitat", 
   "p_flower_abundance_any",
@@ -285,4 +292,4 @@ print(stan_out, digits = 3, pars = c("P_species"))
 # get an "average" P value
 fit_summary <- rstan::summary(stan_out)
 View(cbind(1:nrow(fit_summary$summary), fit_summary$summary)) # View to see which row corresponds to the parameter of interest
-(mean_FTP <- mean(fit_summary$summary[250:322,1]))
+(mean_FTP <- mean(fit_summary$summary[236:308,1]))

@@ -67,7 +67,7 @@ L_u %*% t(L_u)
 # Generate uncorrelated z from a standard normal distribution assuming 50 species
 n_species <- 50
 delta0_u1 = 0.5
-delta1_u1 = 0.5
+delta1_u1 = 0
 delta0_u2 = 0
 delta1_u2 = 1
 
@@ -108,7 +108,7 @@ L_u %*% z_u
 
 # Use the following diagonal matrix to scale the z_u.
 tau_u1 <- 0.2
-tau_u2 <- 0.01
+tau_u2 <- 0.1
 (diag_matrix_tau <- diag(c(tau_u1,  tau_u2)))
 
 # Finally, generate the adjustments for each subject u:
