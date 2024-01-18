@@ -4,7 +4,7 @@
 library(rstan)
 
 source("./dynamic_occupancy_model/run_model/prep_data.R")
-min_unique_detections = 3 # >=
+min_unique_detections = 2 # >=
 my_data <- process_raw_data(min_unique_detections)
 
 ## --------------------------------------------------
@@ -90,7 +90,7 @@ params <- c(
             
             "p0", "delta1_p0", "sigma_p_species", 
             "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq", "p_flower_abundance_any", 
-            "species_richness", "avg_species_richness_control", "avg_species_richness_enhanced", 
+            "species_richness", "avg_species_richness_control", "avg_species_richness_enhanced", "increase_richness_enhanced",
             #"turnover_control", "turnover_enhanced",
             #"psi_eq_habitat0", "psi_eq_habitat1",
             "T_rep", "T_obs", "P_species")

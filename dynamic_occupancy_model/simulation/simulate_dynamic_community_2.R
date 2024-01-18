@@ -1,47 +1,60 @@
+library(sn) # for multivariate skewed normal distr data simulation
+
 
 ## --------------------------------------------------
 ### Define simulation conditions
 
 # choose sample sizes and 
-n_species <- 120 # number of species
-n_sites <- 60 # number of sites (must be an even number for simulation code)
-n_years <- 7 # number of years
+n_species <- 100 # number of species
+n_sites <- 20 # number of sites (must be an even number for simulation code)
+n_years <- 4 # number of years
 n_years_minus1 <- n_years - 1
 n_visits <- 6 # number of surveys per year
+
+mean_enhancement_herb_flowers <- 0.5
+sigma_herb_flowers_means <- 0.5
+sigma_herbaceous_flowers_visit <- 1
+sigma_woody_flowers_means <- 1
+sigma_woody_flowers_visit <- 1
 
 # set parameter values
 psi1_0 <- 0 # prob of initial occupancy
 sigma_psi1_species <- 2 # prob of initial occupancy
-mu_psi1_habitat <- 0.5 # habitat effect
-sigma_psi1_habitat <- 1 # species-specific variation
+psi1_herbaceous_flowers <- 0.6
+psi1_woody_flowers <- 0.4
+psi1_specialization <- -1
+psi1_interaction_1 <- 0
+psi1_interaction_2 <- 0.5
 
-gamma0 <- -2 # colonization probability
-sigma_gamma_species <- 0.5 # species-specific variation
-mu_gamma_habitat <- 0.25 # habitat effect
-sigma_gamma_habitat <- 0.75 # species-specific variation
-# add year effects (logit-scale) # make min and max == 0 if not including this in model
-# min must be lower than max
-gamma_min = -0.5
-gamma_max = 0.5
+gamma0 <- -0.25 # prob of initial occupancy
+sigma_gamma_species <- 1 # prob of initial occupancy
+gamma_herbaceous_flowers <- 0
+gamma_woody_flowers <- 0
+gamma_specialization <- -1.25
+gamma_interaction_1 <- 0
+gamma_interaction_2 <- 1
+gamma_min = 0 # set these to zero if you want no year heterogeneity
+gamma_max = 0 
 
-phi0 <- 1.25 # persistence probability
-sigma_phi_species <- 1 # species-specific variation
-mu_phi_habitat <- 1.5 # habitat effect
-sigma_phi_habitat <- 1 # species-specific variation
-# add year effects (logit-scale) # make min and max == 0 if not including this in model
-# min must be lower than max
-phi_min = -1
-phi_max = 1
+phi0 <- 2 # prob of initial occupancy
+sigma_phi_species <- 1 # prob of initial occupancy
+phi_herbaceous_flowers <- 0
+phi_woody_flowers <- 0
+phi_specialization <- -0.5
+phi_interaction_1 <- 0.5
+phi_interaction_2 <- 0.5
+phi_min = 0 # set these to zero if you want no year heterogeneity
+phi_max = 0 
 
 p0 <- 0 # probability of detection (logit scaled)
 sigma_p_species <- 2 # species-specific variation
-sigma_p_site <- 0.5 # site-specific variation
-# site specific random effect
-p_habitat <- -0.5 # increase in detection rate moving from one habitat type to the other (logit scaled)
+p_degree <- 0.75
+p_flower_abundance_any <- 0.5 # increase in detection rate moving from one habitat type to the other (logit scaled)
 mu_p_species_date <- 0
 sigma_p_species_date <- 1
 mu_p_species_date_sq <- -0.5  
 sigma_p_species_date_sq <- 1
+p_overdispersion_sigma <- 0.5
 
 mean_survey_date <- 180
 sigma_survey_date <- 40
@@ -51,94 +64,48 @@ sigma_survey_date <- 40
 create_missing_data <- FALSE # create holes in the data? (MAR)
 prob_missing <- 0.2 # if so, what proportion of data missing?
 
-# test generating some correlated data
-rho <- .8
-# Correlation matrix
-(rho_u <- matrix(c(1, rho, rho, 1), ncol = 2))
-
-# Cholesky factor:
-# (Transpose it so that it looks the same as in Stan)
-(L_u <- t(chol(rho_u)))
-
-# Verify that we recover rho_u,
-# Recall that %*% indicates matrix multiplication
-L_u %*% t(L_u)
-
-# Generate uncorrelated z from a standard normal distribution assuming 50 species
-n_species <- 50
-delta0_u1 = 0.5
-delta1_u1 = 0
-delta0_u2 = 0
-delta1_u2 = 1
-
-d <- runif(n_species, -2, 2)
-
-mu_z_u1 = vector(length = n_species)
-
-for(i in 1:n_species){
-  mu_z_u1[i] = delta0_u1 + delta1_u1*d[i]
-}
-
-z_u1 = vector(length = n_species)
-
-for(i in 1:n_species){
-  z_u1[i] <- rnorm(n=1, mean=mu_z_u1[i], sd=1)
-}
-
-mu_z_u2 = vector(length = n_species)
-
-for(i in 1:n_species){
-  mu_z_u2[i] = delta0_u2 + delta1_u2*d[i]
-}
-
-z_u2 = vector(length = n_species)
-
-for(i in 1:n_species){
-  z_u2[i] <- rnorm(n=1, mean=mu_z_u2[i], sd=1)
-}
-
-#(z_u1 <- rnorm(n_species, 0, 1))
-#(z_u2 <- rnorm(n_species, 0, 1))
-
-# matrix z_u
-(z_u <- matrix(c(z_u1, z_u2), ncol = n_species, byrow = TRUE))
-
-# Then, generate correlated parameters by pre-multiplying the z_u matrix with the L_u
-L_u %*% z_u
-
-# Use the following diagonal matrix to scale the z_u.
-tau_u1 <- 0.2
-tau_u2 <- 0.1
-(diag_matrix_tau <- diag(c(tau_u1,  tau_u2)))
-
-# Finally, generate the adjustments for each subject u:
-(u <- diag_matrix_tau %*% L_u %*% z_u)
-
-# The rows are correlated ~.8
-cor(u[1, ], u[2, ])
-
-# The variance components can be recovered as well:
-sd(u[1, ])
-sd(u[2, ])
-
-plot(u[1, ], d)
-cor(u[1, ], d)
-
-plot(u[2, ], d)
-cor(u[2, ], d)
-
 ## --------------------------------------------------
 ### Define simulation function
 
 simulate_data <- function(
-    n_species, n_sites, n_years, n_visits,
-    psi1_0, sigma_psi1_species, mu_psi1_habitat, sigma_psi1_habitat,
-    gamma0, sigma_gamma_species, mu_gamma_habitat, sigma_gamma_habitat, 
-    phi0, sigma_phi_species, mu_phi_habitat, sigma_phi_habitat, 
-    p0, sigma_p_species, sigma_p_site, p_habitat_type,
-    mu_p_species_date, sigma_p_species_date, mu_p_species_date_sq, sigma_p_species_date_sq,
-    mean_survey_date, sigma_survey_date,
-    create_missing_data, prob_missing
+    n_species, n_sites, n_years, n_years_minus1, n_visits,
+    psi1_0,
+    sigma_psi1_species,
+    psi1_herbaceous_flowers,
+    psi1_woody_flowers,
+    psi1_specialization,
+    psi1_interaction_1,
+    psi1_interaction_2,
+    
+    gamma0,
+    sigma_gamma_species,
+    gamma_herbaceous_flowers,
+    gamma_woody_flowers,
+    gamma_specialization,
+    gamma_interaction_1,
+    gamma_interaction_2,
+    
+    phi0,
+    sigma_phi_species,
+    phi_herbaceous_flowers,
+    phi_woody_flowers,
+    phi_specialization,
+    phi_interaction_1,
+    phi_interaction_2,
+    
+    p0, # probability of detection (logit scaled)
+    sigma_p_species, # species-specific variation
+    p_degree,
+    p_flower_abundance_any, # increase in detection rate moving from one habitat type to the other (logit scaled)
+    mu_p_species_date,
+    sigma_p_species_date,
+    mu_p_species_date_sq,  
+    sigma_p_species_date_sq,
+    p_overdispersion_sigma,
+    mean_survey_date,
+    sigma_survey_date,
+    create_missing_data,
+    prob_missing
 ){
   
   ## ilogit and logit functions
@@ -150,35 +117,15 @@ simulate_data <- function(
     (x - mean(x)) / sd(x)
   }
   
-  # choose sample sizes
-  n_species <- n_species # number of species 
-  n_sites <- n_sites # number of sites
-  n_years <- n_years # number of years
-  n_visits <- n_visits # number of surveys per year
-  
   # prepare arrays for z and y
   z <- array(NA, dim = c(n_species, n_sites, n_years)) # latent presence/absence
   y <- array(NA, dim = c(n_species, n_sites, n_years, n_visits)) # observed data
   
-  # set parameter values
-  psi1_0 <- psi1_0 # prob of initial occupancy
-  sigma_psi1_species <- sigma_psi1_species # species-specific variation
-  mu_psi1_habitat <- mu_psi1_habitat # effect of habitat type on occurrence
-  sigma_psi1_habitat <- sigma_psi1_habitat
-  
-  gamma0 <- gamma0 # colonization probability
-  sigma_gamma_species <- sigma_gamma_species # species-specific variation
-  mu_gamma_habitat <- mu_gamma_habitat # effect of habitat type on colonization
-  sigma_gamma_habitat <- sigma_gamma_habitat # effect of habitat type on colonization
   gamma_year <- vector(length = n_years_minus1)
   for(k in 1:length(gamma_year)){
     gamma_year[k] <- runif(1, min=gamma_min, max=gamma_max)
   }
   
-  phi0 <- phi0 # persistence probability
-  sigma_phi_species <- sigma_phi_species # species-specific variation
-  mu_phi_habitat <- mu_phi_habitat # effect of habitat type on persistence
-  sigma_phi_habitat <- sigma_phi_habitat # effect of habitat type on persistence
   phi_year <- vector(length = n_years_minus1)
   for(k in 1:length(phi_year)){
     phi_year[k] <- runif(1, min=phi_min, max=phi_max)
@@ -186,22 +133,57 @@ simulate_data <- function(
   
   # p <- p # probability of detection
   # equilibrium occupancy rate (for the average species)
-  (psi_eq_habitat0 <- ilogit(gamma0) / (ilogit(gamma0)+(1-ilogit(phi0)))) # equilibrium occupancy rate 
-  (psi_eq_habitat1 <- ilogit(gamma0 + mu_gamma_habitat) / (ilogit(gamma0 + mu_gamma_habitat)+(1-ilogit(phi0 + mu_phi_habitat)))) # equilibrium occupancy rate
+  #(psi_eq_habitat0 <- ilogit(gamma0) / (ilogit(gamma0)+(1-ilogit(phi0)))) # equilibrium occupancy rate 
+  #(psi_eq_habitat1 <- ilogit(gamma0 + mu_gamma_habitat) / (ilogit(gamma0 + mu_gamma_habitat)+(1-ilogit(phi0 + mu_phi_habitat)))) # equilibrium occupancy rate
   
   ## --------------------------------------------------
   ## Create covariate data
   
+  ## --------------------------------------------------
+  ## species specialization
+  
+  #d <- rbeta(n_species, 0.75, 2)
+  #d_scaled <- center_scale(d)
+  
+  # in my real data most species tend to have pretty low specialization (skewed left)
+  # the degree and d' are possibly positively correlated
+  
+  xi <- c(0, 0)
+  Omega <- diag(2)
+  Omega[2,1] <- Omega[1,2] <- 0.5
+  alpha <- c(3,3)
+  correlated_data <- sn::rmsn(n_species, xi, Omega, alpha)
+  
+  d <- correlated_data[,1]
+  degree <- correlated_data[,2]
+  
+  #define function to scale values between 0 and 1
+  scale_values <- function(x){(x-min(x))/(max(x)-min(x))}
+  
+  #scale values in 'sales' column to be between 0 and 1
+  d <- scale_values(d)
+  degree <- scale_values(degree)
+  
+  #hist(d)
+  #hist(degree)
+  
+  d_scaled <- center_scale(d)
+  degree_scaled <- center_scale(degree)
+  
+  #hist(d_scaled)
+  #hist(degree_scaled)
+  
+  ## --------------------------------------------------
   ## day of year
   # should have a value for each site*year*visit
   date <- array(NA, dim =c(n_sites, n_years, n_visits))
   mean_survey_date = mean_survey_date
   sigma_survey_date = sigma_survey_date
   
-  for(site in 1:n_sites) { # for each site
-    for(n_years in 1:n_years) { # for each n_years
+  for(j in 1:n_sites) { # for each site
+    for(k in 1:n_years) { # for each n_years
       # create a vector of visit dates centered on the middle of the early summer
-      date[site, n_years, 1:n_visits] <- sort(as.integer(rnorm(
+      date[j, k, 1:n_visits] <- sort(as.integer(rnorm(
         n_visits, mean = mean_survey_date, sd = sigma_survey_date))) 
     }
   }
@@ -209,26 +191,119 @@ simulate_data <- function(
   ## let's scale the calendar day of year by the mean date (z-score scaled)
   date_scaled <- center_scale(date) 
   
+  ## --------------------------------------------------
+  ## habitat type
+  
   ## habitat type
   habitat_type <- rep(c(0,1), each = n_sites / 2)
   
-
+  ## --------------------------------------------------
+  ## herbaceous flower cover
+  
+  # flower abundance herb by survey
+  
+  # there is probably some connection between visits within each given site
+  # so we will make some mean site values where some sites tend to have more flowers
+  # for the herbs this is in part driven by the management
+  herbaceous_flower_means <- vector(length=n_sites)
+  for(j in 1:n_sites){
+    herbaceous_flower_means[j] = rnorm(1, mean=mean_enhancement_herb_flowers*habitat_type[j], sd=sigma_herb_flowers_means) 
+  }
+  # View(as.data.frame(cbind(habitat_type, herbaceous_flower_means)))
+  mean(herbaceous_flower_means[1:10])
+  mean(herbaceous_flower_means[11:20])
+  
+  # now generate visit specific herbaceous flower counts
+  herbaceous_flowers_scaled_by_survey <- array(data = NA, dim = c(n_sites, n_years, n_visits))
+  for(j in 1:n_sites) { # for each site
+    for(k in 1:n_years) { # for each n_years
+      for(l in 1:n_visits){
+        herbaceous_flowers_scaled_by_survey[j,k,l] = rnorm(1, herbaceous_flower_means[j], sigma_herbaceous_flowers_visit)
+      }
+    }
+  }
+  mean(herbaceous_flowers_scaled_by_survey[1:(n_sites/2),,])
+  mean(herbaceous_flowers_scaled_by_survey[((n_sites/2)+1):n_sites,,])
+  
+  ## --------------------------------------------------
+  ## woody flower cover
+  
+  # flower abundance woody by survey
+  
+  # there is probably some connection between visits within each given site
+  # so we will make some mean site values where some sites tend to have more flowers
+  # for the woody this is unrelated to the habitat management and pretty random
+  woody_flower_means <- vector(length=n_sites)
+  for(j in 1:n_sites){
+    woody_flower_means[j] = rnorm(1, mean=0, sd=sigma_woody_flowers_means) 
+  }
+  # View(as.data.frame(cbind(habitat_type, herbaceous_flower_means)))
+  mean(woody_flower_means[1:10])
+  mean(woody_flower_means[11:20])
+  
+  # now generate visit specific herbaceous flower counts
+  woody_flowers_scaled_by_survey <- array(data = NA, dim = c(n_sites, n_years, n_visits))
+  for(j in 1:n_sites) { # for each site
+    for(k in 1:n_years) { # for each n_years
+      for(l in 1:n_visits){
+        woody_flowers_scaled_by_survey[j,k,l] = rnorm(1, woody_flower_means[j], sigma_woody_flowers_visit)
+      }
+    }
+  }
+  mean(woody_flowers_scaled_by_survey[1:10,,])
+  mean(woody_flowers_scaled_by_survey[11:20,,])
+  
+  
+  # flower abundance woody by survey
+  # these two things should be correlated
+  # then calculate average annual of each (for ecological processes)
+  # and calculate average of both of together for each survey (for detection)
+    
+  flowers_any_by_survey <- array(data = NA, dim = c(n_sites, n_years, n_visits))
+  for(j in 1:n_sites) { # for each site
+    for(k in 1:n_years) { # for each n_years
+      for(l in 1:n_visits){
+        flowers_any_by_survey[j,k,l] = 
+          (herbaceous_flowers_scaled_by_survey[j,k,l] + woody_flowers_scaled_by_survey[j,k,l]) / 2
+          
+      }
+    }
+  }
+  mean(flowers_any_by_survey[1:10,,])
+  mean(flowers_any_by_survey[11:20,,])
+  
+  ## --------------------------------------------------
+  ## calculate mean flowers by site X year for each category
+  
+  # herbaceous flowers
+  herbaceous_flowers_scaled <- matrix(NA, nrow=n_sites, ncol=n_years)
+  for(j in 1:n_sites) { # for each site
+    for(k in 1:n_years) { # for each n_years
+      herbaceous_flowers_scaled[j,k] = mean(herbaceous_flowers_scaled_by_survey[j,k,])
+    }
+  }
+  
+  # woody flowers
+  woody_flowers_scaled <- matrix(NA, nrow=n_sites, ncol=n_years)
+  for(j in 1:n_sites) { # for each site
+    for(k in 1:n_years) { # for each n_years
+      woody_flowers_scaled[j,k] = mean(woody_flowers_scaled_by_survey[j,k,])
+    }
+  }
+  
   ## --------------------------------------------------
   ## Create random effects
   
   ## species-specific random intercepts
   psi1_species <- rnorm(n=n_species, mean=psi1_0, sd=sigma_psi1_species)
-  psi1_habitat <- rnorm(n=n_species, mean=mu_psi1_habitat, sd=sigma_psi1_habitat)
   
   gamma_species <- rnorm(n=n_species, mean=gamma0, sd=sigma_gamma_species)
-  gamma_habitat <- rnorm(n=n_species, mean=mu_gamma_habitat, sd=sigma_gamma_habitat)
-  
+
   phi_species <- rnorm(n=n_species, mean=phi0, sd=sigma_phi_species)
-  phi_habitat <- rnorm(n=n_species, mean=mu_phi_habitat, sd=sigma_phi_habitat)
-  
+
   p_species <- rnorm(n=n_species, mean=p0, sd=sigma_p_species)
 
-  p_site <- rnorm(n=n_sites, mean=0, sd=sigma_p_site)
+  # p_site <- rnorm(n=n_sites, mean=0, sd=sigma_p_site)
   
   p_species_date <- rnorm(n=n_species, mean=mu_p_species_date, sd=sigma_p_species_date)
   
@@ -247,8 +322,8 @@ simulate_data <- function(
           
           logit_p[i,j,k,l] = 
             p_species[i] +
-            p_site[j] +
-            p_habitat * habitat_type[j] +
+            p_degree * degree[i] +
+            p_flower_abundance_any * flowers_any_by_survey[j,k,l] +
             p_species_date[i]*date_scaled[j, k, l] + # a spatiotemporally specific intercept
             p_species_date_sq[i]*(date_scaled[j, k, l])^2 # a spatiotemporally specific intercept
           
@@ -269,21 +344,33 @@ simulate_data <- function(
         
         logit_psi1[i,j] = 
           psi1_species[i] +
-          psi1_habitat[i] * habitat_type[j] 
+          psi1_herbaceous_flowers * herbaceous_flowers_scaled[j,k] +  
+          psi1_specialization * d[i] +
+          (psi1_interaction_1 * d[i] * herbaceous_flowers_scaled[j,k]) +
+          psi1_woody_flowers * woody_flowers_scaled[j,k] + 
+          (psi1_interaction_2 * d[i] * woody_flowers_scaled[j,k])
         
         logit_gamma[i,j,k] = 
           gamma_species[i] +
-          gamma_habitat[i] * habitat_type[j] +
-          gamma_year[k]
+          gamma_herbaceous_flowers * herbaceous_flowers_scaled[j,k] + 
+          gamma_specialization * d[i] +
+          (gamma_interaction_1 * d[i] * herbaceous_flowers_scaled[j,k]) +
+          gamma_woody_flowers * woody_flowers_scaled[j,k] + 
+          (gamma_interaction_2 * d[i] * woody_flowers_scaled[j,k])
         
         logit_phi[i,j,k] = 
           phi_species[i] +
-          phi_habitat[i] * habitat_type[j] +
-          phi_year[k]
-        
+          phi_herbaceous_flowers * herbaceous_flowers_scaled[j,k] + 
+          phi_specialization * d[i] +
+          (phi_interaction_1 * d[i] * herbaceous_flowers_scaled[j,k]) +
+          phi_woody_flowers * woody_flowers_scaled[j,k] + 
+          (phi_interaction_2 * d[i] * woody_flowers_scaled[j,k])
+      
       }
-    } 
+    }
   }
+        
+
 
   # generate initial presence/absence states
   for(i in 1:n_species){
@@ -360,23 +447,23 @@ simulate_data <- function(
   # _ sites with no visits, _ with 1 visit, and _ with 2 visits through 7 visits
   
   # compute true expected and realized occupancy (psi and psi_fs)
-  psi_habitat0 <- numeric(n_years) ; psi_habitat0[1] <- ilogit(psi1_0)
-  psi_habitat1 <- numeric(n_years) ; psi_habitat1[1] <- ilogit(psi1_0 + mu_psi1_habitat)
+  #psi_habitat0 <- numeric(n_years) ; psi_habitat0[1] <- ilogit(psi1_0)
+  #psi_habitat1 <- numeric(n_years) ; psi_habitat1[1] <- ilogit(psi1_0 + mu_psi1_habitat)
   
   # expected for the average species across the two habitat types
-    for(k in 2:n_years){ # compute true values of psi
-      psi_habitat0[k] <- psi_habitat0[k-1] * ilogit(phi0) + (1 - psi_habitat0[k-1]) * ilogit(gamma0)
-    }
+    #for(k in 2:n_years){ # compute true values of psi
+    #  psi_habitat0[k] <- psi_habitat0[k-1] * ilogit(phi0) + (1 - psi_habitat0[k-1]) * ilogit(gamma0)
+    #}
   
-    for(k in 2:n_years){ # compute true values of psi
-      psi_habitat1[k] <- psi_habitat1[k-1] * ilogit(phi0 + mu_phi_habitat) + (1 - psi_habitat1[k-1]) * ilogit(gamma0 + mu_gamma_habitat)
-    }
+    #for(k in 2:n_years){ # compute true values of psi
+   #   psi_habitat1[k] <- psi_habitat1[k-1] * ilogit(phi0 + mu_phi_habitat) + (1 - psi_habitat1[k-1]) * ilogit(gamma0 + mu_gamma_habitat)
+   # }
   
   # actual occupancy rate given the simulated data (for the average species)
   # only works if 1 species # psi_fs_habitat0 <- colSums(z[1:n_species,1:(n_sites/2),]) / (n_sites/2) # psi finite sample
-  psi_fs_habitat0 <- apply(z[,1:(n_sites/2),], 3, function(x) mean(x))
+  #psi_fs_habitat0 <- apply(z[,1:(n_sites/2),], 3, function(x) mean(x))
   # only works if 1 species # psi_fs_habitat1 <- colSums(z[,(n_sites/2+1):n_sites,]) / (n_sites/2) # psi finite sample
-  psi_fs_habitat1 <- apply(z[,(n_sites/2+1):n_sites,], 3, function(x) mean(x))
+  #psi_fs_habitat1 <- apply(z[,(n_sites/2+1):n_sites,], 3, function(x) mean(x))
   
   # compute observed occupancy proportion (for the average species)
   zobs <- apply(y2, c(1,2,3), function(x) max(x, na.rm = TRUE))
@@ -390,19 +477,26 @@ simulate_data <- function(
   ## --------------------------------------------------
   # Return stuff
   return(list(
-    psi_habitat0 = psi_habitat0,
-    psi_habitat1 = psi_habitat1,
-    psi_fs_habitat0 = psi_fs_habitat0,
-    psi_fs_habitat1 = psi_fs_habitat1,
-    psi_obs_habitat0 = psi_obs_habitat0,
-    psi_obs_habitat1 = psi_obs_habitat1,
-    psi_eq_habitat0 = psi_eq_habitat0,
-    psi_eq_habitat1 = psi_eq_habitat1,
+    #psi_habitat0 = psi_habitat0,
+    #psi_habitat1 = psi_habitat1,
+    #psi_fs_habitat0 = psi_fs_habitat0,
+    #psi_fs_habitat1 = psi_fs_habitat1,
+    #psi_obs_habitat0 = psi_obs_habitat0,
+    #psi_obs_habitat1 = psi_obs_habitat1,
+    #psi_eq_habitat0 = psi_eq_habitat0,
+    #psi_eq_habitat1 = psi_eq_habitat1,
     V = y2, # return detection data after potentially introducing NAs,
     habitat_type = habitat_type,
+    herbaceous_flowers_scaled = herbaceous_flowers_scaled,
+    woody_flowers_scaled = woody_flowers_scaled,
+    flowers_any_by_survey = flowers_any_by_survey,
+    
     date_scaled = date_scaled,
     gamma_year = gamma_year,
-    phi_year = phi_year
+    phi_year = phi_year,
+    d = d_scaled,
+    degree = degree_scaled,
+    flowers_any_by_survey
   ))
   
 } # end function
@@ -413,27 +507,62 @@ simulate_data <- function(
 
 set.seed(1)
 my_simulated_data <- simulate_data(  
-  n_species, n_sites, n_years, n_visits,
-  psi1_0, sigma_psi1_species, mu_psi1_habitat, sigma_psi1_habitat,
-  gamma0, sigma_gamma_species, mu_gamma_habitat, sigma_gamma_habitat, 
-  phi0, sigma_phi_species, mu_phi_habitat, sigma_phi_habitat, 
-  p0, sigma_p_species, sigma_p_site, p_habitat_type,
-  mu_p_species_date, sigma_p_species_date, mu_p_species_date_sq, sigma_p_species_date_sq,
-  mean_survey_date, sigma_survey_date,
-  create_missing_data, prob_missing
+  n_species, n_sites, n_years, n_years_minus1, n_visits,
+  psi1_0,
+  sigma_psi1_species,
+  psi1_herbaceous_flowers,
+  psi1_woody_flowers,
+  psi1_specialization,
+  psi1_interaction_1,
+  psi1_interaction_2,
+  
+  gamma0,
+  sigma_gamma_species,
+  gamma_herbaceous_flowers,
+  gamma_woody_flowers,
+  gamma_specialization,
+  gamma_interaction_1,
+  gamma_interaction_2,
+  
+  phi0,
+  sigma_phi_species,
+  phi_herbaceous_flowers,
+  phi_woody_flowers,
+  phi_specialization,
+  phi_interaction_1,
+  phi_interaction_2,
+  
+  p0, # probability of detection (logit scaled)
+  sigma_p_species, # species-specific variation
+  p_degree,
+  p_flower_abundance_any, # increase in detection rate moving from one habitat type to the other (logit scaled)
+  mu_p_species_date,
+  sigma_p_species_date,
+  mu_p_species_date_sq,  
+  sigma_p_species_date_sq,
+  p_overdispersion_sigma,
+  mean_survey_date,
+  sigma_survey_date,
+  create_missing_data,
+  prob_missing
   )
 
 V <- my_simulated_data$V
 habitat_type <- my_simulated_data$habitat_type
-psi_habitat0 <- my_simulated_data$psi_habitat0
-psi_habitat1 <- my_simulated_data$psi_habitat1
-psi_fs_habitat0 <- my_simulated_data$psi_fs_habitat0
-psi_fs_habitat1 <- my_simulated_data$psi_fs_habitat1
-psi_obs_habitat0 <- my_simulated_data$psi_obs_habitat0
-psi_obs_habitat1 <- my_simulated_data$psi_obs_habitat1
-psi_eq_habitat0 <- my_simulated_data$psi_eq_habitat0
-psi_eq_habitat1 <- my_simulated_data$psi_eq_habitat1
+#psi_habitat0 <- my_simulated_data$psi_habitat0
+#psi_habitat1 <- my_simulated_data$psi_habitat1
+#psi_fs_habitat0 <- my_simulated_data$psi_fs_habitat0
+#psi_fs_habitat1 <- my_simulated_data$psi_fs_habitat1
+#psi_obs_habitat0 <- my_simulated_data$psi_obs_habitat0
+#psi_obs_habitat1 <- my_simulated_data$psi_obs_habitat1
+#psi_eq_habitat0 <- my_simulated_data$psi_eq_habitat0
+#psi_eq_habitat1 <- my_simulated_data$psi_eq_habitat1
 date_scaled <- my_simulated_data$date_scaled
+d <- my_simulated_data$d
+degree <- my_simulated_data$degree
+herbaceous_flowers_scaled <- my_simulated_data$herbaceous_flowers_scaled
+woody_flowers_scaled <- my_simulated_data$woody_flowers_scaled
+flowers_any_by_survey <- my_simulated_data$flowers_any_by_survey
 species <- seq(1, n_species, by=1)
 sites <- seq(1, n_sites, by=1)
 years <- seq(1, n_years_minus1, by=1)
@@ -441,43 +570,35 @@ years <- seq(1, n_years_minus1, by=1)
 gamma_year <- my_simulated_data$gamma_year
 phi_year <- my_simulated_data$phi_year
 
-# Plot trajectories of psi, psi_fs, psi_eq and psi_obs
-plot(1:n_years, psi_habitat0, type = 'l', col = "red3", lwd = 3, ylim = c(0,1), xlab = "Year",
-     ylab = "Occupancy of average species", frame = F)
-lines(psi_habitat1, type = 'l', col = "blue", lwd = 3)
-points(1:n_years, psi_fs_habitat0, type = 'b', col = "red3", pch = 16, cex = 2)
-points(1:n_years, psi_fs_habitat1, type = 'b', col = "blue", pch = 16, cex = 2)
-abline(h = psi_eq_habitat0, lty = 2, col = "red3")
-abline(h = psi_eq_habitat1, lty = 2, col = "blue")
-lines(1:n_years, psi_obs_habitat0, col = "red", lwd = 3)
-lines(1:n_years, psi_obs_habitat1, col = "lightblue", lwd = 3)
-
-legend('topright', c('True psi hab0', 'True psi hab1', 
-                     'Finite-sample psi hab0', 'Finite-sample psi hab1', 
-                     'Equilibrium psi hab0', 'Equilibrium psi hab1', 
-                     'Observed psi hab0', 'Observed psi hab1'),
-       col = c('red3', 'blue', 
-               'red3', 'blue',
-               'red3', 'blue',
-               'red', 'lightblue'
-               ), pch = c(NA, NA, 16, 16, NA, NA, NA, NA), lty = c(1,1,1,1,2,2,1,1),
-       lwd = c(3,3,1,1,2,2,3,3), cex = 1.2, bty = 'n')
-
-
 ## --------------------------------------------------
 ### Prep data and tweak model options
 
 stan_data <- c("V", "species", "sites", "years",
                "n_species", "n_sites", "n_years", "n_years_minus1", "n_visits",
-               "habitat_type", "date_scaled") 
+               "habitat_type", "date_scaled", "d", "degree", 
+               "herbaceous_flowers_scaled", "woody_flowers_scaled", "flowers_any_by_survey") 
 
-## Parameters monitored
-params <- c("psi1_0",  "sigma_psi1_species", "mu_psi1_habitat", "sigma_psi1_habitat",
-            "gamma0",  "sigma_gamma_species", "mu_gamma_habitat", "sigma_gamma_habitat", "gamma_year",
-            "phi0", "sigma_phi_species", "mu_phi_habitat", "sigma_phi_habitat", "phi_year",
-            "p0", "sigma_p_species", "sigma_p_site", "p_habitat", 
-            "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq",
-            "T_rep", "T_obs", "P_species")
+
+## Parameters monitored 
+params <- c(
+  "psi1_0", "sigma_psi1_species",
+  "psi1_herbaceous_flowers", "psi1_woody_flowers", "psi1_specialization",
+  "psi1_interaction_1", "psi1_interaction_2",
+  
+  "gamma0", "sigma_gamma_species",
+  "gamma_herbaceous_flowers", "gamma_woody_flowers", "gamma_specialization",
+  "gamma_interaction_1", "gamma_interaction_2",
+  
+  "phi0", "sigma_phi_species",
+  "phi_herbaceous_flowers", "phi_woody_flowers", "phi_specialization",
+  "phi_interaction_1", "phi_interaction_2",
+  
+  "p0", "sigma_p_species", "p_degree", 
+  "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq", "p_flower_abundance_any", 
+  "species_richness", "avg_species_richness_control", "avg_species_richness_enhanced", "increase_richness_enhanced",
+  #"turnover_control", "turnover_enhanced",
+  #"psi_eq_habitat0", "psi_eq_habitat1",
+  "T_rep", "T_obs", "P_species")
 
 # MCMC settings
 n_iterations <- 300
@@ -533,12 +654,12 @@ targets <- as.data.frame(cbind(params, parameter_values))
 ### Run model
 
 library(rstan)
-stan_model <- "./dynamic_occupancy_model/models/dynocc_model_with_year_effects.stan"
+stan_model <- "./dynamic_occupancy_model/models/dynocc_model_4.stan"
 
 ## Call Stan from R
 stan_out_sim <- stan(stan_model,
                      data = stan_data, 
-                     init = inits, 
+                     #init = inits, 
                      pars = params,
                      chains = n_chains, iter = n_iterations, 
                      warmup = n_burnin, thin = n_thin,
@@ -546,39 +667,31 @@ stan_out_sim <- stan(stan_model,
                      open_progress = FALSE,
                      cores = n_cores)
 
-print(stan_out_sim, digits = 3, 
-      pars = c("psi1_0",  "sigma_psi1_species", "mu_psi1_habitat", "sigma_psi1_habitat",
-               "gamma0",  "sigma_gamma_species", "mu_gamma_habitat", "sigma_gamma_habitat",
-               "phi0", "sigma_phi_species", "mu_phi_habitat", "sigma_phi_habitat", 
-               "p0", "sigma_p_species", "sigma_p_site", "p_habitat", 
-               "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq"
-               ))
-
-print(stan_out_sim, digits = 3, 
-      pars = c("gamma_year", "phi_year"
-      ))
-
-print(gamma_year)
-print(phi_year)
-
 saveRDS(stan_out_sim, "./dynamic_occupancy_model/simulation/stan_out_sim.rds")
 stan_out_sim <- readRDS("./dynamic_occupancy_model/simulation/stan_out_sim.rds")
 
 traceplot(stan_out_sim, pars = c(
-  "psi1_0",  "sigma_psi1_species", "mu_psi1_habitat", "sigma_psi1_habitat",
-  "gamma0",  "sigma_gamma_species", "mu_gamma_habitat", "sigma_gamma_habitat",
-  "phi0", "sigma_phi_species", "mu_phi_habitat", "sigma_phi_habitat"
+  "psi1_0", "sigma_psi1_species",
+  "psi1_herbaceous_flowers", "psi1_woody_flowers", "psi1_specialization",
+  "psi1_interaction_1", "psi1_interaction_2",
+  
+  "gamma0", "sigma_gamma_species",
+  "gamma_herbaceous_flowers", "gamma_woody_flowers", "gamma_specialization",
+  "gamma_interaction_1", "gamma_interaction_2",
+  
+  "phi0", "sigma_phi_species",
+  "phi_herbaceous_flowers", "phi_woody_flowers", "phi_specialization",
+  "phi_interaction_1", "phi_interaction_2"
 ))
 
-traceplot(stan_out_sim, pars = c(
-  "gamma_year",  "phi_year"
-))
 
 traceplot(stan_out_sim, pars = c(
-  "p0", "sigma_p_species", "sigma_p_site", "p_habitat", 
+  "p0", "sigma_p_species", "p_degree",
+  #"sigma_p_site", 
+  #"p_habitat", 
+  "p_flower_abundance_any",
   "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq" 
 ))
-
 
 ### PPC's
 
