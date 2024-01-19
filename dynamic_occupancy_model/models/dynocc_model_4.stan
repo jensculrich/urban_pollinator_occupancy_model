@@ -95,15 +95,17 @@ transformed parameters {
       for(k in 1:n_years){ // loop across all years
   
         psi1[i,j] = inv_logit( // probability (0-1) of occurrence in year 1 is equal to..
+          psi1_0 +
           psi1_species[species[i]] + // a species specific intercept
-          psi1_herbaceous_flowers * herbaceous_flowers_scaled[j,k] + 
+          psi1_herbaceous_flowers * herbaceous_flowers_scaled[j,1] + 
           psi1_specialization * d[i] +
-          (psi1_interaction_1 * d[i] * herbaceous_flowers_scaled[j,k]) +
-          psi1_woody_flowers * woody_flowers_scaled[j,k] + 
-          (psi1_interaction_2 * d[i] * woody_flowers_scaled[j,k])
+          (psi1_interaction_1 * d[i] * herbaceous_flowers_scaled[j,1]) +
+          psi1_woody_flowers * woody_flowers_scaled[j,1] + 
+          (psi1_interaction_2 * d[i] * woody_flowers_scaled[j,1])
           ); // end phi[j,k]
         
         gamma[i,j,k] = inv_logit( // probability (0-1) of colonization is equal to..
+          gamma0 +
           gamma_species[species[i]] + // a species specific intercept
           gamma_herbaceous_flowers * herbaceous_flowers_scaled[j,k] + 
           gamma_specialization * d[i] +
@@ -113,6 +115,7 @@ transformed parameters {
           ); // end phi[j,k]
         
         phi[i,j,k] = inv_logit( // probability (0-1) of persistence is equal to..
+          phi0 +
           phi_species[species[i]] + // a species specific intercept
           phi_herbaceous_flowers * herbaceous_flowers_scaled[j,k] + 
           phi_specialization * d[i] +
@@ -154,6 +157,7 @@ transformed parameters {
         for(l in 1:n_visits){ // loop across all visits
           
           p[i,j,k,l] = inv_logit( // probability (0-1) of detection is equal to..
+            p0 +
             p_species[species[i]] + // a species specific intercept
             p_degree * degree[i] +
             p_date[species[i]] * date_scaled[j,k,l] + // a species-specific phenological detection effect (peak)
@@ -175,8 +179,8 @@ model {
   
   // occupancy
   // initial state
-  psi1_0 ~ normal(0, 1); // persistence intercept
-  psi1_species ~ normal(psi1_0, sigma_phi_species); // species-specific intercepts (centered on global)
+  psi1_0 ~ normal(0, 2); // persistence intercept
+  psi1_species ~ normal(0, sigma_phi_species); // species-specific intercepts (centered on global)
   sigma_psi1_species ~ normal(0, 1); // variation in species-specific intercepts
   psi1_herbaceous_flowers ~ normal(0, 2); // effect of habitat on colonization
   psi1_woody_flowers ~ normal(0, 2); // effect of habitat on colonization
@@ -185,8 +189,8 @@ model {
   psi1_interaction_2 ~ normal(0, 1); // effect of specialization on response to habitat
   
   // colonization
-  gamma0 ~ normal(0, 1); // persistence intercept
-  gamma_species ~ normal(gamma0, sigma_phi_species); // species-specific intercepts (centered on global)
+  gamma0 ~ normal(0, 2); // persistence intercept
+  gamma_species ~ normal(0, sigma_gamma_species); // species-specific intercepts (centered on global)
   sigma_gamma_species ~ normal(0, 1); // variation in species-specific intercepts
   gamma_herbaceous_flowers ~ normal(0, 2); // effect of habitat on colonization
   gamma_woody_flowers ~ normal(0, 2); // effect of habitat on colonization
@@ -195,20 +199,20 @@ model {
   gamma_interaction_2 ~ normal(0, 1); // effect of specialization on response to habitat
   
   // persistence
-  phi0 ~ normal(0, 1); // persistence intercept
-  phi_species ~ normal(phi0, sigma_phi_species); // species-specific intercepts (centered on global)
+  phi0 ~ normal(0, 2); // persistence intercept
+  phi_species ~ normal(0, sigma_phi_species); // species-specific intercepts (centered on global)
   sigma_phi_species ~ normal(0, 1); // variation in species-specific intercepts
   phi_herbaceous_flowers ~ normal(0, 2); // effect of habitat on colonization
   phi_woody_flowers ~ normal(0, 2); // effect of habitat on colonization
-  phi_specialization ~ normal(0,2);
+  phi_specialization ~ normal(0, 2);
   phi_interaction_1 ~ normal(0, 1); // baseline effect of habitat 
   phi_interaction_2 ~ normal(0, 1); // effect of specialization on response to habitat
   
   // detection
-  p0 ~ normal(0, 1); // global intercept
-  p_species ~ normal(p0, sigma_p_species); // species-specific intercepts (centered on global)
+  p0 ~ normal(0, 2); // global intercept
+  p_species ~ normal(0, sigma_p_species); // species-specific intercepts (centered on global)
   sigma_p_species ~ normal(0, 1); // variation in species-specific intercepts
-  p_degree ~ normal(0, 1); // effect of specialization on intercept
+  p_degree ~ normal(0, 2); // effect of specialization on intercept
   p_date ~ normal(mu_p_species_date, sigma_p_species_date); // species-specific phenology (peak)
   mu_p_species_date ~ normal(0, 2); // mean
   sigma_p_species_date ~ normal(0, 1); // variation
