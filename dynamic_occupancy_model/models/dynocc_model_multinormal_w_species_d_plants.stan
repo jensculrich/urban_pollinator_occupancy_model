@@ -9,12 +9,6 @@
 // year == k
 // visit == l
 
-// multinormal species effects for correlations in psi1 and detection ONLY
-
-functions {
-  
-}
-
 data {
   
   int<lower=0> n_species;

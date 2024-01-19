@@ -47,7 +47,7 @@ phi_max = 0
 
 p0 <- 0 # probability of detection (logit scaled)
 sigma_p_species <- 2 # species-specific variation
-p_degree <- 0.75
+p_specialization <- 0.75
 p_flower_abundance_any <- 0.5 # increase in detection rate moving from one habitat type to the other (logit scaled)
 mu_p_species_date <- 0
 sigma_p_species_date <- 1
@@ -94,7 +94,7 @@ simulate_data <- function(
     
     p0, # probability of detection (logit scaled)
     sigma_p_species, # species-specific variation
-    p_degree,
+    p_specialization,
     p_flower_abundance_any, # increase in detection rate moving from one habitat type to the other (logit scaled)
     mu_p_species_date,
     sigma_p_species_date,
@@ -291,8 +291,6 @@ simulate_data <- function(
 
   p_species <- rnorm(n=n_species, mean=0, sd=sigma_p_species)
 
-  # p_site <- rnorm(n=n_sites, mean=0, sd=sigma_p_site)
-  
   p_species_date <- rnorm(n=n_species, mean=mu_p_species_date, sd=sigma_p_species_date)
   
   p_species_date_sq <- rnorm(n=n_species, mean=mu_p_species_date_sq, sd=sigma_p_species_date_sq)
@@ -311,7 +309,7 @@ simulate_data <- function(
           logit_p[i,j,k,l] = 
             p0 +
             p_species[i] +
-            p_degree * degree_scaled[i] +
+            p_specialization * degree_scaled[i] +
             p_flower_abundance_any * flowers_any_by_survey[j,k,l] +
             p_species_date[i]*date_scaled[j, k, l] + # a spatiotemporally specific intercept
             p_species_date_sq[i]*(date_scaled[j, k, l])^2 # a spatiotemporally specific intercept
@@ -526,7 +524,7 @@ my_simulated_data <- simulate_data(
   
   p0, # probability of detection (logit scaled)
   sigma_p_species, # species-specific variation
-  p_degree,
+  p_specialization,
   p_flower_abundance_any, # increase in detection rate moving from one habitat type to the other (logit scaled)
   mu_p_species_date,
   sigma_p_species_date,
@@ -585,11 +583,9 @@ params <- c(
   "phi_herbaceous_flowers", "phi_woody_flowers", "phi_specialization",
   "phi_interaction_1", "phi_interaction_2",
   
-  "p0", "sigma_p_species", "p_degree", 
+  "p0", "sigma_p_species", "p_specialization", 
   "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq", "p_flower_abundance_any", 
   "species_richness", "avg_species_richness_control", "avg_species_richness_enhanced", "increase_richness_enhanced",
-  #"turnover_control", "turnover_enhanced",
-  #"psi_eq_habitat0", "psi_eq_habitat1",
   "T_rep", "T_obs", "P_species")
 
 # MCMC settings
@@ -614,7 +610,7 @@ parameter_values <-  c(
   phi_herbaceous_flowers, phi_woody_flowers, phi_specialization,
   phi_interaction_1, phi_interaction_2,
   
-  p0, sigma_p_species, p_degree, 
+  p0, sigma_p_species, p_specialization, 
   mu_p_species_date, sigma_p_species_date, 
   mu_p_species_date_sq, sigma_p_species_date_sq, p_flower_abundance_any, 
   NA, NA, NA, NA,
@@ -654,7 +650,7 @@ inits <- lapply(1:n_chains, function(i)
        
        p0 = runif(1, -1, 1),
        sigma_p_species = runif(1, 0, 1),
-       p_degree = runif(1, -1, 1),
+       p_specialization = runif(1, -1, 1),
        p_flower_abundance_any = runif(1, -1, 1),
        mu_p_species_date = runif(1, -1, 1),
        sigma_p_species_date = runif(1, 0, 1),
@@ -701,7 +697,7 @@ traceplot(stan_out_sim, pars = c(
 
 
 traceplot(stan_out_sim, pars = c(
-  "p0", "sigma_p_species", "p_degree",
+  "p0", "sigma_p_species", "p_specialization",
   "p_flower_abundance_any",
   "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq" 
 ))
@@ -713,7 +709,7 @@ traceplot(stan_out_sim,
           ))
 
 pairs(stan_out_sim, pars = c(
-  "p0", "sigma_p_species", "p_degree",
+  "p0", "sigma_p_species", "p_specialization",
   "p_flower_abundance_any"
 ))
 
@@ -758,7 +754,7 @@ estimates_lower <- c(
   fit_summary$summary[21,4], # phi_interaction_2
   fit_summary$summary[22,4], # p0
   fit_summary$summary[23,4], # sigma_p_species
-  fit_summary$summary[24,4], # p_degree
+  fit_summary$summary[24,4], # p_specialization
   fit_summary$summary[25,4], # mu_p_species_date
   fit_summary$summary[26,4], # sigma_p_species_date
   fit_summary$summary[27,4], # mu_p_species_date_sq
@@ -790,7 +786,7 @@ estimates_upper <- c(
   fit_summary$summary[21,8], # phi_interaction_2
   fit_summary$summary[22,8], # p0
   fit_summary$summary[23,8], # sigma_p_species
-  fit_summary$summary[24,8], # p_degree
+  fit_summary$summary[24,8], # p_specialization
   fit_summary$summary[25,8], # mu_p_species_date
   fit_summary$summary[26,8], # sigma_p_species_date
   fit_summary$summary[27,8], # mu_p_species_date_sq
@@ -870,7 +866,7 @@ p
 # get an "average" P value
 fit_summary <- rstan::summary(stan_out)
 View(cbind(1:nrow(fit_summary$summary), fit_summary$summary)) # View to see which row corresponds to the parameter of interest
-(mean_FTP <- mean(fit_summary$summary[firstP:lastP,1])) # replace firstP lastP
+(mean_FTP <- mean(fit_summary$summary[435:554,1])) # replace firstP lastP
 
 # Evaluation of fit on a species level
 # as data frame
