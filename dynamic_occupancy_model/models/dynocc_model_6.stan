@@ -16,6 +16,8 @@ data {
   int<lower=0> n_sites;
   int<lower=1> sites[n_sites]; // vector of site identities
   int<lower=0> n_years;
+  int<lower=0> n_years_minus1;
+  int<lower=0> years[n_years_minus1]; // vector of year identities (no final year because we don't return after last transition)
   int<lower=0> n_visits;
   int<lower=0,upper=1> V[n_species, n_sites, n_years, n_visits];
   
@@ -52,6 +54,7 @@ parameters {
   real gamma_specialization;
   real gamma_interaction_1;
   real gamma_interaction_2;
+  vector[n_years_minus1] gamma_year;
   
   // persistence
   real phi0; 
@@ -60,6 +63,7 @@ parameters {
   real phi_specialization;
   real phi_interaction_1;
   real phi_interaction_2;
+  vector[n_years_minus1] phi_year;
 
   // detection
   real p0;
@@ -106,7 +110,8 @@ transformed parameters {
           gamma_specialization * d[i] +
           (gamma_interaction_1 * d[i] * herbaceous_flowers_scaled[j,k]) +
           gamma_woody_flowers * woody_flowers_scaled[j,k] + 
-          (gamma_interaction_2 * d[i] * woody_flowers_scaled[j,k])
+          (gamma_interaction_2 * d[i] * woody_flowers_scaled[j,k]) +
+          gamma_year[years[k]]
           ); // end phi[j,k]
         
         phi[i,j,k] = inv_logit( // probability (0-1) of persistence is equal to..
@@ -116,7 +121,8 @@ transformed parameters {
           phi_specialization * d[i] +
           (phi_interaction_1 * d[i] * herbaceous_flowers_scaled[j,k]) +
           phi_woody_flowers * woody_flowers_scaled[j,k] + 
-          (phi_interaction_2 * d[i] * woody_flowers_scaled[j,k])
+          (phi_interaction_2 * d[i] * woody_flowers_scaled[j,k]) +
+          phi_year[years[k]]
           ); // end phi[j,k]
              
       } // end loop across all years
@@ -199,6 +205,7 @@ model {
   gamma_specialization ~ normal(0, 2);
   gamma_interaction_1 ~ normal(0, 1); // baseline effect of habitat 
   gamma_interaction_2 ~ normal(0, 1); // effect of specialization on response to habitat
+  gamma_year ~ normal(0, 1); // year effects
   
   // persistence
   phi0 ~ normal(0, 1); // persistence intercept
@@ -207,6 +214,7 @@ model {
   phi_specialization ~ normal(0, 2);
   phi_interaction_1 ~ normal(0, 1); // baseline effect of habitat 
   phi_interaction_2 ~ normal(0, 1); // effect of specialization on response to habitat
+  phi_year ~ normal(0, 1);
   
   // detection
   p0 ~ normal(0, 2); // global intercept
@@ -251,7 +259,7 @@ generated quantities{
   real avg_species_richness_enhanced[n_years]; // average across sites
   real avg_species_richness_control[n_years]; // average across sites
   real increase_richness_enhanced[n_years]; // difference in average species richness in each year
-
+  
   // equilibrium occupancy rate (for average species)  
   //real psi_eq_habitat0; // control sites
   //real psi_eq_habitat1; // enhanced sites
@@ -352,19 +360,19 @@ generated quantities{
           // else the site could be occupied or not
           } else {
             
-            Z[i,j,k] = bernoulli_logit_rng(psi[i,j,k]);
+            //Z[i,j,k] = bernoulli_logit_rng(psi[i,j,k]);
             
             // occupancy but never observed by either dataset
-            //real ulo = inv_logit(psi[i,j,k]) * 
-              // ((1 - inv_logit(p[j,k]))^n_visits) // for no visit heterogeneity in p
-              //(1 - inv_logit(p[i,j,k,1])) * (1 - inv_logit(p[i,j,k,2])) *
-              //(1 - inv_logit(p[i,j,k,3])) * (1 - inv_logit(p[i,j,k,4])) *
-              //(1 - inv_logit(p[i,j,k,5])) * (1 - inv_logit(p[i,j,k,6]));
+            real ulo = inv_logit(psi[i,j,k]) * 
+              //((1 - inv_logit(p[j,k]))^n_visits) // for no visit heterogeneity in p
+              (1 - inv_logit(p[i,j,k,1])) * (1 - inv_logit(p[i,j,k,2])) *
+              (1 - inv_logit(p[i,j,k,3])) * (1 - inv_logit(p[i,j,k,4])) *
+              (1 - inv_logit(p[i,j,k,5])) * (1 - inv_logit(p[i,j,k,6]));
             // non-occupancy
-           //real uln = (1 - inv_logit(psi[i,j,k]));
+            real uln = (1 - inv_logit(psi[i,j,k]));
             
             // outcome of occupancy given the likelihood associated with both possibilities
-            //Z[i,j,k] = bernoulli_rng(ulo / (ulo + uln));
+            Z[i,j,k] = bernoulli_rng(ulo / (ulo + uln));
             
           } // end else uncertain occupancy state
         

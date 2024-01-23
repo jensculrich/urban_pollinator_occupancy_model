@@ -1,7 +1,7 @@
 library(rstan)
 
 source("./dynamic_occupancy_model/run_model/prep_data.R")
-min_unique_detections = 1 # >=
+min_unique_detections = 2 # >=
 my_data <- process_raw_data(min_unique_detections)
 
 stan_out <- readRDS("./dynamic_occupancy_model/model_outputs/stan_out.rds")

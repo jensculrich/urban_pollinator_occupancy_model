@@ -18,7 +18,7 @@ dagified <- dagify(
   herbaceous_flower_abundance ~ mowing_enhancement,
   herbaceous_flower_diversity ~ mowing_enhancement,
   soil ~ mowing_enhancement,
-  vegetation_height ~ mowing_enhancement
+  vegetation_height ~ mowing_enhancement,
   labels = c(
     "occurrence" = "occurrence",
     "herbaceous_flower_abundance" = "herbaceous\n flower abundance",
@@ -29,8 +29,8 @@ dagified <- dagify(
     "woody_flower_diversity" = "woody\n flower diversity",
     "mowing_enhancement" = "no-mow\n enhancement"
   ),
-  exposure = 'past_land_use',
-  outcome = 'cooling',
+  exposure = 'mowing_enhancement',
+  outcome = 'occurrence',
   coords = list(x = c(occurrence = 0, herbaceous_flower_abundance = -1, herbaceous_flower_diversity = 0, 
                       woody_flower_abundance = 1, woody_flower_diversity = 2,
                       vegetation_height = 1, soil = 0, mowing_enhancement = 0),

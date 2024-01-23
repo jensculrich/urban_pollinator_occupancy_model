@@ -4,7 +4,7 @@
 library(rstan)
 
 source("./dynamic_occupancy_model/run_model/prep_data.R")
-min_unique_detections = 1 # >=
+min_unique_detections = 2 # >=
 my_data <- process_raw_data(min_unique_detections)
 
 ## --------------------------------------------------
@@ -50,11 +50,13 @@ params <- c("L_species", "sigma_species",
   
             "gamma0", #"sigma_gamma_species",
             "gamma_herbaceous_flowers", "gamma_woody_flowers", "gamma_specialization",
-            "gamma_interaction_1", "gamma_interaction_2",
+            "gamma_interaction_1", "gamma_interaction_2", 
+            #"gamma_year",
             
             "phi0", #"sigma_phi_species",
             "phi_herbaceous_flowers", "phi_woody_flowers", "phi_specialization",
             "phi_interaction_1", "phi_interaction_2",
+            #"phi_year",
             
             "p0", #"sigma_p_species", 
             "p_specialization",
@@ -63,12 +65,13 @@ params <- c("L_species", "sigma_species",
             "species_richness", "avg_species_richness_control", "avg_species_richness_enhanced", "increase_richness_enhanced",
             #"turnover_control", "turnover_enhanced",
             #"psi_eq_habitat0", "psi_eq_habitat1",
+            "species_effects",
             "T_rep", "T_obs", "P_species")
 
 # MCMC settings
-n_iterations <- 300
+n_iterations <- 400
 n_thin <- 1
-n_burnin <- 150
+n_burnin <- 200
 n_chains <- 4
 n_cores <- n_chains
 delta = 0.95
@@ -119,7 +122,7 @@ inits <- lapply(1:n_chains, function(i)
 
 # stan_model <- "./dynamic_occupancy_model/models/dynocc_model_with_year_effects.stan"
 # stan_model <- "./dynamic_occupancy_model/models/dynocc_model.stan"
-stan_model <- "./dynamic_occupancy_model/models/dynocc_model_6.stan"
+stan_model <- "./dynamic_occupancy_model/models/dynocc_model_with_species_corrs_and_years.stan"
 
 ## Call Stan from R
 set.seed(1)
@@ -134,7 +137,7 @@ stan_out <- stan(stan_model,
                      open_progress = FALSE,
                      cores = n_cores)
 
-saveRDS(stan_out, "./dynamic_occupancy_model/model_outputs/stan_out3.rds")
+saveRDS(stan_out, "./dynamic_occupancy_model/model_outputs/stan_out3_2ormore.rds")
 stan_out <- readRDS("./dynamic_occupancy_model/model_outputs/stan_out3.rds")
 
 
@@ -211,4 +214,4 @@ print(stan_out, digits = 3, pars = c("P_species"))
 # get an "average" P value
 fit_summary <- rstan::summary(stan_out)
 View(cbind(1:nrow(fit_summary$summary), fit_summary$summary)) # View to see which row corresponds to the parameter of interest
-(mean_FTP <- mean(fit_summary$summary[321:426,1]))
+(mean_FTP <- mean(fit_summary$summary[650:738,1]))
