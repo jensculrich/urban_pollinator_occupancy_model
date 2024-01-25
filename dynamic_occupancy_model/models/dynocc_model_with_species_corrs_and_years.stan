@@ -11,15 +11,15 @@
 
 data {
   
-  int<lower=0> n_species;
+  int<lower=0> n_species; // number of species
   int<lower=1> species[n_species]; // vector of species identities
-  int<lower=0> n_sites;
+  int<lower=0> n_sites; // number of sites
   int<lower=1> sites[n_sites]; // vector of site identities
-  int<lower=0> n_years;
+  int<lower=0> n_years; // total years
   int<lower=0> n_years_minus1;
   int<lower=0> years[n_years_minus1]; // vector of year identities (no final year because we don't return after last transition)
-  int<lower=0> n_visits;
-  int<lower=0,upper=1> V[n_species, n_sites, n_years, n_visits];
+  int<lower=0> n_visits; // visits per year
+  int<lower=0,upper=1> V[n_species, n_sites, n_years, n_visits]; // binary detection / non detection
   
   // covariate data
   int<lower=0, upper=1> habitat_type[n_sites]; // categorical habitat type (0 or 1)
@@ -35,17 +35,17 @@ data {
 parameters {
   
   // correlated species random effects
-  vector<lower=0>[4] sigma_species; // SDs for random effects for persistence
-  cholesky_factor_corr[4] L_species; // Correlation matrix for random intercepts and slopes for persistence
-  matrix[4,n_species] z_species; // Random effects for persistence//real delta1_phi0;
+  vector<lower=0>[4] sigma_species; // SDs for species random effects 
+  cholesky_factor_corr[4] L_species; // Correlation matrix for random intercepts for species
+  matrix[4,n_species] z_species; // Random effects for psi1, gamma, phi, and p
   
   // initial state
-  real psi1_0; 
-  real psi1_herbaceous_flowers;
-  real psi1_woody_flowers;
-  real psi1_specialization;
-  real psi1_interaction_1;
-  real psi1_interaction_2;
+  real psi1_0; // intercept
+  real psi1_herbaceous_flowers; // effect of herbaceous flowers
+  real psi1_woody_flowers; // effect of woody flowers
+  real psi1_specialization; // effect of species specialization
+  real psi1_interaction_1; // interaction herbaceous flowers and specialization
+  real psi1_interaction_2; // interaction woody flowers and specialization
   
   // colonization
   real gamma0; 
@@ -66,15 +66,15 @@ parameters {
   //vector[n_years_minus1] phi_year;
 
   // detection
-  real p0;
-  real p_specialization;
-  vector[n_species] p_date;
-  real mu_p_species_date;
-  real<lower=0> sigma_p_species_date;
-  vector[n_species] p_date_sq;
-  real<lower=0> sigma_p_species_date_sq;
-  real mu_p_species_date_sq;
-  real p_flower_abundance_any;
+  real p0; // intercept
+  real p_specialization; // effect of species specialization
+  vector[n_species] p_date; // phenology peak
+  real mu_p_species_date; // community mean
+  real<lower=0> sigma_p_species_date; // variation
+  vector[n_species] p_date_sq; // decay pattern of phenology
+  real<lower=0> sigma_p_species_date_sq; // community mean
+  real mu_p_species_date_sq; // variation
+  real p_flower_abundance_any; // effect of survey specific flower abundance
 
 } // end parameters
 
@@ -84,6 +84,7 @@ transformed parameters {
   real psi1[n_species, n_sites]; // odds of occurrence year 1
   real gamma[n_species, n_sites, n_years]; // odds of colonization
   real phi[n_species, n_sites, n_years]; // odds of persistence
+  real p[n_species, n_sites, n_years, n_visits];  // odds of detection
   
   matrix[n_species,4] species_effects;
   species_effects = (diag_pre_multiply(sigma_species,L_species)*z_species)'; // the dash indicates transposition
@@ -121,7 +122,20 @@ transformed parameters {
           phi_woody_flowers * woody_flowers_scaled[j,k] + 
           (phi_interaction_2 * d[i] * woody_flowers_scaled[j,k]) 
           ); // end phi[j,k]
-             
+          
+          for(l in 1:n_visits){ // loop across all visits
+
+            p[i,j,k,l] = inv_logit( // probability (0-1) of detection is equal to..
+              p0 +
+              species_effects[species[i],4] + + // a species specific intercept
+              p_specialization * degree[i] +
+              p_date[species[i]] * date_scaled[j,k,l] + // a species-specific phenological detection effect (peak)
+              p_date_sq[species[i]] * (date_scaled[j,k,l])^2 + // a species-specific phenological detection effect (decay)
+              p_flower_abundance_any * flowers_any_by_survey[j,k,l]
+              ); // end p[j,k,l]
+            
+          } // end loop across all visits
+          
       } // end loop across all years
     } // end loop across all sites
   } // end loop across all species 
@@ -145,29 +159,6 @@ transformed parameters {
       } // end loop across all years
     } // end loop across all sites
   } // end loop across all species
-
-  // construct an detection array
-  real p[n_species, n_sites, n_years, n_visits];  // odds of detection
-  
-  for(i in 1:n_species){
-    for(j in 1:n_sites){    // loop across all sites
-      for(k in 1:n_years){ // loop across all years
-        for(l in 1:n_visits){ // loop across all visits
-          
-          p[i,j,k,l] = inv_logit( // probability (0-1) of detection is equal to..
-            p0 +
-            species_effects[species[i],4] + + // a species specific intercept
-            p_specialization * degree[i] +
-            p_date[species[i]] * date_scaled[j,k,l] + // a species-specific phenological detection effect (peak)
-            p_date_sq[species[i]] * (date_scaled[j,k,l])^2 + // a species-specific phenological detection effect (decay)
-            p_flower_abundance_any * flowers_any_by_survey[j,k,l]
-            ); // end p[j,k,l]
-             
-        } // end loop across all visits
-      } // end loop across all years
-    } // end loop across all sites
-  } // end loop across all species 
-  
    
 } // end transformed parameters
 
@@ -192,16 +183,16 @@ model {
   psi1_herbaceous_flowers ~ normal(0, 2); // effect of habitat on colonization
   psi1_woody_flowers ~ normal(0, 2); // effect of habitat on colonization
   psi1_specialization ~ normal(0, 2);
-  psi1_interaction_1 ~ normal(0, 1); // baseline effect of habitat 
-  psi1_interaction_2 ~ normal(0, 1); // effect of specialization on response to habitat
+  psi1_interaction_1 ~ normal(0, 2); // baseline effect of habitat 
+  psi1_interaction_2 ~ normal(0, 2); // effect of specialization on response to habitat
   
   // colonization
   gamma0 ~ normal(0, 1); // persistence intercept
   gamma_herbaceous_flowers ~ normal(0, 2); // effect of habitat on colonization
   gamma_woody_flowers ~ normal(0, 2); // effect of habitat on colonization
   gamma_specialization ~ normal(0, 2);
-  gamma_interaction_1 ~ normal(0, 1); // baseline effect of habitat 
-  gamma_interaction_2 ~ normal(0, 1); // effect of specialization on response to habitat
+  gamma_interaction_1 ~ normal(0, 2); // baseline effect of habitat 
+  gamma_interaction_2 ~ normal(0, 2); // effect of specialization on response to habitat
   //gamma_year ~ normal(0, 1); // year effects
   
   // persistence
@@ -209,8 +200,8 @@ model {
   phi_herbaceous_flowers ~ normal(0, 2); // effect of habitat on colonization
   phi_woody_flowers ~ normal(0, 2); // effect of habitat on colonization
   phi_specialization ~ normal(0, 2);
-  phi_interaction_1 ~ normal(0, 1); // baseline effect of habitat 
-  phi_interaction_2 ~ normal(0, 1); // effect of specialization on response to habitat
+  phi_interaction_1 ~ normal(0, 2); // baseline effect of habitat 
+  phi_interaction_2 ~ normal(0, 2); // effect of specialization on response to habitat
   //phi_year ~ normal(0, 1);
   
   // detection
@@ -229,12 +220,16 @@ model {
     for (j in 1:n_sites){
       for (k in 1:n_years){
           
-          if (sum(V[i,j,k]) > 0){ // lp observed
+          if (sum(V[i,j,k]) > 0){ // lp observed 
+            // detection on each visit given detection rate on each visit
             target += (log(psi[i,j,k]) + bernoulli_lpmf(V[i,j,k]|p[i,j,k]));
           } else { // lp unobserved (set up for 6 annual visits)
+            // marginal likelihood of...
+            // non-detection on each visit given detection rate on each visit given occurrence
             target += (log_sum_exp(log(psi[i,j,k]) + log1m(p[i,j,k,1]) + log1m(p[i,j,k,2]) + 
                                                     log1m(p[i,j,k,3]) + log1m(p[i,j,k,4]) + 
                                                     log1m(p[i,j,k,5]) + log1m(p[i,j,k,6]),
+            // or just simple no occurrence
                                           log1m(psi[i,j,k])));
           } // end if/else
   
@@ -357,19 +352,7 @@ generated quantities{
           // else the site could be occupied or not
           } else {
             
-            //Z[i,j,k] = bernoulli_logit_rng(psi[i,j,k]);
-            
-            // occupancy but never observed by either dataset
-            real ulo = inv_logit(psi[i,j,k]) * 
-              //((1 - inv_logit(p[j,k]))^n_visits) // for no visit heterogeneity in p
-              (1 - inv_logit(p[i,j,k,1])) * (1 - inv_logit(p[i,j,k,2])) *
-              (1 - inv_logit(p[i,j,k,3])) * (1 - inv_logit(p[i,j,k,4])) *
-              (1 - inv_logit(p[i,j,k,5])) * (1 - inv_logit(p[i,j,k,6]));
-            // non-occupancy
-            real uln = (1 - inv_logit(psi[i,j,k]));
-            
-            // outcome of occupancy given the likelihood associated with both possibilities
-            Z[i,j,k] = bernoulli_rng(ulo / (ulo + uln));
+            Z[i,j,k] = bernoulli_logit_rng(psi[i,j,k]);
             
           } // end else uncertain occupancy state
         

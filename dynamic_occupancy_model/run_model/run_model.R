@@ -69,9 +69,9 @@ params <- c("L_species", "sigma_species",
             "T_rep", "T_obs", "P_species")
 
 # MCMC settings
-n_iterations <- 400
+n_iterations <- 1000
 n_thin <- 1
-n_burnin <- 200
+n_burnin <- 500
 n_chains <- 4
 n_cores <- n_chains
 delta = 0.95

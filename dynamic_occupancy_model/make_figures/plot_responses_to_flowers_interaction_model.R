@@ -4,7 +4,7 @@ source("./dynamic_occupancy_model/run_model/prep_data.R")
 min_unique_detections = 2 # >=
 my_data <- process_raw_data(min_unique_detections)
 
-stan_out <- readRDS("./dynamic_occupancy_model/model_outputs/stan_out2.rds")
+stan_out <- readRDS("./dynamic_occupancy_model/model_outputs/stan_out3_2ormore.rds")
 
 fit_summary <- rstan::summary(stan_out)
 View(cbind(1:nrow(fit_summary$summary), fit_summary$summary)) # View to see which row corresponds to the parameter of interest
@@ -103,17 +103,17 @@ plot(NA, xlim=c(-2,2), ylim=c(0,1),
 for(i in 1:length(seq)){
   curve(ilogit(
     # gamma0 +
-    fit_summary$summary[8,1] + 
+    fit_summary$summary[27,1] + 
     # gamma_herbaceous_flowers*x +
-    fit_summary$summary[10,1]*x + 
+    fit_summary$summary[28,1]*x * 0 + 
     # gamma_woody_flowers*x + # set this to mean of zero
-    fit_summary$summary[11,1]*0 + 
+    fit_summary$summary[29,1]*0 + 
     # gamma_specialization*d[i] + 
-    fit_summary$summary[12,1]*seq[i] +  
+    fit_summary$summary[30,1]*seq[i] +  
     # gamma_interaction1 *d[i] * x + 
-    (fit_summary$summary[13,1] * seq[i] * x) +   
+    (fit_summary$summary[31,1] * seq[i] * x) * 0 +   
     # gamma_interaction2 *d[i] * x + # set this to mean of zero   
-    (fit_summary$summary[14,1] * seq[i] * 0) 
+    (fit_summary$summary[32,1] * seq[i] * 0) * 0
   ),
   add=TRUE, col = my_palette[i], lwd = 3)
 }
@@ -121,17 +121,17 @@ for(i in 1:length(seq)){
 # add mean response curve (average d)
 curve(ilogit(
     # gamma0 +
-    fit_summary$summary[8,1] + 
+    fit_summary$summary[27,1] + 
       # gamma_herbaceous_flowers*x +
-      fit_summary$summary[10,1]* x + 
+      fit_summary$summary[28,1]* x + 
       # gamma_woody_flowers*x + # set this to mean of zero
-      fit_summary$summary[11,1]*0 + 
+      fit_summary$summary[29,1]*0 + 
       # gamma_specialization*d[i] + 
-      fit_summary$summary[12,1]*0 +  
+      fit_summary$summary[30,1]*0 +  
       # gamma_interaction1 *d[i] * x + 
-      (fit_summary$summary[13,1] * 0 * x) +   
+      (fit_summary$summary[31,1] * 0 * x) +   
       # gamma_interaction2 *d[i] * x + # set this to mean of zero   
-      (fit_summary$summary[14,1] * 0 * 0) 
+      (fit_summary$summary[32,1] * 0 * 0) 
   ),
 add=TRUE, col = "black", lwd = 3, lty = "dashed")
 
@@ -147,17 +147,17 @@ plot(NA, xlim=c(-2,2), ylim=c(0,1),
 for(i in 1:length(seq)){
   curve(ilogit(
     # gamma0 +
-    fit_summary$summary[8,1] + 
+    fit_summary$summary[27,1] + 
       # gamma_herbaceous_flowers*x +
-      fit_summary$summary[10,1]*0 + 
+      fit_summary$summary[28,1]*0 + 
       # gamma_woody_flowers*x + # set this to mean of zero
-      fit_summary$summary[11,1]*x + 
+      fit_summary$summary[29,1]*x + 
       # gamma_specialization*d[i] + 
-      fit_summary$summary[12,1]*seq[i] +  
+      fit_summary$summary[30,1]*seq[i] +  
       # gamma_interaction1 *d[i] * x + 
-      (fit_summary$summary[13,1] * seq[i] * 0) +   
+      (fit_summary$summary[31,1] * seq[i] * 0) +   
       # gamma_interaction2 *d[i] * x + # set this to mean of zero   
-      (fit_summary$summary[14,1] * seq[i] * x) 
+      (fit_summary$summary[32,1] * seq[i] * x)
   ),
   add=TRUE, col = my_palette[i], lwd = 3)
 }
@@ -165,17 +165,17 @@ for(i in 1:length(seq)){
 # add mean response curve (average d)
 curve(ilogit(
   # gamma0 +
-  fit_summary$summary[8,1] + 
+  fit_summary$summary[27,1] + 
     # gamma_herbaceous_flowers*x +
-    fit_summary$summary[10,1]*0 + 
+    fit_summary$summary[28,1]*0 + 
     # gamma_woody_flowers*x + # set this to mean of zero
-    fit_summary$summary[11,1]*x + 
+    fit_summary$summary[29,1]*x + 
     # gamma_specialization*d[i] + 
-    fit_summary$summary[12,1]*0 +  
+    fit_summary$summary[30,1]*0 +  
     # gamma_interaction1 *d[i] * x + 
-    (fit_summary$summary[13,1] * 0 * 0) +   
+    (fit_summary$summary[31,1] * 0 * 0) +   
     # gamma_interaction2 *d[i] * x + # set this to mean of zero   
-    (fit_summary$summary[14,1] * 0 * x) 
+    (fit_summary$summary[32,1] * 0 * x) 
 ),
 add=TRUE, col = "black", lwd = 3, lty = "dashed")
 
@@ -204,17 +204,17 @@ plot(NA, xlim=c(-2,2), ylim=c(0,1),
 for(i in 1:length(seq)){
   curve(ilogit(
     # gamma0 +
-    fit_summary$summary[15,1] + 
+    fit_summary$summary[33,1] + 
       # gamma_herbaceous_flowers*x +
-      fit_summary$summary[17,1]*x + 
+      fit_summary$summary[34,1]*x  *0 + 
       # gamma_woody_flowers*x + # set this to mean of zero
-      fit_summary$summary[18,1]*0 + 
+      fit_summary$summary[35,1]*0 + 
       # gamma_specialization*d[i] + 
-      fit_summary$summary[19,1]*seq[i] +  
+      fit_summary$summary[36,1]*seq[i] +  
       # gamma_interaction1 *d[i] * x + 
-      (fit_summary$summary[20,1] * seq[i] * x) +   
+      (fit_summary$summary[37,1] * seq[i] * x) * 0 +   
       # gamma_interaction2 *d[i] * x + # set this to mean of zero   
-      (fit_summary$summary[21,1] * seq[i] * 0) 
+      (fit_summary$summary[38,1] * seq[i] * 0) 
   ),
   add=TRUE, col = my_palette[i], lwd = 3)
 }
@@ -248,17 +248,17 @@ plot(NA, xlim=c(-2,2), ylim=c(0,1),
 for(i in 1:length(seq)){
   curve(ilogit(
     # gamma0 +
-    fit_summary$summary[15,1] + 
+    fit_summary$summary[33,1] + 
       # gamma_herbaceous_flowers*x +
-      fit_summary$summary[17,1]*0 + 
+      fit_summary$summary[34,1]*0 + 
       # gamma_woody_flowers*x + # set this to mean of zero
-      fit_summary$summary[18,1]*x + 
+      fit_summary$summary[35,1]*x + 
       # gamma_specialization*d[i] + 
-      fit_summary$summary[19,1]*seq[i] +  
+      fit_summary$summary[36,1]*seq[i] +  
       # gamma_interaction1 *d[i] * x + 
-      (fit_summary$summary[20,1] * seq[i] * 0) +   
+      (fit_summary$summary[37,1] * seq[i] * 0) +   
       # gamma_interaction2 *d[i] * x + # set this to mean of zero   
-      (fit_summary$summary[21,1] * seq[i] * x) 
+      (fit_summary$summary[38,1] * seq[i] * x) * 0 
   ),
   add=TRUE, col = my_palette[i], lwd = 3)
 }
@@ -266,17 +266,17 @@ for(i in 1:length(seq)){
 # add mean response curve (average d)
 curve(ilogit(
   # gamma0 +
-  fit_summary$summary[15,1] + 
+  fit_summary$summary[33,1] + 
     # gamma_herbaceous_flowers*x +
-    fit_summary$summary[17,1]*0 + 
+    fit_summary$summary[34,1]*0 + 
     # gamma_woody_flowers*x + # set this to mean of zero
-    fit_summary$summary[18,1]*x + 
+    fit_summary$summary[35,1]*x + 
     # gamma_specialization*d[i] + 
-    fit_summary$summary[19,1]*0 +  
+    fit_summary$summary[36,1]*0 +  
     # gamma_interaction1 *d[i] * x + 
-    (fit_summary$summary[20,1] * 0 * 0) +   
+    (fit_summary$summary[37,1] * 0 * 0) +   
     # gamma_interaction2 *d[i] * x + # set this to mean of zero   
-    (fit_summary$summary[21,1] * 0 * x) 
+    (fit_summary$summary[38,1] * 0 * x) 
 ),
 add=TRUE, col = "black", lwd = 3, lty = "dashed")
 
@@ -295,17 +295,17 @@ plot(NA, xlim=c(-2,2), ylim=c(0,1),
 for(i in 1:length(seq)){
   curve(ilogit(
     # gamma0 +
-    fit_summary$summary[1,1] + 
+    fit_summary$summary[21,1] + 
       # gamma_herbaceous_flowers*x +
-      fit_summary$summary[3,1]*x + 
+      fit_summary$summary[22,1]*x + 
       # gamma_woody_flowers*x + # set this to mean of zero
-      fit_summary$summary[4,1]*0 + 
+      fit_summary$summary[23,1]*0 + 
       # gamma_specialization*d[i] + 
-      fit_summary$summary[5,1]*seq[i] +  
+      fit_summary$summary[24,1]*seq[i] +  
       # gamma_interaction1 *d[i] * x + 
-      (fit_summary$summary[6,1] * seq[i] * x) +   
+      (fit_summary$summary[25,1] * seq[i] * x) +   
       # gamma_interaction2 *d[i] * x + # set this to mean of zero   
-      (fit_summary$summary[7,1] * seq[i] * 0) 
+      (fit_summary$summary[26,1] * seq[i] * 0) 
   ),
   add=TRUE, col = my_palette[i], lwd = 3)
 }
@@ -313,17 +313,17 @@ for(i in 1:length(seq)){
 # add mean response curve (average d)
 curve(ilogit(
   # gamma0 +
-  fit_summary$summary[1,1] + 
+  fit_summary$summary[21,1] + 
     # gamma_herbaceous_flowers*x +
-    fit_summary$summary[3,1]* x + 
+    fit_summary$summary[22,1]* x + 
     # gamma_woody_flowers*x + # set this to mean of zero
-    fit_summary$summary[4,1]*0 + 
+    fit_summary$summary[23,1]*0 + 
     # gamma_specialization*d[i] + 
-    fit_summary$summary[5,1]*0 +  
+    fit_summary$summary[24,1]*0 +  
     # gamma_interaction1 *d[i] * x + 
-    (fit_summary$summary[7,1] * 0 * x) +   
+    (fit_summary$summary[25,1] * 0 * x) +   
     # gamma_interaction2 *d[i] * x + # set this to mean of zero   
-    (fit_summary$summary[8,1] * 0 * 0) 
+    (fit_summary$summary[26,1] * 0 * 0) 
 ),
 add=TRUE, col = "black", lwd = 3, lty = "dashed")
 
@@ -339,17 +339,17 @@ plot(NA, xlim=c(-2,2), ylim=c(0,1),
 for(i in 1:length(seq)){
   curve(ilogit(
     # gamma0 +
-    fit_summary$summary[1,1] + 
+    fit_summary$summary[21,1] + 
       # gamma_herbaceous_flowers*x +
-      fit_summary$summary[3,1]*0 + 
+      fit_summary$summary[22,1]*0 + 
       # gamma_woody_flowers*x + # set this to mean of zero
-      fit_summary$summary[4,1]*x + 
+      fit_summary$summary[23,1]*x + 
       # gamma_specialization*d[i] + 
-      fit_summary$summary[5,1]*seq[i] +  
+      fit_summary$summary[24,1]*seq[i] +  
       # gamma_interaction1 *d[i] * x + 
-      (fit_summary$summary[6,1] * seq[i] * 0) +   
+      (fit_summary$summary[25,1] * seq[i] * 0) +   
       # gamma_interaction2 *d[i] * x + # set this to mean of zero   
-      (fit_summary$summary[7,1] * seq[i] * x) 
+      (fit_summary$summary[26,1] * seq[i] * x) 
   ),
   add=TRUE, col = my_palette[i], lwd = 3)
 }
