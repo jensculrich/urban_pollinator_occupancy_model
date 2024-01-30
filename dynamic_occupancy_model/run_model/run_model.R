@@ -4,7 +4,7 @@
 library(rstan)
 
 source("./dynamic_occupancy_model/run_model/prep_data.R")
-min_unique_detections = 2 # >=
+min_unique_detections = 1 # >=
 my_data <- process_raw_data(min_unique_detections)
 
 ## --------------------------------------------------
@@ -66,12 +66,12 @@ params <- c("L_species", "sigma_species",
             #"turnover_control", "turnover_enhanced",
             #"psi_eq_habitat0", "psi_eq_habitat1",
             "species_effects",
-            "T_rep", "T_obs", "P_species")
+            "W_species_rep")
 
 # MCMC settings
-n_iterations <- 1000
+n_iterations <- 300
 n_thin <- 1
-n_burnin <- 500
+n_burnin <- 150
 n_chains <- 4
 n_cores <- n_chains
 delta = 0.95
@@ -137,7 +137,7 @@ stan_out <- stan(stan_model,
                      open_progress = FALSE,
                      cores = n_cores)
 
-saveRDS(stan_out, "./dynamic_occupancy_model/model_outputs/stan_out3_2ormore.rds")
+saveRDS(stan_out, "./dynamic_occupancy_model/model_outputs/stan_out3_1ormore_with_new_PPC.rds")
 stan_out <- readRDS("./dynamic_occupancy_model/model_outputs/stan_out3.rds")
 
 

@@ -127,7 +127,7 @@ transformed parameters {
 
             p[i,j,k,l] = inv_logit( // probability (0-1) of detection is equal to..
               p0 +
-              species_effects[species[i],4] + + // a species specific intercept
+              species_effects[species[i],4] + // a species specific intercept
               p_specialization * degree[i] +
               p_date[species[i]] * date_scaled[j,k,l] + // a species-specific phenological detection effect (peak)
               p_date_sq[species[i]] * (date_scaled[j,k,l])^2 + // a species-specific phenological detection effect (decay)
@@ -308,57 +308,15 @@ generated quantities{
   //}
   
   //
-  // posterior predictive check (Freeman-Tukey posterior pred check, binned by species)
+  // posterior predictive check (number of detections, binned by species)
   //
-  // estimate expected values (occurrence is a partially latent variable so when we don't observe the species, we don't actually know the expected values)
-  // create replicated data using the paramter estimates and stochastic process defined by the model
-  // gather real detecions
+  real V_rep[n_species, n_sites, n_years, n_visits]; // repd detections given repd occurrence
+  real W_species_rep[n_species]; // sum of simulated detections
   
-  // test the rate at which the number of detections in the real data versus the repped data 
-  // are closer to the expected values. The FTP is the rate at which the real data are closer.
-  
-  int Z[n_species, n_sites, n_years];
-  
-  int z_rep[n_species, n_sites, n_years]; // repd occurrence
-  int y_rep[n_species, n_sites, n_years, n_visits]; // repd detections given repd occurrence
-
-  real eval[n_species,n_sites,n_years,n_visits]; // expected values
-
-  real T_rep[n_species]; // Freeman-Tukey distance from eval (species bin)
-  real T_obs[n_species]; // Freeman-Tukey distance from eval (species bin)
-
-  real P_species[n_species]; // P-value by species
-
-  // Initialize T_rep and T_obs and P-values
+  // initialize at 0
   for(i in 1:n_species){
-    
-    T_rep[i] = 0;
-    T_obs[i] = 0;
-    
-    P_species[i] = 0;
-
+    W_species_rep[i] = 0;
   }
-      
-  // Predict Z at sites
-  for(i in 1:n_species) { // loop across all species
-    for(j in 1:n_sites) { // loop across all sites
-      for(k in 1:n_years){ // loop across all years
-      
-          // if occupancy state is certain then the expected occupancy is 1
-          if(sum(V[i, j, k, 1:n_visits]) > 0) {
-          
-            Z[i,j,k] = 1;
-          
-          // else the site could be occupied or not
-          } else {
-            
-            Z[i,j,k] = bernoulli_logit_rng(psi[i,j,k]);
-            
-          } // end else uncertain occupancy state
-        
-      } // end loop across years
-    } // end loop across sites
-  } // end loop across species
       
   // generating posterior predictive distribution
   // Predict Z at sites
@@ -367,45 +325,14 @@ generated quantities{
       for(k in 1:n_years){ // loop across all years
         for(l in 1:n_visits){
           
-          // expected detections
-          eval[i,j,k,l] = Z[i,j,k] * 
-            bernoulli_logit_rng(p[i,j,k,l]);
+          // detections in replicated data (us z_simmed from above)
+          V_rep[i,j,k,l] = z_simmed[i,j,k] * bernoulli_logit_rng(p[i,j,k,l]);
           
-          // occupancy in replicated data
-          // should evaluate to zero if the site is not in range
-          z_rep[i,j,k] = bernoulli_logit_rng(psi[i,j,k]); 
-          
-          // detections in replicated data
-          y_rep[i,j,k,l] = z_rep[i,j,k] * bernoulli_logit_rng(p[i,j,k,l]);
-
-          // Compute fit statistic (Tukey-Freeman) for replicate data
-          // community science records
-          // Binned by species
-          T_rep[i] = T_rep[i] + (sqrt(y_rep[i,j,k,l]) - 
-            sqrt(eval[i,j,k,l]))^2;
-          // Compute fit statistic (Tukey-Freeman) for real data
-          // Binned by species
-          T_obs[i] = T_obs[i] + (sqrt(V[i,j,k,l]) - 
-            sqrt(eval[i,j,k,l]))^2;
-          
+          W_species_rep[i] = W_species_rep[i] + V_rep[i,j,k,l];
+           
         } // end loop across visits
       } // end loop across years
     } // end loop across sites
   } // end loop across species
   
-  // bin by species
-  for(i in 1:n_species) { // loop across all species
-    
-    // if the discrepancy is lower for the real data for the species
-    // versus the replicated data
-    if(T_obs[i] < T_rep[i]){
-      
-      // then increase species P by 1      
-      P_species[i] = P_species[i] + 1;
-      // the ppc will involve averaging P across the number of post-burnin iterations
-            
-    }
-    
-  }
-
 } // end generated quantities
