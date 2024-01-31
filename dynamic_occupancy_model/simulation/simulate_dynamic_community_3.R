@@ -144,8 +144,22 @@ simulate_data <- function(
   # in my real data most species tend to have pretty low specialization (skewed left)
   # the degree and d' are possibly positively correlated
   
-  d_scaled <- rnorm(n_species, mean=0, sd = 1)
+  #d_scaled <- rnorm(n_species, mean=0, sd = 1)
   
+  mu <- c(0, 0)
+  stddev <- c(1, 1)
+  corMat <- matrix(c(1, 0.8,
+                     0.8, 1),
+                   ncol = 2)
+  covMat <- stddev %*% t(stddev) * corMat
+  correlated_data <- MASS::mvrnorm(n = n_species, mu = mu, Sigma = covMat, empirical = FALSE)
+  
+  d <- correlated_data[,1]
+  degree <- correlated_data[,2]
+  
+  d_scaled <- d
+  degree_scaled <- degree
+
   ## --------------------------------------------------
   ## day of year
   # should have a value for each site*year*visit
@@ -296,8 +310,8 @@ simulate_data <- function(
           
           logit_p[i,j,k,l] = 
             p0 +
-            #p_species[i] +
-            #p_specialization * degree_scaled[i] +
+            p_species[i] +
+            p_specialization * degree_scaled[i] +
             #p_flower_abundance_any * flowers_any_by_survey[j,k,l] +
             p_species_date[i]*date_scaled[j, k, l] + # a spatiotemporally specific intercept
             p_species_date_sq[i]*(date_scaled[j, k, l])^2 # a spatiotemporally specific intercept
@@ -318,28 +332,28 @@ simulate_data <- function(
       for(k in 1:n_years_minus1){
         
         logit_psi1[i,j] = 
-          psi1_0# +
+          psi1_0 +
           #psi1_species[i] +
           #psi1_herbaceous_flowers * herbaceous_flowers_scaled[j,1] +  
-          #psi1_specialization * d_scaled[i] +
+          psi1_specialization * d_scaled[i] #+
           #(psi1_interaction_1 * d_scaled[i] * herbaceous_flowers_scaled[j,1]) +
           #psi1_woody_flowers * woody_flowers_scaled[j,1] + 
           #(psi1_interaction_2 * d_scaled[i] * woody_flowers_scaled[j,1])
         
         logit_gamma[i,j,k] = 
-          gamma0 #+
+          gamma0 +
           #gamma_species[i] +
           #gamma_herbaceous_flowers * herbaceous_flowers_scaled[j,k] + 
-          #gamma_specialization * d_scaled[i] +
+          gamma_specialization * d_scaled[i] #+
           #(gamma_interaction_1 * d_scaled[i] * herbaceous_flowers_scaled[j,k]) +
           #gamma_woody_flowers * woody_flowers_scaled[j,k] + 
           #(gamma_interaction_2 * d_scaled[i] * woody_flowers_scaled[j,k])
         
         logit_phi[i,j,k] = 
-          phi0 #+
+          phi0 +
           #phi_species[i] +
           #phi_herbaceous_flowers * herbaceous_flowers_scaled[j,k] + 
-          #phi_specialization * d_scaled[i] +
+          phi_specialization * d_scaled[i] #+
           #(phi_interaction_1 * d_scaled[i] * herbaceous_flowers_scaled[j,k]) +
           #phi_woody_flowers * woody_flowers_scaled[j,k] + 
           #(phi_interaction_2 * d_scaled[i] * woody_flowers_scaled[j,k])
@@ -473,7 +487,7 @@ simulate_data <- function(
     gamma_year = gamma_year,
     phi_year = phi_year,
     d = d_scaled,
-    degree = d_scaled # for now just keep them as the same thing
+    degree = degree_scaled
   ))
   
 } # end function
@@ -561,24 +575,27 @@ params <- c(#"L_species", "sigma_species",
   
   "psi1_0", 
   #"sigma_psi1_species",
-  #"psi1_herbaceous_flowers", "psi1_woody_flowers", "psi1_specialization",
+  #"psi1_herbaceous_flowers", "psi1_woody_flowers", 
+  "psi1_specialization",
   #"psi1_interaction_1", "psi1_interaction_2",
   
   "gamma0", 
   #"sigma_gamma_species",
-  #"gamma_herbaceous_flowers", "gamma_woody_flowers", "gamma_specialization",
+  #"gamma_herbaceous_flowers", "gamma_woody_flowers", 
+  "gamma_specialization",
   #"gamma_interaction_1", "gamma_interaction_2", 
   #"gamma_year",
   
   "phi0", 
   #"sigma_phi_species",
-  #"phi_herbaceous_flowers", "phi_woody_flowers", "phi_specialization",
+  #"phi_herbaceous_flowers", "phi_woody_flowers", 
+  "phi_specialization",
   #"phi_interaction_1", "phi_interaction_2",
   #"phi_year",
   
   "p0", 
-  #"sigma_p_species", 
-  #"p_specialization",
+  "sigma_p_species", 
+  "p_specialization",
   "mu_p_species_date", "sigma_p_species_date", 
   "mu_p_species_date_sq", "sigma_p_species_date_sq", 
   #"p_flower_abundance_any", 
@@ -639,21 +656,24 @@ inits <- lapply(1:n_chains, function(i)
 parameter_values <-  c(
   psi1_0, 
   #sigma_psi1_species,
-  #psi1_herbaceous_flowers, psi1_woody_flowers, psi1_specialization,
+  #psi1_herbaceous_flowers, psi1_woody_flowers, 
+  psi1_specialization,
   #psi1_interaction_1, psi1_interaction_2,
   
   gamma0, 
   #sigma_gamma_species,
-  #gamma_herbaceous_flowers, gamma_woody_flowers, gamma_specialization,
+  #gamma_herbaceous_flowers, gamma_woody_flowers, 
+  gamma_specialization,
   #gamma_interaction_1, gamma_interaction_2,
   
   phi0, 
   #sigma_phi_species,
-  #phi_herbaceous_flowers, phi_woody_flowers, phi_specialization,
+  #phi_herbaceous_flowers, phi_woody_flowers, 
+  phi_specialization,
   #phi_interaction_1, phi_interaction_2,
   
   p0, 
-  # sigma_p_species, p_specialization, 
+  sigma_p_species, p_specialization, 
   mu_p_species_date, sigma_p_species_date, 
   mu_p_species_date_sq, sigma_p_species_date_sq, 
   #p_flower_abundance_any, 
@@ -712,7 +732,7 @@ stan_model <- "./dynamic_occupancy_model/models/dynocc1.stan"
 ## Call Stan from R
 stan_out_sim <- stan(stan_model,
                      data = stan_data, 
-                     init = inits, 
+                     #init = inits, 
                      pars = params,
                      chains = n_chains, iter = n_iterations, 
                      warmup = n_burnin, thin = n_thin,
@@ -725,15 +745,17 @@ saveRDS(stan_out_sim, "./dynamic_occupancy_model/simulation/stan_out_sim2.rds")
 #stan_out_sim <- readRDS("./dynamic_occupancy_model/simulation/stan_out_sim.rds")
 
 traceplot(stan_out_sim, pars = c(
-  "psi1_0",
+  "psi1_0", "psi1_specialization",
   
-  "gamma0", 
-  "phi0"
+  "gamma0", "gamma_specialization",
+  
+  "phi0", "phi_specialization"
 ))
 
 
 traceplot(stan_out_sim, pars = c(
-  "p0", #"sigma_p_species", "p_specialization",
+  "p0", "sigma_p_species", 
+  "p_specialization",
   #"p_flower_abundance_any",
   "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq" 
 ))
@@ -745,8 +767,7 @@ traceplot(stan_out_sim,
           ))
 
 pairs(stan_out_sim, pars = c(
-  "p0", "sigma_p_species", "p_specialization",
-  "p_flower_abundance_any"
+  "p0", "p_specialization"
 ))
 
 pairs(stan_out_sim, pars = c(
@@ -771,30 +792,30 @@ estimates_lower <- c(
   #fit_summary$summary[2,4], # sigma_psi1_species
   #fit_summary$summary[3,4], # psi1_herbaceous_flowers
   #fit_summary$summary[4,4], # psi1_woody_flowers
-  #fit_summary$summary[5,4], # psi1_specialization
+  fit_summary$summary[2,4], # psi1_specialization
   #fit_summary$summary[6,4], # psi1_interaction_1
   #fit_summary$summary[7,4], # psi1_interaction_2
-  fit_summary$summary[2,4], # gamma0
+  fit_summary$summary[3,4], # gamma0
   #fit_summary$summary[9,4], # sigma_gamma_species
   #fit_summary$summary[10,4], # gamma_herbaceous_flowers
   #fit_summary$summary[11,4], # gamma_woody_flowers
-  #fit_summary$summary[12,4], # gamma_specialization
+  fit_summary$summary[4,4], # gamma_specialization
   #fit_summary$summary[13,4], # gamma_interaction_1
   #fit_summary$summary[14,4], # gamma_interaction_2
-  fit_summary$summary[3,4], # phi0
+  fit_summary$summary[5,4], # phi0
   #fit_summary$summary[16,4], # sigma_phi_species
   #fit_summary$summary[17,4], # phi_herbaceous_flowers
   #fit_summary$summary[18,4], # phi_woody_flowers
-  #fit_summary$summary[19,4], # phi_specialization
+  fit_summary$summary[6,4], # phi_specialization
   #fit_summary$summary[20,4], # phi_interaction_1
   #fit_summary$summary[21,4], # phi_interaction_2
-  fit_summary$summary[4,4], # p0
-  #fit_summary$summary[23,4], # sigma_p_species
-  #fit_summary$summary[24,4], # p_specialization
-  fit_summary$summary[5,4], # mu_p_species_date
-  fit_summary$summary[6,4], # sigma_p_species_date
-  fit_summary$summary[7,4], # mu_p_species_date_sq
-  fit_summary$summary[8,4]#, # sigma_p_species_date_sq
+  fit_summary$summary[7,4], # p0
+  fit_summary$summary[8,4], # sigma_p_species
+  fit_summary$summary[9,4], # p_specialization
+  fit_summary$summary[10,4], # mu_p_species_date
+  fit_summary$summary[11,4], # sigma_p_species_date
+  fit_summary$summary[12,4], # mu_p_species_date_sq
+  fit_summary$summary[13,4]#, # sigma_p_species_date_sq
   #fit_summary$summary[29,4] # p_flower_abundance_any
 )
 
@@ -803,30 +824,30 @@ estimates_upper <- c(
   #fit_summary$summary[2,8], # sigma_psi1_species
   #fit_summary$summary[3,8], # psi1_herbaceous_flowers
   #fit_summary$summary[4,8], # psi1_woody_flowers
-  #fit_summary$summary[5,8], # psi1_specialization
+  fit_summary$summary[2,8], # psi1_specialization
   #fit_summary$summary[6,8], # psi1_interaction_1
   #fit_summary$summary[7,8], # psi1_interaction_2
-  fit_summary$summary[2,8], # gamma0
+  fit_summary$summary[3,8], # gamma0
   #fit_summary$summary[9,8], # sigma_gamma_species
   #fit_summary$summary[10,8], # gamma_herbaceous_flowers
   #fit_summary$summary[11,8], # gamma_woody_flowers
-  #fit_summary$summary[12,8], # gamma_specialization
+  fit_summary$summary[4,8], # gamma_specialization
   #fit_summary$summary[13,8], # gamma_interaction_1
   #fit_summary$summary[14,8], # gamma_interaction_2
-  fit_summary$summary[3,8], # phi0
+  fit_summary$summary[5,8], # phi0
   #fit_summary$summary[16,8], # sigma_phi_species
   #fit_summary$summary[17,8], # phi_herbaceous_flowers
   #fit_summary$summary[18,8], # phi_woody_flowers
-  #fit_summary$summary[19,8], # phi_specialization
+  fit_summary$summary[6,8], # phi_specialization
   #fit_summary$summary[20,8], # phi_interaction_1
   #fit_summary$summary[21,8], # phi_interaction_2
-  fit_summary$summary[4,8], # p0
-  #fit_summary$summary[23,8], # sigma_p_species
-  #fit_summary$summary[24,8], # p_specialization
-  fit_summary$summary[5,8], # mu_p_species_date
-  fit_summary$summary[6,8], # sigma_p_species_date
-  fit_summary$summary[7,8], # mu_p_species_date_sq
-  fit_summary$summary[8,8]#, # sigma_p_species_date_sq
+  fit_summary$summary[7,8], # p0
+  fit_summary$summary[8,8], # sigma_p_species
+  fit_summary$summary[9,8], # p_specialization
+  fit_summary$summary[10,8], # mu_p_species_date
+  fit_summary$summary[11,8], # sigma_p_species_date
+  fit_summary$summary[12,8], # mu_p_species_date_sq
+  fit_summary$summary[13,8]#, # sigma_p_species_date_sq
   #fit_summary$summary[29,8] # p_flower_abundance_any
 )
 

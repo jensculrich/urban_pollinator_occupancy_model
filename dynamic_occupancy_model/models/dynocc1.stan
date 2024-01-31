@@ -43,7 +43,7 @@ parameters {
   //real<lower=0> sigma_psi1_species;
   //real psi1_herbaceous_flowers; // effect of herbaceous flowers
   //real psi1_woody_flowers; // effect of woody flowers
-  //real psi1_specialization; // effect of species specialization
+  real psi1_specialization; // effect of species specialization
   //real psi1_interaction_1; // interaction herbaceous flowers and specialization
   //real psi1_interaction_2; // interaction woody flowers and specialization
   
@@ -53,7 +53,7 @@ parameters {
   //real<lower=0> sigma_gamma_species;
   //real gamma_herbaceous_flowers;
   //real gamma_woody_flowers;
-  //real gamma_specialization;
+  real gamma_specialization;
   //real gamma_interaction_1;
   //real gamma_interaction_2;
   //vector[n_years_minus1] gamma_year;
@@ -64,16 +64,16 @@ parameters {
   //real<lower=0> sigma_phi_species;
   //real phi_herbaceous_flowers;
   //real phi_woody_flowers;
-  //real phi_specialization;
+  real phi_specialization;
   //real phi_interaction_1;
   //real phi_interaction_2;
   //vector[n_years_minus1] phi_year;
 
   // detection
   real p0; // intercept
-  //vector[n_species] p_species;
-  //real<lower=0> sigma_p_species;
-  //real p_specialization; // effect of species specialization
+  vector[n_species] p_species;
+  real<lower=0> sigma_p_species;
+  real p_specialization; // effect of species specialization
   vector[n_species] p_date; // phenology peak
   real mu_p_species_date; // community mean
   real<lower=0> sigma_p_species_date; // variation
@@ -97,30 +97,30 @@ transformed parameters {
       for(k in 1:n_years){ // loop across all years
   
         psi1[i,j] = inv_logit( // probability (0-1) of occurrence in year 1 is equal to..
-          psi1_0// +
+          psi1_0 +
           //psi1_species[species[i]] + // a species specific intercept
           //psi1_herbaceous_flowers * herbaceous_flowers_scaled[j,1] + 
-          //psi1_specialization * d[i] +
+          psi1_specialization * d[i] //+
           //(psi1_interaction_1 * d[i] * herbaceous_flowers_scaled[j,1]) +
           //psi1_woody_flowers * woody_flowers_scaled[j,1] + 
           //(psi1_interaction_2 * d[i] * woody_flowers_scaled[j,1])
           ); // end phi[j,k]
         
         gamma[i,j,k] = inv_logit( // probability (0-1) of colonization is equal to..
-          gamma0 //+
+          gamma0 +
           //gamma_species[species[i]] + // a species specific intercept
           //gamma_herbaceous_flowers * herbaceous_flowers_scaled[j,k] + 
-          //gamma_specialization * d[i] +
+          gamma_specialization * d[i] //+
           //(gamma_interaction_1 * d[i] * herbaceous_flowers_scaled[j,k]) +
           //gamma_woody_flowers * woody_flowers_scaled[j,k] + 
           //(gamma_interaction_2 * d[i] * woody_flowers_scaled[j,k])
           ); // end phi[j,k]
         
         phi[i,j,k] = inv_logit( // probability (0-1) of persistence is equal to..
-          phi0// +
+          phi0 +
           //phi_species[species[i]] + // a species specific intercept
           //phi_herbaceous_flowers * herbaceous_flowers_scaled[j,k] + 
-          //phi_specialization * d[i] +
+          phi_specialization * d[i] //+
           //(phi_interaction_1 * d[i] * herbaceous_flowers_scaled[j,k]) +
           //phi_woody_flowers * woody_flowers_scaled[j,k] + 
           //(phi_interaction_2 * d[i] * woody_flowers_scaled[j,k]) 
@@ -130,8 +130,8 @@ transformed parameters {
 
             p[i,j,k,l] = inv_logit( // probability (0-1) of detection is equal to..
               p0 +
-              //p_species[species[i]] + // a species specific intercept
-              //p_specialization * degree[i] +
+              p_species[species[i]] + // a species specific intercept
+              p_specialization * degree[i] +
               p_date[species[i]] * date_scaled[j,k,l] + // a species-specific phenological detection effect (peak)
               p_date_sq[species[i]] * (date_scaled[j,k,l])^2 //+ // a species-specific phenological detection effect (decay)
               //p_flower_abundance_any * flowers_any_by_survey[j,k,l]
@@ -176,7 +176,7 @@ model {
   //sigma_psi1_species ~ cauchy(0, 3); 
   //psi1_herbaceous_flowers ~ normal(0, 2); // effect of habitat on colonization
   //psi1_woody_flowers ~ normal(0, 2); // effect of habitat on colonization
-  //psi1_specialization ~ normal(0, 2);
+  psi1_specialization ~ normal(0, 2);
   //psi1_interaction_1 ~ normal(0, 2); // baseline effect of habitat 
   //psi1_interaction_2 ~ normal(0, 2); // effect of specialization on response to habitat
   
@@ -186,7 +186,7 @@ model {
   //sigma_gamma_species ~ cauchy(0, 3); 
   //gamma_herbaceous_flowers ~ normal(0, 2); // effect of habitat on colonization
   //gamma_woody_flowers ~ normal(0, 2); // effect of habitat on colonization
-  //gamma_specialization ~ normal(0, 2);
+  gamma_specialization ~ normal(0, 2);
   //gamma_interaction_1 ~ normal(0, 2); // baseline effect of habitat 
   //gamma_interaction_2 ~ normal(0, 2); // effect of specialization on response to habitat
   //gamma_year ~ normal(0, 1); // year effects
@@ -197,16 +197,16 @@ model {
   //sigma_phi_species ~ cauchy(0, 3);
   //phi_herbaceous_flowers ~ normal(0, 2); // effect of habitat on colonization
   //phi_woody_flowers ~ normal(0, 2); // effect of habitat on colonization
-  //phi_specialization ~ normal(0, 2);
+  phi_specialization ~ normal(0, 2);
   //phi_interaction_1 ~ normal(0, 2); // baseline effect of habitat 
   //phi_interaction_2 ~ normal(0, 2); // effect of specialization on response to habitat
   //phi_year ~ normal(0, 1);
   
   // detection
   p0 ~ normal(-2, 3); // global intercept
-  //p_species ~ normal(0, sigma_p_species);
-  //sigma_p_species ~ cauchy(0, 3);
-  //p_specialization ~ normal(0, 2); // effect of specialization on intercept
+  p_species ~ normal(0, sigma_p_species);
+  sigma_p_species ~ cauchy(0, 3);
+  p_specialization ~ normal(0, 2); // effect of specialization on intercept
   p_date ~ normal(mu_p_species_date, sigma_p_species_date); // species-specific phenology (peak)
   mu_p_species_date ~ normal(0, 2); // mean
   sigma_p_species_date ~ cauchy(0, 2); // variation
