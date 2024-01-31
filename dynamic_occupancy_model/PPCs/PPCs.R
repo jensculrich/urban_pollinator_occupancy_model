@@ -63,6 +63,8 @@ start = 1 # which species to start at (hard to see them all at once)
 # start at 1, 37, and 73 is pretty good for visualization
 n = 36 # how many species to plot (36 is a good number to look at the species in 3 slices)
 
+stan_fit_first_W <- 195 # this changes depending on how many params you tracked
+
 df_estimates <- data.frame(X = numeric(), 
                            Y = numeric(), 
                            lower_95 = numeric(),
@@ -74,11 +76,11 @@ df_estimates <- data.frame(X = numeric(),
 for(i in 1:n){
   
   row <- c((i + start - 1), 
-           fit_summary$summary[(533+(start+i-2)),1],
-           fit_summary$summary[(533+(start+i-2)),4],
-           fit_summary$summary[(533+(start+i-2)),8],
-           fit_summary$summary[(533+(start+i-2)),5],
-           fit_summary$summary[(533+(start+i-2)),7])
+           fit_summary$summary[(stan_fit_first_W+(start+i-2)),1],
+           fit_summary$summary[(stan_fit_first_W+(start+i-2)),4],
+           fit_summary$summary[(stan_fit_first_W+(start+i-2)),8],
+           fit_summary$summary[(stan_fit_first_W+(start+i-2)),5],
+           fit_summary$summary[(stan_fit_first_W+(start+i-2)),7])
   
   df_estimates[i,] <- row
   

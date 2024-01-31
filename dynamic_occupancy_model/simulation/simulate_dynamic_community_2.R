@@ -18,7 +18,7 @@ sigma_woody_flowers_visit <- 1
 
 # set parameter values
 psi1_0 <- 0 # prob of initial occupancy
-sigma_psi1_species <- 1 # prob of initial occupancy
+sigma_psi1_species <- 2 # prob of initial occupancy
 psi1_herbaceous_flowers <- 0.6
 psi1_woody_flowers <- 0.4
 psi1_specialization <- -1
@@ -45,7 +45,7 @@ phi_interaction_2 <- 0.5
 phi_min = 0 # set these to zero if you want no year heterogeneity
 phi_max = 0 
 
-p0 <- 0 # probability of detection (logit scaled)
+p0 <- -2 # probability of detection (logit scaled)
 sigma_p_species <- 2 # species-specific variation
 p_specialization <- 0.75
 p_flower_abundance_any <- 0.5 # increase in detection rate moving from one habitat type to the other (logit scaled)
@@ -565,36 +565,81 @@ phi_year <- my_simulated_data$phi_year
 
 stan_data <- c("V", "species", "sites", "years",
                "n_species", "n_sites", "n_years", "n_years_minus1", "n_visits",
-               "habitat_type", "date_scaled", "d", "degree", 
-               "herbaceous_flowers_scaled", "woody_flowers_scaled", "flowers_any_by_survey") 
-
+               "habitat_type", "date_scaled", "d", "degree", "herbaceous_flowers_scaled", "woody_flowers_scaled", "flowers_any_by_survey") 
 
 ## Parameters monitored 
-params <- c(
+params <- c(#"L_species", "sigma_species",
+  
   "psi1_0", "sigma_psi1_species",
   "psi1_herbaceous_flowers", "psi1_woody_flowers", "psi1_specialization",
   "psi1_interaction_1", "psi1_interaction_2",
   
   "gamma0", "sigma_gamma_species",
   "gamma_herbaceous_flowers", "gamma_woody_flowers", "gamma_specialization",
-  "gamma_interaction_1", "gamma_interaction_2",
+  "gamma_interaction_1", "gamma_interaction_2", 
+  #"gamma_year",
   
   "phi0", "sigma_phi_species",
   "phi_herbaceous_flowers", "phi_woody_flowers", "phi_specialization",
   "phi_interaction_1", "phi_interaction_2",
+  #"phi_year",
   
-  "p0", "sigma_p_species", "p_specialization", 
-  "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq", "p_flower_abundance_any", 
+  "p0", "sigma_p_species", 
+  "p_specialization",
+  "mu_p_species_date", "sigma_p_species_date", 
+  "mu_p_species_date_sq", "sigma_p_species_date_sq", "p_flower_abundance_any", 
   "species_richness", "avg_species_richness_control", "avg_species_richness_enhanced", "increase_richness_enhanced",
-  "T_rep", "T_obs", "P_species")
+  #"turnover_control", "turnover_enhanced",
+  #"psi_eq_habitat0", "psi_eq_habitat1",
+  "W_species_rep")
 
 # MCMC settings
-n_iterations <- 400
+n_iterations <- 300
 n_thin <- 1
-n_burnin <- 200
+n_burnin <- 150
 n_chains <- 4
 n_cores <- n_chains
-delta = 0.9
+delta = 0.95
+
+## Initial values
+# given the number of parameters, the chains need some decent initial values
+# otherwise sometimes they have a hard time starting to sample
+inits <- lapply(1:n_chains, function(i)
+  
+  list(psi1_0 = runif(1, -1, 1),
+       sigma_psi1_species = runif(1, 1, 2),
+       psi1_herbaceous_flowers = runif(1, -1, 1),
+       psi1_woody_flowers = runif(1, -1, 1),
+       psi1_specialization = runif(1, -1, 1),
+       psi1_interaction_1 = runif(1, -1, 1),
+       psi1_interaction_2 = runif(1, -1, 1),
+       
+       gamma0 = runif(1, -1, 0),
+       sigma_gamma_species = runif(1, 1, 2),
+       gamma_herbaceous_flowers = runif(1, -1, 1),
+       gamma_woody_flowers = runif(1, -1, 1),
+       gamma_specialization = runif(1, -1, 1),
+       gamma_interaction_1 = runif(1, -1, 1),
+       gamma_interaction_2 = runif(1, -1, 1),
+       
+       phi0 = runif(1, 1, 2),
+       sigma_phi_species = runif(1, 1, 2),
+       phi_herbaceous_flowers = runif(1, -1, 1),
+       phi_woody_flowers = runif(1, -1, 1),
+       phi_specialization = runif(1, -1, 1),
+       phi_interaction_1 = runif(1, -1, 1),
+       phi_interaction_2 = runif(1, -1, 1),
+       
+       p0 = runif(1, -1, 1),
+       sigma_p_species = runif(1, 1, 2),
+       p_degree = runif(1, -1, 1),
+       p_flower_abundance_any = runif(1, -1, 1),
+       mu_p_species_date = runif(1, -1, 1),
+       sigma_p_species_date = runif(1, 0, 1),
+       mu_p_species_date_sq = runif(1, -1, 1),
+       sigma_p_species_date_sq = runif(1, 0, 1)
+  )
+)
 
 # targets
 parameter_values <-  c(
@@ -614,7 +659,7 @@ parameter_values <-  c(
   mu_p_species_date, sigma_p_species_date, 
   mu_p_species_date_sq, sigma_p_species_date_sq, p_flower_abundance_any, 
   NA, NA, NA, NA,
-  NA, NA, NA
+  NA
 )
 
 
@@ -664,7 +709,7 @@ targets <- as.data.frame(cbind(params, parameter_values))
 
 ## --------------------------------------------------
 ### Run model
-stan_model <- "./dynamic_occupancy_model/models/dynocc_model_4.stan"
+stan_model <- "./dynamic_occupancy_model/models/dynocc1.stan"
 
 ## Call Stan from R
 stan_out_sim <- stan(stan_model,
@@ -678,7 +723,7 @@ stan_out_sim <- stan(stan_model,
                      open_progress = FALSE,
                      cores = n_cores)
 
-saveRDS(stan_out_sim, "./dynamic_occupancy_model/simulation/stan_out_sim.rds")
+saveRDS(stan_out_sim, "./dynamic_occupancy_model/simulation/stan_out_sim2.rds")
 #stan_out_sim <- readRDS("./dynamic_occupancy_model/simulation/stan_out_sim.rds")
 
 traceplot(stan_out_sim, pars = c(

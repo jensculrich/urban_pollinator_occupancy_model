@@ -24,7 +24,7 @@ process_raw_data <- function(min_unique_detections) {
     
     # Filter by SPECIES
     # Remove honeybees from our preliminary analysis
-    filter(!SPECIES %in% c("Apis mellifera","undetermined", "undetermined/unconfirmed ID"))  %>%
+    filter(!SPECIES %in% c("Apis mellifera", "undetermined", "undetermined/unconfirmed ID"))  %>%
     
     # Filter by SPECIES
     # Remove some others until resolved for final analyses
