@@ -2,6 +2,8 @@
 # we will compare this to how many detections per species simulated in the 
 # generated quantities block of our model (W_rep) for a visual PPC
 
+library(tidyverse)
+
 source("./dynamic_occupancy_model/run_model/prep_data.R")
 min_unique_detections = 1 # >=
 my_data <- process_raw_data(min_unique_detections)
@@ -40,12 +42,20 @@ for(i in 1:n_species){
   W_species[i] = sum(V[i,,,])
 }
 
+
+# for simulated data
+W_df <- as.data.frame(cbind(species, W_species)) %>%
+  mutate(W_species = as.numeric(W_species))
+
+# for real data
 W_df <- as.data.frame(cbind(species_names, W_species)) %>%
   mutate(W_species = as.numeric(W_species))
 
 # get W distributions from model
 stan_out <- readRDS("./dynamic_occupancy_model/model_outputs/stan_out3_1ormore.rds")
 fit_summary <- rstan::summary(stan_out)
+fit_summary <- rstan::summary(stan_out_sim)
+
 View(cbind(1:nrow(fit_summary$summary), fit_summary$summary)) # View to see which row corresponds to the parameter of interest
 
 
@@ -63,7 +73,7 @@ start = 1 # which species to start at (hard to see them all at once)
 # start at 1, 37, and 73 is pretty good for visualization
 n = 36 # how many species to plot (36 is a good number to look at the species in 3 slices)
 
-stan_fit_first_W <- 195 # this changes depending on how many params you tracked
+stan_fit_first_W <- 78 # this changes depending on how many params you tracked
 
 df_estimates <- data.frame(X = numeric(), 
                            Y = numeric(), 
