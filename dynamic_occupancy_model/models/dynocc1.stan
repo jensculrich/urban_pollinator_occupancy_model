@@ -203,7 +203,7 @@ model {
   //phi_year ~ normal(0, 1);
   
   // detection
-  p0 ~ normal(-2, 3); // global intercept
+  p0 ~ normal(0, 3); // global intercept
   p_species ~ normal(0, sigma_p_species);
   sigma_p_species ~ cauchy(0, 3);
   p_specialization ~ normal(0, 2); // effect of specialization on intercept

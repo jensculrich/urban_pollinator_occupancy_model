@@ -47,7 +47,7 @@ phi_max = 0
 
 p0 <- -2.5 # probability of detection (logit scaled)
 sigma_p_species <- 2 # species-specific variation
-p_specialization <- 0.75
+p_specialization <- -0.25
 p_flower_abundance_any <- 0.5 # increase in detection rate moving from one habitat type to the other (logit scaled)
 mu_p_species_date <- 0
 sigma_p_species_date <- 1
@@ -144,21 +144,22 @@ simulate_data <- function(
   # in my real data most species tend to have pretty low specialization (skewed left)
   # the degree and d' are possibly positively correlated
   
-  #d_scaled <- rnorm(n_species, mean=0, sd = 1)
+  d_scaled <- rnorm(n_species, mean=0, sd = 1)
+  degree_scaled <- d_scaled
   
-  mu <- c(0, 0)
-  stddev <- c(1, 1)
-  corMat <- matrix(c(1, 0.8,
-                     0.8, 1),
-                   ncol = 2)
-  covMat <- stddev %*% t(stddev) * corMat
-  correlated_data <- MASS::mvrnorm(n = n_species, mu = mu, Sigma = covMat, empirical = FALSE)
+  #mu <- c(0, 0)
+  #stddev <- c(1, 1)
+  #corMat <- matrix(c(1, 0.8,
+  #                   0.8, 1),
+  #                 ncol = 2)
+  #covMat <- stddev %*% t(stddev) * corMat
+  #correlated_data <- MASS::mvrnorm(n = n_species, mu = mu, Sigma = covMat, empirical = FALSE)
   
-  d <- correlated_data[,1]
-  degree <- correlated_data[,2]
+  #d <- correlated_data[,1]
+  #degree <- correlated_data[,2]
   
-  d_scaled <- d
-  degree_scaled <- degree
+  #d_scaled <- d
+  #degree_scaled <- degree
 
   ## --------------------------------------------------
   ## day of year
@@ -311,7 +312,7 @@ simulate_data <- function(
           logit_p[i,j,k,l] = 
             p0 +
             p_species[i] +
-            p_specialization * degree_scaled[i] +
+            p_specialization * d_scaled[i] +
             #p_flower_abundance_any * flowers_any_by_survey[j,k,l] +
             p_species_date[i]*date_scaled[j, k, l] + # a spatiotemporally specific intercept
             p_species_date_sq[i]*(date_scaled[j, k, l])^2 # a spatiotemporally specific intercept

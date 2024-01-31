@@ -39,29 +39,36 @@ flowers_any_by_survey <- my_data$flowers_any_by_survey
 
 stan_data <- c("V", "species", "sites", "years",
                "n_species", "n_sites", "n_years", "n_years_minus1", "site_year_visit_count", "n_visits",
-               "habitat_type", "date_scaled", "d", "degree", "herbaceous_flowers_scaled", "woody_flowers_scaled", "flowers_any_by_survey") 
+               "habitat_type", "date_scaled", "d", "degree"#, 
+               #"herbaceous_flowers_scaled", "woody_flowers_scaled", "flowers_any_by_survey"
+               ) 
 
 ## Parameters monitored 
 params <- c(#"L_species", "sigma_species",
             
-            "psi1_0", "psi1_species",
-            "psi1_herbaceous_flowers", "psi1_woody_flowers", "psi1_specialization",
-            "psi1_interaction_1", "psi1_interaction_2",
+            "psi1_0", #"psi1_species",
+            #"psi1_herbaceous_flowers", "psi1_woody_flowers", 
+            "psi1_specialization",
+            #"psi1_interaction_1", "psi1_interaction_2",
   
-            "gamma0", "gamma_species",
-            "gamma_herbaceous_flowers", "gamma_woody_flowers", "gamma_specialization",
-            "gamma_interaction_1", "gamma_interaction_2", 
+            "gamma0", #"gamma_species",
+            #"gamma_herbaceous_flowers", "gamma_woody_flowers", 
+            "gamma_specialization",
+            #"gamma_interaction_1", "gamma_interaction_2", 
             #"gamma_year",
             
-            "phi0", "phi_species",
-            "phi_herbaceous_flowers", "phi_woody_flowers", "phi_specialization",
-            "phi_interaction_1", "phi_interaction_2",
+            "phi0", #"phi_species",
+            #"phi_herbaceous_flowers", "phi_woody_flowers", 
+            "phi_specialization",
+            #"phi_interaction_1", "phi_interaction_2",
             #"phi_year",
             
-            "p0", "p_species", "sigma_p_species", 
+            "p0", #"p_species", 
+            "sigma_p_species", 
             "p_specialization",
             "mu_p_species_date", "sigma_p_species_date", 
-            "mu_p_species_date_sq", "sigma_p_species_date_sq", "p_flower_abundance_any", 
+            "mu_p_species_date_sq", "sigma_p_species_date_sq", 
+            #"p_flower_abundance_any", 
             "species_richness", "avg_species_richness_control", "avg_species_richness_enhanced", "increase_richness_enhanced",
             #"turnover_control", "turnover_enhanced",
             #"psi_eq_habitat0", "psi_eq_habitat1",
@@ -133,7 +140,7 @@ stan_out <- stan(stan_model,
                      open_progress = FALSE,
                      cores = n_cores)
 
-saveRDS(stan_out, "./dynamic_occupancy_model/model_outputs/stan_out3_1ormore_with_new_PPC.rds")
+saveRDS(stan_out, "./dynamic_occupancy_model/model_outputs/stan_out.rds")
 stan_out <- readRDS("./dynamic_occupancy_model/model_outputs/stan_out3.rds")
 
 
