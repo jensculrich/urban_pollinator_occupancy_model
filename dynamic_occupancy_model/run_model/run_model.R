@@ -38,41 +38,43 @@ flowers_any_by_survey <- my_data$flowers_any_by_survey
 ### Prep data and tweak model options
 
 stan_data <- c("V", "species", "sites", "years",
-               "n_species", "n_sites", "n_years", "n_years_minus1", "site_year_visit_count", "n_visits",
-               "habitat_type", "date_scaled", "d", "degree"#, 
-               #"herbaceous_flowers_scaled", "woody_flowers_scaled", "flowers_any_by_survey"
-               ) 
+               "n_species", "n_sites", "n_years", "n_years_minus1", "n_visits",
+               "habitat_type", "date_scaled", "d", "degree",
+               "herbaceous_flowers_scaled", "woody_flowers_scaled", "flowers_any_by_survey"
+) 
 
 ## Parameters monitored 
 params <- c(#"L_species", "sigma_species",
-            
-            "psi1_0", #"psi1_species",
-            #"psi1_herbaceous_flowers", "psi1_woody_flowers", 
-            "psi1_specialization",
-            #"psi1_interaction_1", "psi1_interaction_2",
   
-            "gamma0", #"gamma_species",
-            #"gamma_herbaceous_flowers", "gamma_woody_flowers", 
-            "gamma_specialization",
-            #"gamma_interaction_1", "gamma_interaction_2", 
-            #"gamma_year",
-            
-            "phi0", #"phi_species",
-            #"phi_herbaceous_flowers", "phi_woody_flowers", 
-            "phi_specialization",
-            #"phi_interaction_1", "phi_interaction_2",
-            #"phi_year",
-            
-            "p0", #"p_species", 
-            "sigma_p_species", 
-            "p_specialization",
-            "mu_p_species_date", "sigma_p_species_date", 
-            "mu_p_species_date_sq", "sigma_p_species_date_sq", 
-            #"p_flower_abundance_any", 
-            "species_richness", "avg_species_richness_control", "avg_species_richness_enhanced", "increase_richness_enhanced",
-            #"turnover_control", "turnover_enhanced",
-            #"psi_eq_habitat0", "psi_eq_habitat1",
-            "W_species_rep")
+  "psi1_0", 
+  "sigma_psi1_species",
+  "psi1_herbaceous_flowers", "psi1_woody_flowers", 
+  "psi1_specialization",
+  "psi1_interaction_1", "psi1_interaction_2",
+  
+  "gamma0", 
+  "sigma_gamma_species",
+  "gamma_herbaceous_flowers", "gamma_woody_flowers", 
+  "gamma_specialization",
+  "gamma_interaction_1", "gamma_interaction_2", 
+  #"gamma_year",
+  
+  "phi0", 
+  "sigma_phi_species",
+  "phi_herbaceous_flowers", "phi_woody_flowers", 
+  "phi_specialization",
+  "phi_interaction_1", "phi_interaction_2",
+  #"phi_year",
+  
+  "p0", 
+  "sigma_p_species", 
+  "p_specialization",
+  "mu_p_species_date", "sigma_p_species_date", 
+  "mu_p_species_date_sq", "sigma_p_species_date_sq", 
+  "p_flower_abundance_any", 
+  #"species_richness", 
+  "avg_species_richness_control", "avg_species_richness_enhanced", "increase_richness_enhanced",
+  "W_species_rep")
 
 # MCMC settings
 n_iterations <- 300
@@ -88,7 +90,7 @@ delta = 0.95
 inits <- lapply(1:n_chains, function(i)
   
   list(psi1_0 = runif(1, -1, 1),
-       #sigma_psi1_species = runif(1, 0, 1),
+       sigma_psi1_species = runif(1, 1, 2),
        psi1_herbaceous_flowers = runif(1, -1, 1),
        psi1_woody_flowers = runif(1, -1, 1),
        psi1_specialization = runif(1, -1, 1),
@@ -96,7 +98,7 @@ inits <- lapply(1:n_chains, function(i)
        psi1_interaction_2 = runif(1, -1, 1),
        
        gamma0 = runif(1, -1, 0),
-       #sigma_gamma_species = runif(1, 0, 1),
+       sigma_gamma_species = runif(1, 1, 2),
        gamma_herbaceous_flowers = runif(1, -1, 1),
        gamma_woody_flowers = runif(1, -1, 1),
        gamma_specialization = runif(1, -1, 1),
@@ -104,7 +106,7 @@ inits <- lapply(1:n_chains, function(i)
        gamma_interaction_2 = runif(1, -1, 1),
        
        phi0 = runif(1, 1, 2),
-       #sigma_phi_species = runif(1, 0, 1),
+       sigma_phi_species = runif(1, 1, 2),
        phi_herbaceous_flowers = runif(1, -1, 1),
        phi_woody_flowers = runif(1, -1, 1),
        phi_specialization = runif(1, -1, 1),
@@ -112,7 +114,7 @@ inits <- lapply(1:n_chains, function(i)
        phi_interaction_2 = runif(1, -1, 1),
        
        p0 = runif(1, -1, 1),
-       sigma_p_species = runif(1, 0, 1),
+       sigma_p_species = runif(1, 1, 2),
        p_degree = runif(1, -1, 1),
        p_flower_abundance_any = runif(1, -1, 1),
        mu_p_species_date = runif(1, -1, 1),
@@ -122,10 +124,9 @@ inits <- lapply(1:n_chains, function(i)
   )
 )
 
-
 ## --------------------------------------------------
 ### Run model
-stan_model <- "./dynamic_occupancy_model/models/dynocc1.stan"
+stan_model <- "./dynamic_occupancy_model/models/dynocc2.stan"
 
 ## Call Stan from R
 set.seed(1)
@@ -178,15 +179,15 @@ print(stan_out,
 
 # for continuous model
 traceplot(stan_out, pars = c(
-  "psi1_0",#"sigma_psi1_species",
+  "psi1_0","sigma_psi1_species",
   "psi1_herbaceous_flowers", "psi1_woody_flowers", "psi1_specialization",
   "psi1_interaction_1", "psi1_interaction_2",
   
-  "gamma0", #"sigma_gamma_species",
+  "gamma0", "sigma_gamma_species",
   "gamma_herbaceous_flowers", "gamma_woody_flowers", "gamma_specialization",
   "gamma_interaction_1", "gamma_interaction_2",
   
-  "phi0", #"sigma_phi_species",
+  "phi0", "sigma_phi_species",
   "phi_herbaceous_flowers", "phi_woody_flowers", "phi_specialization",
   "phi_interaction_1", "phi_interaction_2"
 ))
@@ -214,7 +215,3 @@ pairs(stan_out,
 
 print(stan_out, digits = 3, pars = c("P_species"))
 
-# get an "average" P value
-fit_summary <- rstan::summary(stan_out)
-View(cbind(1:nrow(fit_summary$summary), fit_summary$summary)) # View to see which row corresponds to the parameter of interest
-(mean_FTP <- mean(fit_summary$summary[650:738,1]))

@@ -5,8 +5,8 @@ library(rstan) # to run analysis
 
 # choose sample sizes and 
 n_species <- 72 # number of species
-n_sites <- 20 # number of sites (must be an even number for simulation code)
-n_years <- 3 # number of years
+n_sites <- 30 # number of sites (must be an even number for simulation code)
+n_years <- 4 # number of years
 n_years_minus1 <- n_years - 1
 n_visits <- 6 # number of surveys per year
 
@@ -46,7 +46,7 @@ phi_min = 0 # set these to zero if you want no year heterogeneity
 phi_max = 0 
 
 p0 <- -2.5 # probability of detection (logit scaled)
-sigma_p_species <- 2 # species-specific variation
+sigma_p_species <- 1 # species-specific variation
 p_specialization <- -0.25
 p_flower_abundance_any <- 0.5 # increase in detection rate moving from one habitat type to the other (logit scaled)
 mu_p_species_date <- 0
@@ -312,8 +312,8 @@ simulate_data <- function(
           logit_p[i,j,k,l] = 
             p0 +
             p_species[i] +
-            p_specialization * d_scaled[i] +
-            #p_flower_abundance_any * flowers_any_by_survey[j,k,l] +
+            #p_specialization * d_scaled[i] +
+            p_flower_abundance_any * flowers_any_by_survey[j,k,l] +
             p_species_date[i]*date_scaled[j, k, l] + # a spatiotemporally specific intercept
             p_species_date_sq[i]*(date_scaled[j, k, l])^2 # a spatiotemporally specific intercept
           
@@ -335,29 +335,29 @@ simulate_data <- function(
         logit_psi1[i,j] = 
           psi1_0 +
           #psi1_species[i] +
-          #psi1_herbaceous_flowers * herbaceous_flowers_scaled[j,1] +  
-          psi1_specialization * d_scaled[i] #+
-          #(psi1_interaction_1 * d_scaled[i] * herbaceous_flowers_scaled[j,1]) +
-          #psi1_woody_flowers * woody_flowers_scaled[j,1] + 
-          #(psi1_interaction_2 * d_scaled[i] * woody_flowers_scaled[j,1])
+          psi1_herbaceous_flowers * herbaceous_flowers_scaled[j,1] +  
+          psi1_specialization * d_scaled[i] +
+          (psi1_interaction_1 * d_scaled[i] * herbaceous_flowers_scaled[j,1]) +
+          psi1_woody_flowers * woody_flowers_scaled[j,1] + 
+          (psi1_interaction_2 * d_scaled[i] * woody_flowers_scaled[j,1])
         
         logit_gamma[i,j,k] = 
           gamma0 +
           #gamma_species[i] +
-          #gamma_herbaceous_flowers * herbaceous_flowers_scaled[j,k] + 
-          gamma_specialization * d_scaled[i] #+
-          #(gamma_interaction_1 * d_scaled[i] * herbaceous_flowers_scaled[j,k]) +
-          #gamma_woody_flowers * woody_flowers_scaled[j,k] + 
-          #(gamma_interaction_2 * d_scaled[i] * woody_flowers_scaled[j,k])
+          gamma_herbaceous_flowers * herbaceous_flowers_scaled[j,k] + 
+          gamma_specialization * d_scaled[i] +
+          (gamma_interaction_1 * d_scaled[i] * herbaceous_flowers_scaled[j,k]) +
+          gamma_woody_flowers * woody_flowers_scaled[j,k] + 
+          (gamma_interaction_2 * d_scaled[i] * woody_flowers_scaled[j,k])
         
         logit_phi[i,j,k] = 
           phi0 +
           #phi_species[i] +
-          #phi_herbaceous_flowers * herbaceous_flowers_scaled[j,k] + 
-          phi_specialization * d_scaled[i] #+
-          #(phi_interaction_1 * d_scaled[i] * herbaceous_flowers_scaled[j,k]) +
-          #phi_woody_flowers * woody_flowers_scaled[j,k] + 
-          #(phi_interaction_2 * d_scaled[i] * woody_flowers_scaled[j,k])
+          phi_herbaceous_flowers * herbaceous_flowers_scaled[j,k] + 
+          phi_specialization * d_scaled[i] +
+          (phi_interaction_1 * d_scaled[i] * herbaceous_flowers_scaled[j,k]) +
+          phi_woody_flowers * woody_flowers_scaled[j,k] + 
+          (phi_interaction_2 * d_scaled[i] * woody_flowers_scaled[j,k])
       
       }
     }
@@ -567,8 +567,8 @@ phi_year <- my_simulated_data$phi_year
 
 stan_data <- c("V", "species", "sites", "years",
                "n_species", "n_sites", "n_years", "n_years_minus1", "n_visits",
-               "habitat_type", "date_scaled", "d", "degree"
-               #"herbaceous_flowers_scaled", "woody_flowers_scaled", "flowers_any_by_survey"
+               "habitat_type", "date_scaled", "d", "degree",
+               "herbaceous_flowers_scaled", "woody_flowers_scaled", "flowers_any_by_survey"
                ) 
 
 ## Parameters monitored 
@@ -576,22 +576,22 @@ params <- c(#"L_species", "sigma_species",
   
   "psi1_0", 
   #"sigma_psi1_species",
-  #"psi1_herbaceous_flowers", "psi1_woody_flowers", 
+  "psi1_herbaceous_flowers", "psi1_woody_flowers", 
   "psi1_specialization",
-  #"psi1_interaction_1", "psi1_interaction_2",
+  "psi1_interaction_1", "psi1_interaction_2",
   
   "gamma0", 
   #"sigma_gamma_species",
-  #"gamma_herbaceous_flowers", "gamma_woody_flowers", 
+  "gamma_herbaceous_flowers", "gamma_woody_flowers", 
   "gamma_specialization",
-  #"gamma_interaction_1", "gamma_interaction_2", 
+  "gamma_interaction_1", "gamma_interaction_2", 
   #"gamma_year",
   
   "phi0", 
   #"sigma_phi_species",
-  #"phi_herbaceous_flowers", "phi_woody_flowers", 
+  "phi_herbaceous_flowers", "phi_woody_flowers", 
   "phi_specialization",
-  #"phi_interaction_1", "phi_interaction_2",
+  "phi_interaction_1", "phi_interaction_2",
   #"phi_year",
   
   "p0", 
@@ -599,10 +599,9 @@ params <- c(#"L_species", "sigma_species",
   "p_specialization",
   "mu_p_species_date", "sigma_p_species_date", 
   "mu_p_species_date_sq", "sigma_p_species_date_sq", 
-  #"p_flower_abundance_any", 
-  "species_richness", "avg_species_richness_control", "avg_species_richness_enhanced", "increase_richness_enhanced",
-  #"turnover_control", "turnover_enhanced",
-  #"psi_eq_habitat0", "psi_eq_habitat1",
+  "p_flower_abundance_any", 
+  #"species_richness", 
+  "avg_species_richness_control", "avg_species_richness_enhanced", "increase_richness_enhanced",
   "W_species_rep")
 
 # MCMC settings
@@ -619,7 +618,7 @@ delta = 0.95
 inits <- lapply(1:n_chains, function(i)
   
   list(psi1_0 = runif(1, -1, 1),
-       sigma_psi1_species = runif(1, 1, 2),
+       #sigma_psi1_species = runif(1, 1, 2),
        psi1_herbaceous_flowers = runif(1, -1, 1),
        psi1_woody_flowers = runif(1, -1, 1),
        psi1_specialization = runif(1, -1, 1),
@@ -627,7 +626,7 @@ inits <- lapply(1:n_chains, function(i)
        psi1_interaction_2 = runif(1, -1, 1),
        
        gamma0 = runif(1, -1, 0),
-       sigma_gamma_species = runif(1, 1, 2),
+       #sigma_gamma_species = runif(1, 1, 2),
        gamma_herbaceous_flowers = runif(1, -1, 1),
        gamma_woody_flowers = runif(1, -1, 1),
        gamma_specialization = runif(1, -1, 1),
@@ -635,7 +634,7 @@ inits <- lapply(1:n_chains, function(i)
        gamma_interaction_2 = runif(1, -1, 1),
        
        phi0 = runif(1, 1, 2),
-       sigma_phi_species = runif(1, 1, 2),
+       #sigma_phi_species = runif(1, 1, 2),
        phi_herbaceous_flowers = runif(1, -1, 1),
        phi_woody_flowers = runif(1, -1, 1),
        phi_specialization = runif(1, -1, 1),
@@ -657,70 +656,28 @@ inits <- lapply(1:n_chains, function(i)
 parameter_values <-  c(
   psi1_0, 
   #sigma_psi1_species,
-  #psi1_herbaceous_flowers, psi1_woody_flowers, 
+  psi1_herbaceous_flowers, psi1_woody_flowers, 
   psi1_specialization,
-  #psi1_interaction_1, psi1_interaction_2,
+  psi1_interaction_1, psi1_interaction_2,
   
   gamma0, 
   #sigma_gamma_species,
-  #gamma_herbaceous_flowers, gamma_woody_flowers, 
+  gamma_herbaceous_flowers, gamma_woody_flowers, 
   gamma_specialization,
-  #gamma_interaction_1, gamma_interaction_2,
+  gamma_interaction_1, gamma_interaction_2,
   
   phi0, 
   #sigma_phi_species,
-  #phi_herbaceous_flowers, phi_woody_flowers, 
+  phi_herbaceous_flowers, phi_woody_flowers, 
   phi_specialization,
-  #phi_interaction_1, phi_interaction_2,
+  phi_interaction_1, phi_interaction_2,
   
   p0, 
   sigma_p_species, p_specialization, 
   mu_p_species_date, sigma_p_species_date, 
   mu_p_species_date_sq, sigma_p_species_date_sq, 
-  #p_flower_abundance_any, 
+  p_flower_abundance_any, 
   NA, NA, NA, NA, NA # 5 generated quantities to track
-)
-
-
-
-## Initial values
-# given the number of parameters, the chains need some decent initial values
-# otherwise sometimes they have a hard time starting to sample
-inits <- lapply(1:n_chains, function(i)
-  
-  list(psi1_0 = runif(1, -1, 1),
-       sigma_psi1_species = runif(1, 0, 1),
-       psi1_herbaceous_flowers = runif(1, -1, 1),
-       psi1_woody_flowers = runif(1, -1, 1),
-       psi1_specialization = runif(1, -1, 1),
-       psi1_interaction_1 = runif(1, -1, 1),
-       psi1_interaction_2 = runif(1, -1, 1),
-       
-       gamma0 = runif(1, -1, 0),
-       sigma_gamma_species = runif(1, 0, 1),
-       gamma_herbaceous_flowers = runif(1, -1, 1),
-       gamma_woody_flowers = runif(1, -1, 1),
-       gamma_specialization = runif(1, -1, 1),
-       gamma_interaction_1 = runif(1, -1, 1),
-       gamma_interaction_2 = runif(1, -1, 1),
-       
-       phi0 = runif(1, 0, 1),
-       sigma_phi_species = runif(1, 0, 1),
-       phi_herbaceous_flowers = runif(1, -1, 1),
-       phi_woody_flowers = runif(1, -1, 1),
-       phi_specialization = runif(1, -1, 1),
-       phi_interaction_1 = runif(1, -1, 1),
-       phi_interaction_2 = runif(1, -1, 1),
-       
-       p0 = runif(1, -1, 1),
-       sigma_p_species = runif(1, 0, 1),
-       p_specialization = runif(1, -1, 1),
-       p_flower_abundance_any = runif(1, -1, 1),
-       mu_p_species_date = runif(1, -1, 1),
-       sigma_p_species_date = runif(1, 0, 1),
-       mu_p_species_date_sq = runif(1, -1, 1),
-       sigma_p_species_date_sq = runif(1, 0, 1)
-  )
 )
 
 targets <- as.data.frame(cbind(params, parameter_values))
@@ -728,12 +685,12 @@ targets <- as.data.frame(cbind(params, parameter_values))
 
 ## --------------------------------------------------
 ### Run model
-stan_model <- "./dynamic_occupancy_model/models/dynocc1.stan"
+stan_model <- "./dynamic_occupancy_model/models/dynocc2.stan"
 
 ## Call Stan from R
 stan_out_sim <- stan(stan_model,
                      data = stan_data, 
-                     #init = inits, 
+                     init = inits, 
                      pars = params,
                      chains = n_chains, iter = n_iterations, 
                      warmup = n_burnin, thin = n_thin,
@@ -742,22 +699,36 @@ stan_out_sim <- stan(stan_model,
                      open_progress = FALSE,
                      cores = n_cores)
 
-saveRDS(stan_out_sim, "./dynamic_occupancy_model/simulation/stan_out_sim2.rds")
+saveRDS(stan_out_sim, "./dynamic_occupancy_model/simulation/stan_out_sim.rds")
 #stan_out_sim <- readRDS("./dynamic_occupancy_model/simulation/stan_out_sim.rds")
 
 traceplot(stan_out_sim, pars = c(
-  "psi1_0", "psi1_specialization",
+  "psi1_0", 
+  #"sigma_psi1_species",
+  "psi1_herbaceous_flowers", "psi1_woody_flowers", 
+  "psi1_specialization",
+  "psi1_interaction_1", "psi1_interaction_2",
   
-  "gamma0", "gamma_specialization",
+  "gamma0", 
+  #"sigma_gamma_species",
+  "gamma_herbaceous_flowers", "gamma_woody_flowers", 
+  "gamma_specialization",
+  "gamma_interaction_1", "gamma_interaction_2", 
+  #"gamma_year",
   
-  "phi0", "phi_specialization"
+  "phi0", 
+  #"sigma_phi_species",
+  "phi_herbaceous_flowers", "phi_woody_flowers", 
+  "phi_specialization",
+  "phi_interaction_1", "phi_interaction_2"
+  #"phi_year",
 ))
 
 
 traceplot(stan_out_sim, pars = c(
   "p0", "sigma_p_species", 
   "p_specialization",
-  #"p_flower_abundance_any",
+  "p_flower_abundance_any",
   "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq" 
 ))
 
@@ -781,7 +752,7 @@ pairs(stan_out_sim, pars = c(
 library(ggplot2)
 library(tidyverse)
 
-targets2 <- targets[1:8,]
+targets2 <- targets[1:26,]
 
 fit_summary <- rstan::summary(stan_out_sim)
 View(cbind(1:nrow(fit_summary$summary), fit_summary$summary)) # View to see which row corresponds to the parameter of interest
@@ -791,65 +762,65 @@ X <- as.factor(seq(1:nrow(targets2)))
 estimates_lower <- c(
   fit_summary$summary[1,4], # psi1_0
   #fit_summary$summary[2,4], # sigma_psi1_species
-  #fit_summary$summary[3,4], # psi1_herbaceous_flowers
-  #fit_summary$summary[4,4], # psi1_woody_flowers
-  fit_summary$summary[2,4], # psi1_specialization
-  #fit_summary$summary[6,4], # psi1_interaction_1
-  #fit_summary$summary[7,4], # psi1_interaction_2
-  fit_summary$summary[3,4], # gamma0
+  fit_summary$summary[2,4], # psi1_herbaceous_flowers
+  fit_summary$summary[3,4], # psi1_woody_flowers
+  fit_summary$summary[4,4], # psi1_specialization
+  fit_summary$summary[5,4], # psi1_interaction_1
+  fit_summary$summary[6,4], # psi1_interaction_2
+  fit_summary$summary[7,4], # gamma0
   #fit_summary$summary[9,4], # sigma_gamma_species
-  #fit_summary$summary[10,4], # gamma_herbaceous_flowers
-  #fit_summary$summary[11,4], # gamma_woody_flowers
-  fit_summary$summary[4,4], # gamma_specialization
-  #fit_summary$summary[13,4], # gamma_interaction_1
-  #fit_summary$summary[14,4], # gamma_interaction_2
-  fit_summary$summary[5,4], # phi0
+  fit_summary$summary[8,4], # gamma_herbaceous_flowers
+  fit_summary$summary[9,4], # gamma_woody_flowers
+  fit_summary$summary[10,4], # gamma_specialization
+  fit_summary$summary[11,4], # gamma_interaction_1
+  fit_summary$summary[12,4], # gamma_interaction_2
+  fit_summary$summary[13,4], # phi0
   #fit_summary$summary[16,4], # sigma_phi_species
-  #fit_summary$summary[17,4], # phi_herbaceous_flowers
-  #fit_summary$summary[18,4], # phi_woody_flowers
-  fit_summary$summary[6,4], # phi_specialization
-  #fit_summary$summary[20,4], # phi_interaction_1
-  #fit_summary$summary[21,4], # phi_interaction_2
-  fit_summary$summary[7,4], # p0
-  fit_summary$summary[8,4], # sigma_p_species
-  fit_summary$summary[9,4], # p_specialization
-  fit_summary$summary[10,4], # mu_p_species_date
-  fit_summary$summary[11,4], # sigma_p_species_date
-  fit_summary$summary[12,4], # mu_p_species_date_sq
-  fit_summary$summary[13,4]#, # sigma_p_species_date_sq
-  #fit_summary$summary[29,4] # p_flower_abundance_any
+  fit_summary$summary[14,4], # phi_herbaceous_flowers
+  fit_summary$summary[15,4], # phi_woody_flowers
+  fit_summary$summary[16,4], # phi_specialization
+  fit_summary$summary[17,4], # phi_interaction_1
+  fit_summary$summary[18,4], # phi_interaction_2
+  fit_summary$summary[19,4], # p0
+  fit_summary$summary[20,4], # sigma_p_species
+  fit_summary$summary[21,4], # p_specialization
+  fit_summary$summary[22,4], # mu_p_species_date
+  fit_summary$summary[23,4], # sigma_p_species_date
+  fit_summary$summary[24,4], # mu_p_species_date_sq
+  fit_summary$summary[25,4], # sigma_p_species_date_sq
+  fit_summary$summary[26,4] # p_flower_abundance_any
 )
 
 estimates_upper <- c(
   fit_summary$summary[1,8], # psi1_0
-  #fit_summary$summary[2,8], # sigma_psi1_species
-  #fit_summary$summary[3,8], # psi1_herbaceous_flowers
-  #fit_summary$summary[4,8], # psi1_woody_flowers
-  fit_summary$summary[2,8], # psi1_specialization
-  #fit_summary$summary[6,8], # psi1_interaction_1
-  #fit_summary$summary[7,8], # psi1_interaction_2
-  fit_summary$summary[3,8], # gamma0
-  #fit_summary$summary[9,8], # sigma_gamma_species
-  #fit_summary$summary[10,8], # gamma_herbaceous_flowers
-  #fit_summary$summary[11,8], # gamma_woody_flowers
-  fit_summary$summary[4,8], # gamma_specialization
-  #fit_summary$summary[13,8], # gamma_interaction_1
-  #fit_summary$summary[14,8], # gamma_interaction_2
-  fit_summary$summary[5,8], # phi0
-  #fit_summary$summary[16,8], # sigma_phi_species
-  #fit_summary$summary[17,8], # phi_herbaceous_flowers
-  #fit_summary$summary[18,8], # phi_woody_flowers
-  fit_summary$summary[6,8], # phi_specialization
-  #fit_summary$summary[20,8], # phi_interaction_1
-  #fit_summary$summary[21,8], # phi_interaction_2
-  fit_summary$summary[7,8], # p0
-  fit_summary$summary[8,8], # sigma_p_species
-  fit_summary$summary[9,8], # p_specialization
-  fit_summary$summary[10,8], # mu_p_species_date
-  fit_summary$summary[11,8], # sigma_p_species_date
-  fit_summary$summary[12,8], # mu_p_species_date_sq
-  fit_summary$summary[13,8]#, # sigma_p_species_date_sq
-  #fit_summary$summary[29,8] # p_flower_abundance_any
+  #fit_summary$summary[2,4], # sigma_psi1_species
+  fit_summary$summary[2,8], # psi1_herbaceous_flowers
+  fit_summary$summary[3,8], # psi1_woody_flowers
+  fit_summary$summary[4,8], # psi1_specialization
+  fit_summary$summary[5,8], # psi1_interaction_1
+  fit_summary$summary[6,8], # psi1_interaction_2
+  fit_summary$summary[7,8], # gamma0
+  #fit_summary$summary[9,4], # sigma_gamma_species
+  fit_summary$summary[8,8], # gamma_herbaceous_flowers
+  fit_summary$summary[9,8], # gamma_woody_flowers
+  fit_summary$summary[10,8], # gamma_specialization
+  fit_summary$summary[11,8], # gamma_interaction_1
+  fit_summary$summary[12,8], # gamma_interaction_2
+  fit_summary$summary[13,8], # phi0
+  #fit_summary$summary[16,4], # sigma_phi_species
+  fit_summary$summary[14,8], # phi_herbaceous_flowers
+  fit_summary$summary[15,8], # phi_woody_flowers
+  fit_summary$summary[16,8], # phi_specialization
+  fit_summary$summary[17,8], # phi_interaction_1
+  fit_summary$summary[18,8], # phi_interaction_2
+  fit_summary$summary[19,8], # p0
+  fit_summary$summary[20,8], # sigma_p_species
+  fit_summary$summary[21,8], # p_specialization
+  fit_summary$summary[22,8], # mu_p_species_date
+  fit_summary$summary[23,8], # sigma_p_species_date
+  fit_summary$summary[24,8], # mu_p_species_date_sq
+  fit_summary$summary[25,8], # sigma_p_species_date_sq
+  fit_summary$summary[26,8] # p_flower_abundance_any
 )
 
 df_estimates <- as.data.frame(cbind(X, targets2, estimates_lower, estimates_upper))
@@ -857,49 +828,48 @@ df_estimates$parameter_value <- as.numeric(df_estimates$parameter_value)
 
 (p <- ggplot(df_estimates) +
     theme_bw() +
-    scale_x_discrete(name="", breaks = c(1, 2, 3, 4, 5, 6, 7, 8#, 
-                                         #9,
-                                         #10, 11, 12, 13, 14, 15, 16, 
-                                         #17, 18, 19, 20, 21, 22, 23, 
-                                         #24, 25, 26, 27, 28, 29
+    scale_x_discrete(name="", breaks = c(1, 2, 3, 4, 5, 6, 7, 8, 
+                                         9, 10, 11, 12, 13, 14, 15, 16, 
+                                         17, 18, 19, 20, 21, 22, 23, 
+                                         24, 25, 26#, 27, 28, 29
                                          ),
 
                      labels=c(bquote(psi[0]), 
                               #bquote(sigma[psi1["species"]]),
-                              #bquote(psi["herb."]),
-                              #bquote(psi["woody"]), 
-                              #bquote(psi["specialization"]),
-                              #bquote(psi["spec.*herb."]),
-                              #bquote(psi["spec.*woody"]),
+                              bquote(psi["herb."]),
+                              bquote(psi["woody"]), 
+                              bquote(psi["specialization"]),
+                              bquote(psi["spec.*herb."]),
+                              bquote(psi["spec.*woody"]),
                               
                               bquote(gamma[0]), 
                               #bquote(sigma[gamma["species"]]),
-                              #bquote(gamma["herb."]),
-                              #bquote(gamma["woody"]), 
-                              #bquote(gamma["specialization"]),
-                              #bquote(gamma["spec.*herb."]),
-                              #bquote(gamma["spec.*woody"]),
+                              bquote(gamma["herb."]),
+                              bquote(gamma["woody"]), 
+                              bquote(gamma["specialization"]),
+                              bquote(gamma["spec.*herb."]),
+                              bquote(gamma["spec.*woody"]),
                               
                               bquote(phi[0]), 
                               #bquote(sigma[phi["species"]]),
-                              #bquote(phi["herb."]),
-                              #bquote(phi["woody"]), 
-                              #bquote(phi["specialization"]),
-                              #bquote(phi["spec.*herb."]),
-                              #bquote(phi["spec.*woody"]),
+                              bquote(phi["herb."]),
+                              bquote(phi["woody"]), 
+                              bquote(phi["specialization"]),
+                              bquote(phi["spec.*herb."]),
+                              bquote(phi["spec.*woody"]),
                           
                               bquote("p"[0]),
-                              #bquote(sigma["p"["species"]]),
-                              #bquote("p"["degree"]),
+                              bquote(sigma["p"["species"]]),
+                              bquote("p"["specialization"]),
                               bquote("p"["date"]),
                               bquote(sigma["p"["date - species"]]),
                               bquote("p"["date^2"]),
-                              bquote(sigma["p"["date^2 - species"]])#,
-                              #bquote("p"["flower abundance - survey"])
+                              bquote(sigma["p"["date^2 - species"]]),
+                              bquote("p"["flower abundance - survey"])
                      )
     ) +
     scale_y_continuous(str_wrap("Posterior model estimate (logit-scaled)", width = 30),
-                       limits = c(-3, 3.5)) +
+                       limits = c(-3.5, 3.5)) +
     guides(color = guide_legend(title = "")) +
     geom_hline(yintercept = 0, lty = "dashed") +
     theme(legend.text=element_text(size=10),

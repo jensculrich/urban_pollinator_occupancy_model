@@ -69,11 +69,11 @@ c_mid_highlight <- c("#A25050")
 c_dark <- c("#8F2727")
 c_dark_highlight <- c("#7C0000")
 
-start = 73 # which species to start at (hard to see them all at once)
+start = 1 # which species to start at (hard to see them all at once)
 # start at 1, 37, and 73 is pretty good for visualization
 n = 36 # how many species to plot (36 is a good number to look at the species in 3 slices)
 
-stan_fit_first_W <- 77 # this changes depending on how many params you tracked
+stan_fit_first_W <- 91 # this changes depending on how many params you tracked
 
 df_estimates <- data.frame(X = numeric(), 
                            Y = numeric(), 
@@ -97,7 +97,7 @@ for(i in 1:n){
 }
 
 labels=as.vector(c(W_df[start:(start + n - 1),1]))
-ylims = c(0,max(df_estimates$upper_95))
+ylims = c(0,(max(df_estimates$upper_95)+5))
 end_point  = 0.5 + nrow(df_estimates) + nrow(df_estimates) - 1 #
 
 par(mar = c(9,4,1,2))

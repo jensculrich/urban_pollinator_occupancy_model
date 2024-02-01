@@ -29,9 +29,9 @@ data {
   real date_scaled[n_sites, n_years, n_visits]; // scaled day of year on which each visit was conducted
   vector[n_species] d; // species specialization metric ('Bluthgen's d', but can be reset to 'degree' based on data prep)
   vector[n_species] degree; // total unique interactions made by species
-  //real herbaceous_flowers_scaled[n_sites, n_years]; // herbaceous flower abundance in quadrats
-  //real woody_flowers_scaled[n_sites, n_years]; // woody flower abundance in survey area
-  //real flowers_any_by_survey[n_sites, n_years, n_visits]; // flower abundance per survey visit
+  real herbaceous_flowers_scaled[n_sites, n_years]; // herbaceous flower abundance in quadrats
+  real woody_flowers_scaled[n_sites, n_years]; // woody flower abundance in survey area
+  real flowers_any_by_survey[n_sites, n_years, n_visits]; // flower abundance per survey visit
   
 } // end data
 
@@ -41,32 +41,32 @@ parameters {
   real psi1_0; // intercept
   //vector[n_species] psi1_species;  
   //real<lower=0> sigma_psi1_species;
-  //real psi1_herbaceous_flowers; // effect of herbaceous flowers
-  //real psi1_woody_flowers; // effect of woody flowers
+  real psi1_herbaceous_flowers; // effect of herbaceous flowers
+  real psi1_woody_flowers; // effect of woody flowers
   real psi1_specialization; // effect of species specialization
-  //real psi1_interaction_1; // interaction herbaceous flowers and specialization
-  //real psi1_interaction_2; // interaction woody flowers and specialization
+  real psi1_interaction_1; // interaction herbaceous flowers and specialization
+  real psi1_interaction_2; // interaction woody flowers and specialization
   
   // colonization
   real gamma0;
   //vector[n_species] gamma_species;
   //real<lower=0> sigma_gamma_species;
-  //real gamma_herbaceous_flowers;
-  //real gamma_woody_flowers;
+  real gamma_herbaceous_flowers;
+  real gamma_woody_flowers;
   real gamma_specialization;
-  //real gamma_interaction_1;
-  //real gamma_interaction_2;
+  real gamma_interaction_1;
+  real gamma_interaction_2;
   //vector[n_years_minus1] gamma_year;
   
   // persistence
   real phi0;
   //vector[n_species] phi_species;
   //real<lower=0> sigma_phi_species;
-  //real phi_herbaceous_flowers;
-  //real phi_woody_flowers;
+  real phi_herbaceous_flowers;
+  real phi_woody_flowers;
   real phi_specialization;
-  //real phi_interaction_1;
-  //real phi_interaction_2;
+  real phi_interaction_1;
+  real phi_interaction_2;
   //vector[n_years_minus1] phi_year;
 
   // detection
@@ -80,7 +80,7 @@ parameters {
   vector[n_species] p_date_sq; // decay pattern of phenology
   real mu_p_species_date_sq; // variation
   real<lower=0> sigma_p_species_date_sq; // community mean
-  //real p_flower_abundance_any; // effect of survey specific flower abundance
+  real p_flower_abundance_any; // effect of survey specific flower abundance
 
 } // end parameters
 
@@ -99,31 +99,31 @@ transformed parameters {
         psi1[i,j] = inv_logit( // probability (0-1) of occurrence in year 1 is equal to..
           psi1_0 +
           //psi1_species[species[i]] + // a species specific intercept
-          //psi1_herbaceous_flowers * herbaceous_flowers_scaled[j,1] + 
-          psi1_specialization * d[i] //+
-          //(psi1_interaction_1 * d[i] * herbaceous_flowers_scaled[j,1]) +
-          //psi1_woody_flowers * woody_flowers_scaled[j,1] + 
-          //(psi1_interaction_2 * d[i] * woody_flowers_scaled[j,1])
+          psi1_specialization * d[i] +
+          psi1_herbaceous_flowers * herbaceous_flowers_scaled[j,1] + 
+          (psi1_interaction_1 * d[i] * herbaceous_flowers_scaled[j,1]) +
+          psi1_woody_flowers * woody_flowers_scaled[j,1] + 
+          (psi1_interaction_2 * d[i] * woody_flowers_scaled[j,1])
           ); // end phi[j,k]
         
         gamma[i,j,k] = inv_logit( // probability (0-1) of colonization is equal to..
           gamma0 +
           //gamma_species[species[i]] + // a species specific intercept
-          //gamma_herbaceous_flowers * herbaceous_flowers_scaled[j,k] + 
-          gamma_specialization * d[i] //+
-          //(gamma_interaction_1 * d[i] * herbaceous_flowers_scaled[j,k]) +
-          //gamma_woody_flowers * woody_flowers_scaled[j,k] + 
-          //(gamma_interaction_2 * d[i] * woody_flowers_scaled[j,k])
+          gamma_specialization * d[i] +
+          gamma_herbaceous_flowers * herbaceous_flowers_scaled[j,k] + 
+          (gamma_interaction_1 * d[i] * herbaceous_flowers_scaled[j,k]) +
+          gamma_woody_flowers * woody_flowers_scaled[j,k] + 
+          (gamma_interaction_2 * d[i] * woody_flowers_scaled[j,k])
           ); // end phi[j,k]
         
         phi[i,j,k] = inv_logit( // probability (0-1) of persistence is equal to..
           phi0 +
           //phi_species[species[i]] + // a species specific intercept
-          //phi_herbaceous_flowers * herbaceous_flowers_scaled[j,k] + 
-          phi_specialization * d[i] //+
-          //(phi_interaction_1 * d[i] * herbaceous_flowers_scaled[j,k]) +
-          //phi_woody_flowers * woody_flowers_scaled[j,k] + 
-          //(phi_interaction_2 * d[i] * woody_flowers_scaled[j,k]) 
+          phi_specialization * d[i] +
+          phi_herbaceous_flowers * herbaceous_flowers_scaled[j,k] + 
+          (phi_interaction_1 * d[i] * herbaceous_flowers_scaled[j,k]) +
+          phi_woody_flowers * woody_flowers_scaled[j,k] + 
+          (phi_interaction_2 * d[i] * woody_flowers_scaled[j,k]) 
           ); // end phi[j,k]
           
           for(l in 1:n_visits){ // loop across all visits
@@ -133,8 +133,8 @@ transformed parameters {
               p_species[species[i]] + // a species specific intercept
               p_specialization * degree[i] +
               p_date[species[i]] * date_scaled[j,k,l] + // a species-specific phenological detection effect (peak)
-              p_date_sq[species[i]] * (date_scaled[j,k,l])^2 //+ // a species-specific phenological detection effect (decay)
-              //p_flower_abundance_any * flowers_any_by_survey[j,k,l]
+              p_date_sq[species[i]] * (date_scaled[j,k,l])^2 + // a species-specific phenological detection effect (decay)
+              p_flower_abundance_any * flowers_any_by_survey[j,k,l]
               ); // end p[j,k,l]
             
           } // end loop across all visits
@@ -174,38 +174,38 @@ model {
   psi1_0 ~ normal(0, 2); // persistence intercept
   //psi1_species ~ normal(0, sigma_psi1_species);
   //sigma_psi1_species ~ cauchy(0, 3); 
-  //psi1_herbaceous_flowers ~ normal(0, 2); // effect of habitat on colonization
-  //psi1_woody_flowers ~ normal(0, 2); // effect of habitat on colonization
+  psi1_herbaceous_flowers ~ normal(0, 2); // effect of habitat on colonization
+  psi1_woody_flowers ~ normal(0, 2); // effect of habitat on colonization
   psi1_specialization ~ normal(0, 2);
-  //psi1_interaction_1 ~ normal(0, 2); // baseline effect of habitat 
-  //psi1_interaction_2 ~ normal(0, 2); // effect of specialization on response to habitat
+  psi1_interaction_1 ~ normal(0, 2); // baseline effect of habitat 
+  psi1_interaction_2 ~ normal(0, 2); // effect of specialization on response to habitat
   
   // colonization
   gamma0 ~ normal(0, 1); // persistence intercept
   //gamma_species ~ normal(0, sigma_gamma_species);
   //sigma_gamma_species ~ cauchy(0, 3); 
-  //gamma_herbaceous_flowers ~ normal(0, 2); // effect of habitat on colonization
-  //gamma_woody_flowers ~ normal(0, 2); // effect of habitat on colonization
+  gamma_herbaceous_flowers ~ normal(0, 2); // effect of habitat on colonization
+  gamma_woody_flowers ~ normal(0, 2); // effect of habitat on colonization
   gamma_specialization ~ normal(0, 2);
-  //gamma_interaction_1 ~ normal(0, 2); // baseline effect of habitat 
-  //gamma_interaction_2 ~ normal(0, 2); // effect of specialization on response to habitat
+  gamma_interaction_1 ~ normal(0, 2); // baseline effect of habitat 
+  gamma_interaction_2 ~ normal(0, 2); // effect of specialization on response to habitat
   //gamma_year ~ normal(0, 1); // year effects
   
   // persistence
   phi0 ~ normal(0, 1); // persistence intercept
   //phi_species ~ normal(0, sigma_phi_species);
   //sigma_phi_species ~ cauchy(0, 3);
-  //phi_herbaceous_flowers ~ normal(0, 2); // effect of habitat on colonization
-  //phi_woody_flowers ~ normal(0, 2); // effect of habitat on colonization
+  phi_herbaceous_flowers ~ normal(0, 2); // effect of habitat on colonization
+  phi_woody_flowers ~ normal(0, 2); // effect of habitat on colonization
   phi_specialization ~ normal(0, 2);
-  //phi_interaction_1 ~ normal(0, 2); // baseline effect of habitat 
-  //phi_interaction_2 ~ normal(0, 2); // effect of specialization on response to habitat
+  phi_interaction_1 ~ normal(0, 2); // baseline effect of habitat 
+  phi_interaction_2 ~ normal(0, 2); // effect of specialization on response to habitat
   //phi_year ~ normal(0, 1);
   
   // detection
   p0 ~ normal(0, 3); // global intercept
   p_species ~ normal(0, sigma_p_species);
-  sigma_p_species ~ cauchy(0, 3);
+  sigma_p_species ~ normal(0, 2);
   p_specialization ~ normal(0, 2); // effect of specialization on intercept
   p_date ~ normal(mu_p_species_date, sigma_p_species_date); // species-specific phenology (peak)
   mu_p_species_date ~ normal(0, 2); // mean
@@ -213,7 +213,7 @@ model {
   p_date_sq ~ normal(mu_p_species_date_sq, sigma_p_species_date_sq); // species-specific phenology (decay)
   mu_p_species_date_sq ~ normal(0, 2); // mean
   sigma_p_species_date_sq ~ cauchy(0, 2); // variation
-  //p_flower_abundance_any ~ normal(0, 2); // effect of survey visit flower abundance on detection
+  p_flower_abundance_any ~ normal(0, 2); // effect of survey visit flower abundance on detection
   
   // LIKELIHOOD
   for(i in 1:n_species){
