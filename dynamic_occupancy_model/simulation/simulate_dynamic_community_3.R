@@ -4,8 +4,8 @@ library(rstan) # to run analysis
 ### Define simulation conditions
 
 # choose sample sizes and 
-n_species <- 72 # number of species
-n_sites <- 30 # number of sites (must be an even number for simulation code)
+n_species <- 80 # number of species
+n_sites <- 20 # number of sites (must be an even number for simulation code)
 n_years <- 4 # number of years
 n_years_minus1 <- n_years - 1
 n_visits <- 6 # number of surveys per year
@@ -193,25 +193,25 @@ simulate_data <- function(
   # there is probably some connection between visits within each given site
   # so we will make some mean site values where some sites tend to have more flowers
   # for the herbs this is in part driven by the management
-  herbaceous_flower_means <- vector(length=n_sites)
-  for(j in 1:n_sites){
-    herbaceous_flower_means[j] = rnorm(1, mean=mean_enhancement_herb_flowers*habitat_type[j], sd=sigma_herb_flowers_means) 
-  }
+  #herbaceous_flower_means <- vector(length=n_sites)
+  #for(j in 1:n_sites){
+    #herbaceous_flower_means[j] = rnorm(1, mean=mean_enhancement_herb_flowers*habitat_type[j], sd=sigma_herb_flowers_means) 
+  #}
   # View(as.data.frame(cbind(habitat_type, herbaceous_flower_means)))
-  mean(herbaceous_flower_means[1:10])
-  mean(herbaceous_flower_means[11:20])
+  #mean(herbaceous_flower_means[1:10])
+  #mean(herbaceous_flower_means[11:20])
   
   # now generate visit specific herbaceous flower counts
-  herbaceous_flowers_scaled_by_survey <- array(data = NA, dim = c(n_sites, n_years, n_visits))
-  for(j in 1:n_sites) { # for each site
-    for(k in 1:n_years) { # for each n_years
-      for(l in 1:n_visits){
-        herbaceous_flowers_scaled_by_survey[j,k,l] = rnorm(1, herbaceous_flower_means[j], sigma_herbaceous_flowers_visit)
-      }
-    }
-  }
-  mean(herbaceous_flowers_scaled_by_survey[1:(n_sites/2),,])
-  mean(herbaceous_flowers_scaled_by_survey[((n_sites/2)+1):n_sites,,])
+  #herbaceous_flowers_scaled_by_survey <- array(data = NA, dim = c(n_sites, n_years, n_visits))
+  #for(j in 1:n_sites) { # for each site
+    #for(k in 1:n_years) { # for each n_years
+      #for(l in 1:n_visits){
+        #herbaceous_flowers_scaled_by_survey[j,k,l] = rnorm(1, herbaceous_flower_means[j], sigma_herbaceous_flowers_visit)
+      #}
+    #}
+  #}
+  #mean(herbaceous_flowers_scaled_by_survey[1:(n_sites/2),,])
+  #mean(herbaceous_flowers_scaled_by_survey[((n_sites/2)+1):n_sites,,])
   
   ## --------------------------------------------------
   ## woody flower cover
@@ -221,25 +221,25 @@ simulate_data <- function(
   # there is probably some connection between visits within each given site
   # so we will make some mean site values where some sites tend to have more flowers
   # for the woody this is unrelated to the habitat management and pretty random
-  woody_flower_means <- vector(length=n_sites)
-  for(j in 1:n_sites){
-    woody_flower_means[j] = rnorm(1, mean=0, sd=sigma_woody_flowers_means) 
-  }
+  #woody_flower_means <- vector(length=n_sites)
+  #for(j in 1:n_sites){
+    #woody_flower_means[j] = rnorm(1, mean=0, sd=sigma_woody_flowers_means) 
+  #}
   # View(as.data.frame(cbind(habitat_type, herbaceous_flower_means)))
-  mean(woody_flower_means[1:10])
-  mean(woody_flower_means[11:20])
+  #mean(woody_flower_means[1:10])
+  #mean(woody_flower_means[11:20])
   
   # now generate visit specific herbaceous flower counts
-  woody_flowers_scaled_by_survey <- array(data = NA, dim = c(n_sites, n_years, n_visits))
-  for(j in 1:n_sites) { # for each site
-    for(k in 1:n_years) { # for each n_years
-      for(l in 1:n_visits){
-        woody_flowers_scaled_by_survey[j,k,l] = rnorm(1, woody_flower_means[j], sigma_woody_flowers_visit)
-      }
-    }
-  }
-  mean(woody_flowers_scaled_by_survey[1:(n_sites/2),,])
-  mean(woody_flowers_scaled_by_survey[((n_sites/2)+1):n_sites,,])
+  #woody_flowers_scaled_by_survey <- array(data = NA, dim = c(n_sites, n_years, n_visits))
+  #for(j in 1:n_sites) { # for each site
+    #for(k in 1:n_years) { # for each n_years
+      #for(l in 1:n_visits){
+        #woody_flowers_scaled_by_survey[j,k,l] = rnorm(1, woody_flower_means[j], sigma_woody_flowers_visit)
+      #}
+    #}
+  #}
+  #mean(woody_flowers_scaled_by_survey[1:(n_sites/2),,])
+  #mean(woody_flowers_scaled_by_survey[((n_sites/2)+1):n_sites,,])
   
   
   # flower abundance woody by survey
@@ -247,40 +247,128 @@ simulate_data <- function(
   # then calculate average annual of each (for ecological processes)
   # and calculate average of both of together for each survey (for detection)
     
-  flowers_any_by_survey <- array(data = NA, dim = c(n_sites, n_years, n_visits))
+  #flowers_any_by_survey <- array(data = NA, dim = c(n_sites, n_years, n_visits))
   # on average (/2) how many std dev from the norm is the site in terms of its 
   # flower resource environment
-  for(j in 1:n_sites) { # for each site
-    for(k in 1:n_years) { # for each n_years
-      for(l in 1:n_visits){
-        flowers_any_by_survey[j,k,l] = 
-          (herbaceous_flowers_scaled_by_survey[j,k,l] + woody_flowers_scaled_by_survey[j,k,l]) / 2
+  #for(j in 1:n_sites) { # for each site
+    #for(k in 1:n_years) { # for each n_years
+      #for(l in 1:n_visits){
+        #flowers_any_by_survey[j,k,l] = 
+          #(herbaceous_flowers_scaled_by_survey[j,k,l] + woody_flowers_scaled_by_survey[j,k,l]) / 2
           
-      }
-    }
-  }
+      #}
+    #}
+  #}
   
-  mean(flowers_any_by_survey[1:(n_sites/2),,])
-  mean(flowers_any_by_survey[((n_sites/2)+1):n_sites,,])
+  #mean(flowers_any_by_survey[1:(n_sites/2),,])
+  #mean(flowers_any_by_survey[((n_sites/2)+1):n_sites,,])
   
   ## --------------------------------------------------
   ## calculate mean flowers by site X year for each category
   
   # herbaceous flowers
-  herbaceous_flowers_scaled <- matrix(NA, nrow=n_sites, ncol=n_years)
-  for(j in 1:n_sites) { # for each site
-    for(k in 1:n_years) { # for each n_years
-      herbaceous_flowers_scaled[j,k] = mean(herbaceous_flowers_scaled_by_survey[j,k,])
+  #herbaceous_flowers_scaled <- matrix(NA, nrow=n_sites, ncol=n_years)
+  #for(j in 1:n_sites) { # for each site
+    #for(k in 1:n_years) { # for each n_years
+      #herbaceous_flowers_scaled[j,k] = mean(herbaceous_flowers_scaled_by_survey[j,k,])
+    #}
+  #}
+  
+  # woody flowers
+  #woody_flowers_scaled <- matrix(NA, nrow=n_sites, ncol=n_years)
+  #for(j in 1:n_sites) { # for each site
+    #for(k in 1:n_years) { # for each n_years
+      #woody_flowers_scaled[j,k] = mean(woody_flowers_scaled_by_survey[j,k,])
+    #}
+  #}
+  
+  ##-----------------------------------------------------
+  ## different way to simulate flower abundnaces
+  
+  # herbaceous flowers mean per site
+  herbaceous_flower_means <- vector(length=n_sites)
+  for(j in 1:n_sites){
+    herbaceous_flower_means[j] = rnorm(1, mean=0, sd=1) 
+  }
+  
+  # herbaceous flowers mean per site year
+  annual_herbaceous_flower_means <- matrix(nrow=n_sites, ncol=n_years)
+  for(j in 1:n_sites){
+    for(k in 1: n_years){
+      annual_herbaceous_flower_means[j,k] = rnorm(1, mean=herbaceous_flower_means[j], sd=0.5) 
     }
   }
   
-  # woody flowers
-  woody_flowers_scaled <- matrix(NA, nrow=n_sites, ncol=n_years)
-  for(j in 1:n_sites) { # for each site
-    for(k in 1:n_years) { # for each n_years
-      woody_flowers_scaled[j,k] = mean(woody_flowers_scaled_by_survey[j,k,])
+  # herbaceous flowers data per survey
+  flowers_herbaceous_by_survey <- array(dim = c(n_sites, n_years, n_visits))
+  for(j in 1:n_sites){
+    for(k in 1: n_years){
+      for(l in 1:n_visits){
+        flowers_herbaceous_by_survey[j,k,l] = rnorm(1, mean=annual_herbaceous_flower_means[j,k], sd=sigma_herbaceous_flowers_visit) 
+      }
     }
   }
+  flowers_herbaceous_by_survey_scaled = center_scale(flowers_herbaceous_by_survey)
+
+  # average herb flowers across visits to a site in a year
+  herbaceous_flowers_scaled = array(dim = c(n_sites, n_years))
+  for(j in 1:n_sites){
+    for(k in 1: n_years){
+      herbaceous_flowers_scaled[j,k] = mean(flowers_herbaceous_by_survey[j,k,])
+    }
+  }
+  
+  #herbaceous_flowers_scaled <- center_scale(herbaceous_flowers_scaled)
+  
+  ##
+  # woody flowers mean per site
+  woody_flower_means <- vector(length=n_sites)
+  for(j in 1:n_sites){
+    woody_flower_means[j] = rnorm(1, mean=0, sd=1) 
+  }
+  
+  # woody flowers per site year
+  annual_woody_flower_means <- matrix(nrow=n_sites, ncol=n_years)
+  for(j in 1:n_sites){
+    for(k in 1: n_years){
+      annual_woody_flower_means[j,k] = rnorm(1, mean=woody_flower_means[j], sd=0.5) 
+    }
+  }
+  
+  # woody flowers data per survey
+  flowers_woody_by_survey <- array(dim = c(n_sites, n_years, n_visits))
+  for(j in 1:n_sites){
+    for(k in 1: n_years){
+      for(l in 1:n_visits){
+        flowers_woody_by_survey[j,k,l] = rnorm(1, mean=annual_woody_flower_means[j,k], sd=sigma_woody_flowers_visit) 
+      }
+    }
+  }
+  flowers_woody_by_survey_scaled = center_scale(flowers_woody_by_survey)
+  
+  # average woody flowers across visits to a site in a year
+  woody_flowers_scaled = array(dim = c(n_sites, n_years))
+  for(j in 1:n_sites){
+    for(k in 1: n_years){
+      woody_flowers_scaled[j,k] = mean(flowers_woody_by_survey[j,k,])
+    }
+  }
+  
+  #woody_flowers_scaled <- center_scale(woody_flowers_scaled)
+  
+  ##
+  # flower abundance on a given visit (for detection cov)
+  flowers_any_by_survey <- array(dim = c(n_sites, n_years, n_visits))
+  for(j in 1:n_sites){
+    for(k in 1: n_years){
+      for(l in 1:n_visits){
+        flowers_any_by_survey[j,k,l] = 
+          (flowers_herbaceous_by_survey_scaled[j,k,l] + flowers_woody_by_survey_scaled[j,k,l]) / 2
+      }
+    }
+  }
+  
+  
   
   ## --------------------------------------------------
   ## Create random effects
@@ -334,7 +422,7 @@ simulate_data <- function(
         
         logit_psi1[i,j] = 
           psi1_0 +
-          #psi1_species[i] +
+          psi1_species[i] +
           psi1_herbaceous_flowers * herbaceous_flowers_scaled[j,1] +  
           psi1_specialization * d_scaled[i] +
           (psi1_interaction_1 * d_scaled[i] * herbaceous_flowers_scaled[j,1]) +
@@ -343,7 +431,7 @@ simulate_data <- function(
         
         logit_gamma[i,j,k] = 
           gamma0 +
-          #gamma_species[i] +
+          gamma_species[i] +
           gamma_herbaceous_flowers * herbaceous_flowers_scaled[j,k] + 
           gamma_specialization * d_scaled[i] +
           (gamma_interaction_1 * d_scaled[i] * herbaceous_flowers_scaled[j,k]) +
@@ -352,7 +440,7 @@ simulate_data <- function(
         
         logit_phi[i,j,k] = 
           phi0 +
-          #phi_species[i] +
+          phi_species[i] +
           phi_herbaceous_flowers * herbaceous_flowers_scaled[j,k] + 
           phi_specialization * d_scaled[i] +
           (phi_interaction_1 * d_scaled[i] * herbaceous_flowers_scaled[j,k]) +
@@ -575,20 +663,20 @@ stan_data <- c("V", "species", "sites", "years",
 params <- c(#"L_species", "sigma_species",
   
   "psi1_0", 
-  #"sigma_psi1_species",
+  "sigma_psi1_species",
   "psi1_herbaceous_flowers", "psi1_woody_flowers", 
   "psi1_specialization",
   "psi1_interaction_1", "psi1_interaction_2",
   
   "gamma0", 
-  #"sigma_gamma_species",
+  "sigma_gamma_species",
   "gamma_herbaceous_flowers", "gamma_woody_flowers", 
   "gamma_specialization",
   "gamma_interaction_1", "gamma_interaction_2", 
   #"gamma_year",
   
   "phi0", 
-  #"sigma_phi_species",
+  "sigma_phi_species",
   "phi_herbaceous_flowers", "phi_woody_flowers", 
   "phi_specialization",
   "phi_interaction_1", "phi_interaction_2",
@@ -618,7 +706,7 @@ delta = 0.95
 inits <- lapply(1:n_chains, function(i)
   
   list(psi1_0 = runif(1, -1, 1),
-       #sigma_psi1_species = runif(1, 1, 2),
+       sigma_psi1_species = runif(1, 1, 2),
        psi1_herbaceous_flowers = runif(1, -1, 1),
        psi1_woody_flowers = runif(1, -1, 1),
        psi1_specialization = runif(1, -1, 1),
@@ -626,7 +714,7 @@ inits <- lapply(1:n_chains, function(i)
        psi1_interaction_2 = runif(1, -1, 1),
        
        gamma0 = runif(1, -1, 0),
-       #sigma_gamma_species = runif(1, 1, 2),
+       sigma_gamma_species = runif(1, 1, 2),
        gamma_herbaceous_flowers = runif(1, -1, 1),
        gamma_woody_flowers = runif(1, -1, 1),
        gamma_specialization = runif(1, -1, 1),
@@ -634,7 +722,7 @@ inits <- lapply(1:n_chains, function(i)
        gamma_interaction_2 = runif(1, -1, 1),
        
        phi0 = runif(1, 1, 2),
-       #sigma_phi_species = runif(1, 1, 2),
+       sigma_phi_species = runif(1, 1, 2),
        phi_herbaceous_flowers = runif(1, -1, 1),
        phi_woody_flowers = runif(1, -1, 1),
        phi_specialization = runif(1, -1, 1),
@@ -655,19 +743,19 @@ inits <- lapply(1:n_chains, function(i)
 # targets
 parameter_values <-  c(
   psi1_0, 
-  #sigma_psi1_species,
+  sigma_psi1_species,
   psi1_herbaceous_flowers, psi1_woody_flowers, 
   psi1_specialization,
   psi1_interaction_1, psi1_interaction_2,
   
   gamma0, 
-  #sigma_gamma_species,
+  sigma_gamma_species,
   gamma_herbaceous_flowers, gamma_woody_flowers, 
   gamma_specialization,
   gamma_interaction_1, gamma_interaction_2,
   
   phi0, 
-  #sigma_phi_species,
+  sigma_phi_species,
   phi_herbaceous_flowers, phi_woody_flowers, 
   phi_specialization,
   phi_interaction_1, phi_interaction_2,
@@ -677,7 +765,7 @@ parameter_values <-  c(
   mu_p_species_date, sigma_p_species_date, 
   mu_p_species_date_sq, sigma_p_species_date_sq, 
   p_flower_abundance_any, 
-  NA, NA, NA, NA, NA # 5 generated quantities to track
+  NA, NA, NA, NA # 4 generated quantities to track
 )
 
 targets <- as.data.frame(cbind(params, parameter_values))
@@ -704,20 +792,20 @@ saveRDS(stan_out_sim, "./dynamic_occupancy_model/simulation/stan_out_sim.rds")
 
 traceplot(stan_out_sim, pars = c(
   "psi1_0", 
-  #"sigma_psi1_species",
+  "sigma_psi1_species",
   "psi1_herbaceous_flowers", "psi1_woody_flowers", 
   "psi1_specialization",
   "psi1_interaction_1", "psi1_interaction_2",
   
   "gamma0", 
-  #"sigma_gamma_species",
+  "sigma_gamma_species",
   "gamma_herbaceous_flowers", "gamma_woody_flowers", 
   "gamma_specialization",
   "gamma_interaction_1", "gamma_interaction_2", 
   #"gamma_year",
   
   "phi0", 
-  #"sigma_phi_species",
+  "sigma_phi_species",
   "phi_herbaceous_flowers", "phi_woody_flowers", 
   "phi_specialization",
   "phi_interaction_1", "phi_interaction_2"
@@ -752,7 +840,7 @@ pairs(stan_out_sim, pars = c(
 library(ggplot2)
 library(tidyverse)
 
-targets2 <- targets[1:26,]
+targets2 <- targets[1:29,]
 
 fit_summary <- rstan::summary(stan_out_sim)
 View(cbind(1:nrow(fit_summary$summary), fit_summary$summary)) # View to see which row corresponds to the parameter of interest
@@ -761,66 +849,66 @@ X <- as.factor(seq(1:nrow(targets2)))
 
 estimates_lower <- c(
   fit_summary$summary[1,4], # psi1_0
-  #fit_summary$summary[2,4], # sigma_psi1_species
-  fit_summary$summary[2,4], # psi1_herbaceous_flowers
-  fit_summary$summary[3,4], # psi1_woody_flowers
-  fit_summary$summary[4,4], # psi1_specialization
-  fit_summary$summary[5,4], # psi1_interaction_1
-  fit_summary$summary[6,4], # psi1_interaction_2
-  fit_summary$summary[7,4], # gamma0
-  #fit_summary$summary[9,4], # sigma_gamma_species
-  fit_summary$summary[8,4], # gamma_herbaceous_flowers
-  fit_summary$summary[9,4], # gamma_woody_flowers
-  fit_summary$summary[10,4], # gamma_specialization
-  fit_summary$summary[11,4], # gamma_interaction_1
-  fit_summary$summary[12,4], # gamma_interaction_2
-  fit_summary$summary[13,4], # phi0
-  #fit_summary$summary[16,4], # sigma_phi_species
-  fit_summary$summary[14,4], # phi_herbaceous_flowers
-  fit_summary$summary[15,4], # phi_woody_flowers
-  fit_summary$summary[16,4], # phi_specialization
-  fit_summary$summary[17,4], # phi_interaction_1
-  fit_summary$summary[18,4], # phi_interaction_2
-  fit_summary$summary[19,4], # p0
-  fit_summary$summary[20,4], # sigma_p_species
-  fit_summary$summary[21,4], # p_specialization
-  fit_summary$summary[22,4], # mu_p_species_date
-  fit_summary$summary[23,4], # sigma_p_species_date
-  fit_summary$summary[24,4], # mu_p_species_date_sq
-  fit_summary$summary[25,4], # sigma_p_species_date_sq
-  fit_summary$summary[26,4] # p_flower_abundance_any
+  fit_summary$summary[2,4], # sigma_psi1_species
+  fit_summary$summary[3,4], # psi1_herbaceous_flowers
+  fit_summary$summary[4,4], # psi1_woody_flowers
+  fit_summary$summary[5,4], # psi1_specialization
+  fit_summary$summary[6,4], # psi1_interaction_1
+  fit_summary$summary[7,4], # psi1_interaction_2
+  fit_summary$summary[8,4], # gamma0
+  fit_summary$summary[9,4], # sigma_gamma_species
+  fit_summary$summary[10,4], # gamma_herbaceous_flowers
+  fit_summary$summary[11,4], # gamma_woody_flowers
+  fit_summary$summary[12,4], # gamma_specialization
+  fit_summary$summary[13,4], # gamma_interaction_1
+  fit_summary$summary[14,4], # gamma_interaction_2
+  fit_summary$summary[15,4], # phi0
+  fit_summary$summary[16,4], # sigma_phi_species
+  fit_summary$summary[17,4], # phi_herbaceous_flowers
+  fit_summary$summary[18,4], # phi_woody_flowers
+  fit_summary$summary[19,4], # phi_specialization
+  fit_summary$summary[20,4], # phi_interaction_1
+  fit_summary$summary[21,4], # phi_interaction_2
+  fit_summary$summary[22,4], # p0
+  fit_summary$summary[23,4], # sigma_p_species
+  fit_summary$summary[24,4], # p_specialization
+  fit_summary$summary[25,4], # mu_p_species_date
+  fit_summary$summary[26,4], # sigma_p_species_date
+  fit_summary$summary[27,4], # mu_p_species_date_sq
+  fit_summary$summary[28,4], # sigma_p_species_date_sq
+  fit_summary$summary[29,4] # p_flower_abundance_any
 )
 
 estimates_upper <- c(
   fit_summary$summary[1,8], # psi1_0
-  #fit_summary$summary[2,4], # sigma_psi1_species
-  fit_summary$summary[2,8], # psi1_herbaceous_flowers
-  fit_summary$summary[3,8], # psi1_woody_flowers
-  fit_summary$summary[4,8], # psi1_specialization
-  fit_summary$summary[5,8], # psi1_interaction_1
-  fit_summary$summary[6,8], # psi1_interaction_2
-  fit_summary$summary[7,8], # gamma0
-  #fit_summary$summary[9,4], # sigma_gamma_species
-  fit_summary$summary[8,8], # gamma_herbaceous_flowers
-  fit_summary$summary[9,8], # gamma_woody_flowers
-  fit_summary$summary[10,8], # gamma_specialization
-  fit_summary$summary[11,8], # gamma_interaction_1
-  fit_summary$summary[12,8], # gamma_interaction_2
-  fit_summary$summary[13,8], # phi0
-  #fit_summary$summary[16,4], # sigma_phi_species
-  fit_summary$summary[14,8], # phi_herbaceous_flowers
-  fit_summary$summary[15,8], # phi_woody_flowers
-  fit_summary$summary[16,8], # phi_specialization
-  fit_summary$summary[17,8], # phi_interaction_1
-  fit_summary$summary[18,8], # phi_interaction_2
-  fit_summary$summary[19,8], # p0
-  fit_summary$summary[20,8], # sigma_p_species
-  fit_summary$summary[21,8], # p_specialization
-  fit_summary$summary[22,8], # mu_p_species_date
-  fit_summary$summary[23,8], # sigma_p_species_date
-  fit_summary$summary[24,8], # mu_p_species_date_sq
-  fit_summary$summary[25,8], # sigma_p_species_date_sq
-  fit_summary$summary[26,8] # p_flower_abundance_any
+  fit_summary$summary[2,8], # sigma_psi1_species
+  fit_summary$summary[3,8], # psi1_herbaceous_flowers
+  fit_summary$summary[4,8], # psi1_woody_flowers
+  fit_summary$summary[5,8], # psi1_specialization
+  fit_summary$summary[6,8], # psi1_interaction_1
+  fit_summary$summary[7,8], # psi1_interaction_2
+  fit_summary$summary[8,8], # gamma0
+  fit_summary$summary[9,8], # sigma_gamma_species
+  fit_summary$summary[10,8], # gamma_herbaceous_flowers
+  fit_summary$summary[11,8], # gamma_woody_flowers
+  fit_summary$summary[12,8], # gamma_specialization
+  fit_summary$summary[13,8], # gamma_interaction_1
+  fit_summary$summary[14,8], # gamma_interaction_2
+  fit_summary$summary[15,8], # phi0
+  fit_summary$summary[16,8], # sigma_phi_species
+  fit_summary$summary[17,8], # phi_herbaceous_flowers
+  fit_summary$summary[18,8], # phi_woody_flowers
+  fit_summary$summary[19,8], # phi_specialization
+  fit_summary$summary[20,8], # phi_interaction_1
+  fit_summary$summary[21,8], # phi_interaction_2
+  fit_summary$summary[22,8], # p0
+  fit_summary$summary[23,8], # sigma_p_species
+  fit_summary$summary[24,8], # p_specialization
+  fit_summary$summary[25,8], # mu_p_species_date
+  fit_summary$summary[26,8], # sigma_p_species_date
+  fit_summary$summary[27,8], # mu_p_species_date_sq
+  fit_summary$summary[28,8], # sigma_p_species_date_sq
+  fit_summary$summary[29,8] # p_flower_abundance_any
 )
 
 df_estimates <- as.data.frame(cbind(X, targets2, estimates_lower, estimates_upper))
@@ -831,11 +919,11 @@ df_estimates$parameter_value <- as.numeric(df_estimates$parameter_value)
     scale_x_discrete(name="", breaks = c(1, 2, 3, 4, 5, 6, 7, 8, 
                                          9, 10, 11, 12, 13, 14, 15, 16, 
                                          17, 18, 19, 20, 21, 22, 23, 
-                                         24, 25, 26#, 27, 28, 29
+                                         24, 25, 26, 27, 28, 29
                                          ),
 
                      labels=c(bquote(psi[0]), 
-                              #bquote(sigma[psi1["species"]]),
+                              bquote(sigma[psi1["species"]]),
                               bquote(psi["herb."]),
                               bquote(psi["woody"]), 
                               bquote(psi["specialization"]),
@@ -843,7 +931,7 @@ df_estimates$parameter_value <- as.numeric(df_estimates$parameter_value)
                               bquote(psi["spec.*woody"]),
                               
                               bquote(gamma[0]), 
-                              #bquote(sigma[gamma["species"]]),
+                              bquote(sigma[gamma["species"]]),
                               bquote(gamma["herb."]),
                               bquote(gamma["woody"]), 
                               bquote(gamma["specialization"]),
@@ -851,7 +939,7 @@ df_estimates$parameter_value <- as.numeric(df_estimates$parameter_value)
                               bquote(gamma["spec.*woody"]),
                               
                               bquote(phi[0]), 
-                              #bquote(sigma[phi["species"]]),
+                              bquote(sigma[phi["species"]]),
                               bquote(phi["herb."]),
                               bquote(phi["woody"]), 
                               bquote(phi["specialization"]),

@@ -98,7 +98,7 @@ transformed parameters {
   vector[n_species] gamma_species;
   vector[n_species] phi_species;
   vector[n_species] p_species;
-  // implies: beta ~ normal(mu_beta, sigma_beta)
+  // implies: xprocess_species ~ normal(mu_xprocess_species, sigma_xprocess_species)
   psi1_species = psi1_0 + sigma_psi1_species * psi1_species_raw;
   gamma_species = gamma0 + sigma_gamma_species * gamma_species_raw;
   phi_species = phi0 + sigma_phi_species * phi_species_raw;
@@ -191,7 +191,7 @@ model {
   // colonization
   gamma0 ~ normal(0, 2); // persistence intercept
   gamma_species_raw ~ std_normal();
-  sigma_gamma_species ~ normal(0, 2); 
+  sigma_gamma_species ~ normal(0, 1); 
   gamma_herbaceous_flowers ~ normal(0, 2); // effect of habitat on colonization
   gamma_woody_flowers ~ normal(0, 2); // effect of habitat on colonization
   gamma_specialization ~ normal(0, 2);
@@ -202,7 +202,7 @@ model {
   // persistence
   phi0 ~ normal(0, 2); // global intercept
   phi_species_raw ~ std_normal();
-  sigma_phi_species ~ normal(0, 2);
+  sigma_phi_species ~ normal(0, 1);
   phi_herbaceous_flowers ~ normal(0, 2); // effect of habitat on colonization
   phi_woody_flowers ~ normal(0, 2); // effect of habitat on colonization
   phi_specialization ~ normal(0, 2);

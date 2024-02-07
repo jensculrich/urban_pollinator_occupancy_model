@@ -2,6 +2,7 @@
 # we will compare this to how many detections per species simulated in the 
 # generated quantities block of our model (W_rep) for a visual PPC
 
+library(rstan)
 library(tidyverse)
 
 source("./dynamic_occupancy_model/run_model/prep_data.R")
@@ -69,11 +70,11 @@ c_mid_highlight <- c("#A25050")
 c_dark <- c("#8F2727")
 c_dark_highlight <- c("#7C0000")
 
-start = 1 # which species to start at (hard to see them all at once)
+start = 54 # which species to start at (hard to see them all at once)
 # start at 1, 37, and 73 is pretty good for visualization
-n = 36 # how many species to plot (36 is a good number to look at the species in 3 slices)
+n = 53 # how many species to plot (36 is a good number to look at the species in 3 slices)
 
-stan_fit_first_W <- 91 # this changes depending on how many params you tracked
+stan_fit_first_W <- 39 # this changes depending on how many params you tracked
 
 df_estimates <- data.frame(X = numeric(), 
                            Y = numeric(), 

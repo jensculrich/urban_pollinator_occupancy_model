@@ -77,9 +77,9 @@ params <- c(#"L_species", "sigma_species",
   "W_species_rep")
 
 # MCMC settings
-n_iterations <- 300
+n_iterations <- 800
 n_thin <- 1
-n_burnin <- 150
+n_burnin <- 400
 n_chains <- 4
 n_cores <- n_chains
 delta = 0.95
@@ -146,15 +146,15 @@ stan_out <- readRDS("./dynamic_occupancy_model/model_outputs/stan_out3.rds")
 
 
 print(stan_out, digits = 3, 
-      pars = c("psi1_0", #"sigma_psi1_species",
+      pars = c("psi1_0", #sigma_psi1_species",
                "psi1_herbaceous_flowers", "psi1_woody_flowers", "psi1_specialization",
                "psi1_interaction_1", "psi1_interaction_2",
                
-               "gamma0", #"sigma_gamma_species",
+               "gamma0", "sigma_gamma_species",
                "gamma_herbaceous_flowers", "gamma_woody_flowers", "gamma_specialization",
                "gamma_interaction_1", "gamma_interaction_2",
                
-               "phi0", #"sigma_phi_species",
+               "phi0", "sigma_phi_species",
                "phi_herbaceous_flowers", "phi_woody_flowers", "phi_specialization",
                "phi_interaction_1", "phi_interaction_2"
       ))
