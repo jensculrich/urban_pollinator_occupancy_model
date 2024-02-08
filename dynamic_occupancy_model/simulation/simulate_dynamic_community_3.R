@@ -6,7 +6,7 @@ library(rstan) # to run analysis
 # choose sample sizes and 
 n_species <- 80 # number of species
 n_sites <- 20 # number of sites (must be an even number for simulation code)
-n_years <- 4 # number of years
+n_years <- 5 # number of years
 n_years_minus1 <- n_years - 1
 n_visits <- 6 # number of surveys per year
 
@@ -32,8 +32,8 @@ gamma_woody_flowers <- 0
 gamma_specialization <- -1.25
 gamma_interaction_1 <- 0
 gamma_interaction_2 <- 1
-gamma_min = 0 # set these to zero if you want no year heterogeneity
-gamma_max = 0 
+gamma_min = -0.75 # set these to zero if you want no year heterogeneity
+gamma_max = 0.75 
 
 phi0 <- 2 # prob of initial occupancy
 sigma_phi_species <- 1 # prob of initial occupancy
@@ -42,8 +42,8 @@ phi_woody_flowers <- 0
 phi_specialization <- -0.5
 phi_interaction_1 <- 0.5
 phi_interaction_2 <- 0.5
-phi_min = 0 # set these to zero if you want no year heterogeneity
-phi_max = 0 
+phi_min = -0.75 # set these to zero if you want no year heterogeneity
+phi_max = 0.75
 
 p0 <- -2.5 # probability of detection (logit scaled)
 sigma_p_species <- 1 # species-specific variation
@@ -429,10 +429,11 @@ simulate_data <- function(
           psi1_woody_flowers * woody_flowers_scaled[j,1] + 
           (psi1_interaction_2 * d_scaled[i] * woody_flowers_scaled[j,1])
         
-        logit_gamma[i,j,k] = 
+        logit_gamma[i,j,k] = # gamma for transition (starting for between years 1 and 2)
           gamma0 +
           gamma_species[i] +
-          gamma_herbaceous_flowers * herbaceous_flowers_scaled[j,k] + 
+          gamma_year[k] + # gamma transition interval 1
+          gamma_herbaceous_flowers * herbaceous_flowers_scaled[j,k] + # flowers starting with flowers year 2 for transition 1
           gamma_specialization * d_scaled[i] +
           (gamma_interaction_1 * d_scaled[i] * herbaceous_flowers_scaled[j,k]) +
           gamma_woody_flowers * woody_flowers_scaled[j,k] + 
@@ -441,11 +442,12 @@ simulate_data <- function(
         logit_phi[i,j,k] = 
           phi0 +
           phi_species[i] +
-          phi_herbaceous_flowers * herbaceous_flowers_scaled[j,k] + 
+          phi_year[k] +
+          phi_herbaceous_flowers * herbaceous_flowers_scaled[j,k+1] + 
           phi_specialization * d_scaled[i] +
-          (phi_interaction_1 * d_scaled[i] * herbaceous_flowers_scaled[j,k]) +
-          phi_woody_flowers * woody_flowers_scaled[j,k] + 
-          (phi_interaction_2 * d_scaled[i] * woody_flowers_scaled[j,k])
+          (phi_interaction_1 * d_scaled[i] * herbaceous_flowers_scaled[j,k+1]) +
+          phi_woody_flowers * woody_flowers_scaled[j,k+1] + 
+          (phi_interaction_2 * d_scaled[i] * woody_flowers_scaled[j,k+1])
       
       }
     }
@@ -474,6 +476,7 @@ simulate_data <- function(
         # and then assign z stochastically
         # some sites may transition if they are colonized or local extinction occurs
         # but might otherwise retain their state across years
+        # look at year starting with 2, for the first transition (phi or gamma[,,1])
         z[i,j,k] <- rbinom(n = 1, size = 1, prob = exp_z) 
         
       }
@@ -585,7 +588,7 @@ simulate_data <- function(
 ## --------------------------------------------------
 ### Simulate some data
 
-set.seed(1)
+#set.seed(1)
 my_simulated_data <- simulate_data(  
   n_species, n_sites, n_years, n_years_minus1, n_visits,
   psi1_0,
@@ -673,7 +676,6 @@ params <- c(#"L_species", "sigma_species",
   "gamma_herbaceous_flowers", "gamma_woody_flowers", 
   "gamma_specialization",
   "gamma_interaction_1", "gamma_interaction_2", 
-  #"gamma_year",
   
   "phi0", 
   "sigma_phi_species",
@@ -688,6 +690,10 @@ params <- c(#"L_species", "sigma_species",
   "mu_p_species_date", "sigma_p_species_date", 
   "mu_p_species_date_sq", "sigma_p_species_date_sq", 
   "p_flower_abundance_any", 
+  
+  "gamma_year",
+  "phi_year",
+  
   #"species_richness", 
   "avg_species_richness_control", "avg_species_richness_enhanced", "increase_richness_enhanced",
   "W_species_rep")
@@ -765,6 +771,7 @@ parameter_values <-  c(
   mu_p_species_date, sigma_p_species_date, 
   mu_p_species_date_sq, sigma_p_species_date_sq, 
   p_flower_abundance_any, 
+  NA, NA,
   NA, NA, NA, NA # 4 generated quantities to track
 )
 
@@ -773,7 +780,7 @@ targets <- as.data.frame(cbind(params, parameter_values))
 
 ## --------------------------------------------------
 ### Run model
-stan_model <- "./dynamic_occupancy_model/models/dynocc2.stan"
+stan_model <- "./dynamic_occupancy_model/models/dynocc3.stan"
 
 ## Call Stan from R
 stan_out_sim <- stan(stan_model,
@@ -782,7 +789,7 @@ stan_out_sim <- stan(stan_model,
                      pars = params,
                      chains = n_chains, iter = n_iterations, 
                      warmup = n_burnin, thin = n_thin,
-                     seed = 1,
+                     #seed = 1,
                      control=list(adapt_delta=delta),
                      open_progress = FALSE,
                      cores = n_cores)
@@ -820,6 +827,9 @@ traceplot(stan_out_sim, pars = c(
   "mu_p_species_date", "sigma_p_species_date", "mu_p_species_date_sq", "sigma_p_species_date_sq" 
 ))
 
+traceplot(stan_out_sim, pars = c(
+  "gamma_year", "phi_year"))
+
 traceplot(stan_out_sim,  
           pars = c("avg_species_richness_control", 
                    "avg_species_richness_enhanced",
@@ -834,6 +844,11 @@ pairs(stan_out_sim, pars = c(
   "gamma0", "sigma_gamma_species",
   "phi0", "sigma_phi_species"
 ))
+
+print(gamma_year)
+print(phi_year)
+print(stan_out_sim, pars = c(
+  "gamma_year", "phi_year"))
 
 ## --------------------------------------------------
 ### Plot parameter estimates and targets
@@ -957,7 +972,7 @@ df_estimates$parameter_value <- as.numeric(df_estimates$parameter_value)
                      )
     ) +
     scale_y_continuous(str_wrap("Posterior model estimate (logit-scaled)", width = 30),
-                       limits = c(-3.5, 3.5)) +
+                       limits = c(-5, 5)) +
     guides(color = guide_legend(title = "")) +
     geom_hline(yintercept = 0, lty = "dashed") +
     theme(legend.text=element_text(size=10),
@@ -977,6 +992,8 @@ p <- p +
              size = 5, alpha = 0.8, shape = 10, colour = "firebrick2") 
 
 p
+
+
 
 
 ### PPC's

@@ -1,4 +1,4 @@
-// dynocc model 1 + reparameterized random effects
+// dynocc model 2 + effects of year
 
 // dynamic multi-species occupancy model for pollinators in urban parks
 // jcu, started nov 23, 2023.
@@ -22,7 +22,7 @@ data {
   int<lower=1> sites[n_sites]; // vector of site identities
   int<lower=0> n_years; // total years
   int<lower=0> n_years_minus1;
-  int<lower=0> years[n_years_minus1]; // vector of year identities (no final year because we don't return after last transition)
+  int<lower=1> years[n_years_minus1]; // vector of year transition indexes (index 1 == transition between years 1 and 2)
   int<lower=0> n_visits; // visits per year
   int<lower=0,upper=1> V[n_species, n_sites, n_years, n_visits]; // binary detection / non detection
   
@@ -51,25 +51,25 @@ parameters {
   
   // colonization
   real gamma0;
-  //vector[n_species] gamma_species_raw;
-  //real<lower=0> sigma_gamma_species;
+  vector[n_species] gamma_species_raw;
+  real<lower=0> sigma_gamma_species;
   real gamma_herbaceous_flowers;
   real gamma_woody_flowers;
   real gamma_specialization;
   real gamma_interaction_1;
   real gamma_interaction_2;
-  //vector[n_years_minus1] gamma_year;
+  vector[n_years_minus1] gamma_year;
   
   // persistence
   real phi0;
-  //vector[n_species] phi_species_raw;
-  //real<lower=0> sigma_phi_species;
+  vector[n_species] phi_species_raw;
+  real<lower=0> sigma_phi_species;
   real phi_herbaceous_flowers;
   real phi_woody_flowers;
   real phi_specialization;
   real phi_interaction_1;
   real phi_interaction_2;
-  //vector[n_years_minus1] phi_year;
+  vector[n_years_minus1] phi_year;
 
   // detection
   real p0; // intercept
@@ -90,23 +90,23 @@ transformed parameters {
 
   // logit scale psi1, gamma, phi
   real psi1[n_species, n_sites]; // odds of occurrence year 1
-  real gamma[n_species, n_sites, n_years]; // odds of colonization
-  real phi[n_species, n_sites, n_years]; // odds of persistence
+  real gamma[n_species, n_sites, n_years_minus1]; // odds of colonization
+  real phi[n_species, n_sites, n_years_minus1]; // odds of persistence
   real p[n_species, n_sites, n_years, n_visits];  // odds of detection
   
   vector[n_species] psi1_species;
-  //vector[n_species] gamma_species;
-  //vector[n_species] phi_species;
+  vector[n_species] gamma_species;
+  vector[n_species] phi_species;
   vector[n_species] p_species;
-  // implies: beta ~ normal(mu_beta, sigma_beta)
+  // implies: xprocess_species ~ normal(mu_xprocess_species, sigma_xprocess_species)
   psi1_species = psi1_0 + sigma_psi1_species * psi1_species_raw;
-  //gamma_species = gamma0 + sigma_gamma_species * gamma_species_raw;
-  //phi_species = phi0 + sigma_phi_species * phi_species_raw;
+  gamma_species = gamma0 + sigma_gamma_species * gamma_species_raw;
+  phi_species = phi0 + sigma_phi_species * phi_species_raw;
   p_species = p0 + sigma_p_species * p_species_raw;
   
   for(i in 1:n_species){
     for(j in 1:n_sites){    // loop across all sites
-      for(k in 1:n_years){ // loop across all years
+      for(k in 1:n_years_minus1){ // loop across all years
   
         psi1[i,j] = inv_logit( // probability (0-1) of occurrence in year 1 is equal to..
           psi1_species[species[i]] + // a species specific intercept
@@ -119,38 +119,46 @@ transformed parameters {
         
         gamma[i,j,k] = inv_logit( // probability (0-1) of colonization is equal to..
           gamma_species[species[i]] + // a species specific intercept
+          gamma_year[years[k]] + // the effect of the first year transition // index 1 == year 2
           gamma_specialization * d[i] +
-          gamma_herbaceous_flowers * herbaceous_flowers_scaled[j,k] + 
-          (gamma_interaction_1 * d[i] * herbaceous_flowers_scaled[j,k]) +
-          gamma_woody_flowers * woody_flowers_scaled[j,k] + 
-          (gamma_interaction_2 * d[i] * woody_flowers_scaled[j,k])
+          gamma_herbaceous_flowers * herbaceous_flowers_scaled[j,k+1] + 
+          (gamma_interaction_1 * d[i] * herbaceous_flowers_scaled[j,k+1]) +
+          gamma_woody_flowers * woody_flowers_scaled[j,k+1] + 
+          (gamma_interaction_2 * d[i] * woody_flowers_scaled[j,k+1])
           ); // end phi[j,k]
-        
+                
         phi[i,j,k] = inv_logit( // probability (0-1) of persistence is equal to..
           phi_species[species[i]] + // a species specific intercept
+          phi_year[years[k]] + // the effect of the first year transition // index 1 == year 2
           phi_specialization * d[i] +
-          phi_herbaceous_flowers * herbaceous_flowers_scaled[j,k] + 
-          (phi_interaction_1 * d[i] * herbaceous_flowers_scaled[j,k]) +
-          phi_woody_flowers * woody_flowers_scaled[j,k] + 
-          (phi_interaction_2 * d[i] * woody_flowers_scaled[j,k]) 
+          phi_herbaceous_flowers * herbaceous_flowers_scaled[j,k+1] + 
+          (phi_interaction_1 * d[i] * herbaceous_flowers_scaled[j,k+1]) +
+          phi_woody_flowers * woody_flowers_scaled[j,k+1] + 
+          (phi_interaction_2 * d[i] * woody_flowers_scaled[j,k+1]) 
           ); // end phi[j,k]
-          
-          for(l in 1:n_visits){ // loop across all visits
-
-            p[i,j,k,l] = inv_logit( // probability (0-1) of detection is equal to..
-              p_species[species[i]] + // a species specific intercept
-              p_specialization * degree[i] +
-              p_date[species[i]] * date_scaled[j,k,l] + // a species-specific phenological detection effect (peak)
-              p_date_sq[species[i]] * (date_scaled[j,k,l])^2 + // a species-specific phenological detection effect (decay)
-              p_flower_abundance_any * flowers_any_by_survey[j,k,l]
-              ); // end p[j,k,l]
-            
-          } // end loop across all visits
           
       } // end loop across all years
     } // end loop across all sites
   } // end loop across all species 
-     
+  
+  // have to do another loop because phi and gamma have a shorter k index length than p
+  for(i in 1:n_species){
+    for(j in 1:n_sites){    // loop across all sites
+      for(k in 1:n_years){ // loop across all years
+        for(l in 1:n_visits){ // loop across all visits
+
+          p[i,j,k,l] = inv_logit( // probability (0-1) of detection is equal to..
+            p_species[species[i]] + // a species specific intercept
+            p_specialization * degree[i] +
+            p_date[species[i]] * date_scaled[j,k,l] + // a species-specific phenological detection effect (peak)
+            p_date_sq[species[i]] * (date_scaled[j,k,l])^2 + // a species-specific phenological detection effect (decay)
+            p_flower_abundance_any * flowers_any_by_survey[j,k,l]
+            ); // end p[j,k,l]
+            
+        } // end loop across all visits
+      } // end loop across all years
+    } // end loop across all sites
+  } // end loop across all species 
    
   // construct an occurrence array
   real psi[n_species, n_sites, n_years];
@@ -164,7 +172,11 @@ transformed parameters {
         } else { // describe temporally autocorrelated system dynamics
           // As psi approaches 1, there's a weighted switch on phi (survival)
           // As psi approaches 0, there's a weighted switch on gamma (colonization)
-          psi[i,j,k] = psi[i,j,k-1] * phi[i,j,k] + (1 - psi[i,j,k-1]) * gamma[i,j,k]; 
+          // reduce 1 from k for phi and gamma because there are n_years - 1 transitions 
+          // and so there are only n_years - 1 speciesXsite "stacks" of phi and gamma
+          // but phi[,,k-1] for k = 2 will actually consider the effects of 
+          // e.g. flower abundacnce in year 2 (since year 2 is the first year we estimate phi)
+          psi[i,j,k] = psi[i,j,k-1] * phi[i,j,k-1] + (1 - psi[i,j,k-1]) * gamma[i,j,k-1]; 
         } // end if/else
         
       } // end loop across all years
@@ -197,18 +209,18 @@ model {
   gamma_specialization ~ normal(0, 2);
   gamma_interaction_1 ~ normal(0, 2); // baseline effect of habitat 
   gamma_interaction_2 ~ normal(0, 2); // effect of specialization on response to habitat
-  //gamma_year ~ normal(0, 1); // year effects
+  gamma_year ~ normal(0, 0.5); // year effects
   
   // persistence
   phi0 ~ normal(0, 2); // global intercept
   phi_species_raw ~ std_normal();
-  sigma_phi_species ~ normal(0, 2);
+  sigma_phi_species ~ normal(0, 1);
   phi_herbaceous_flowers ~ normal(0, 2); // effect of habitat on colonization
   phi_woody_flowers ~ normal(0, 2); // effect of habitat on colonization
   phi_specialization ~ normal(0, 2);
   phi_interaction_1 ~ normal(0, 2); // baseline effect of habitat 
   phi_interaction_2 ~ normal(0, 2); // effect of specialization on response to habitat
-  //phi_year ~ normal(0, 1);
+  phi_year ~ normal(0, 0.5);
   
   // detection
   p0 ~ normal(0, 2); // global intercept

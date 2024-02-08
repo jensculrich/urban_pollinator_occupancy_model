@@ -58,8 +58,7 @@ parameters {
   real gamma_specialization;
   real gamma_interaction_1;
   real gamma_interaction_2;
-  //vector[n_years_minus1] gamma_year;
-  
+
   // persistence
   real phi0;
   vector[n_species] phi_species_raw;
@@ -69,7 +68,6 @@ parameters {
   real phi_specialization;
   real phi_interaction_1;
   real phi_interaction_2;
-  //vector[n_years_minus1] phi_year;
 
   // detection
   real p0; // intercept
@@ -197,8 +195,7 @@ model {
   gamma_specialization ~ normal(0, 2);
   gamma_interaction_1 ~ normal(0, 2); // baseline effect of habitat 
   gamma_interaction_2 ~ normal(0, 2); // effect of specialization on response to habitat
-  //gamma_year ~ normal(0, 1); // year effects
-  
+
   // persistence
   phi0 ~ normal(0, 2); // global intercept
   phi_species_raw ~ std_normal();
@@ -208,8 +205,7 @@ model {
   phi_specialization ~ normal(0, 2);
   phi_interaction_1 ~ normal(0, 2); // baseline effect of habitat 
   phi_interaction_2 ~ normal(0, 2); // effect of specialization on response to habitat
-  //phi_year ~ normal(0, 1);
-  
+
   // detection
   p0 ~ normal(0, 2); // global intercept
   p_species_raw ~ std_normal();
