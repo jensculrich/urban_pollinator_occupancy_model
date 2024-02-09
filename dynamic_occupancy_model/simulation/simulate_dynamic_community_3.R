@@ -6,7 +6,7 @@ library(rstan) # to run analysis
 # choose sample sizes and 
 n_species <- 80 # number of species
 n_sites <- 24 # number of sites (must be an even number for simulation code)
-n_years <- 10 # number of years
+n_years <- 5 # number of years
 n_years_minus1 <- n_years - 1
 n_visits <- 6 # number of surveys per year
 
@@ -32,8 +32,8 @@ gamma_woody_flowers <- 0
 gamma_specialization <- -1.25
 gamma_interaction_1 <- 0
 gamma_interaction_2 <- 1
-gamma_min = -0.75 # set these to zero if you want no year heterogeneity
-gamma_max = 0.75 
+gamma_min = 0 # set these to zero if you want no year heterogeneity
+gamma_max = 0 
 
 phi0 <- 2 # prob of initial occupancy
 sigma_phi_species <- 1 # prob of initial occupancy
@@ -42,8 +42,8 @@ phi_woody_flowers <- 0
 phi_specialization <- -0.5
 phi_interaction_1 <- 0.5
 phi_interaction_2 <- 0.5
-phi_min = -0.75 # set these to zero if you want no year heterogeneity
-phi_max = 0.75
+phi_min = -1 # set these to zero if you want no year heterogeneity
+phi_max = 1
 
 p0 <- -2.5 # probability of detection (logit scaled)
 sigma_p_species <- 1 # species-specific variation
@@ -433,11 +433,11 @@ simulate_data <- function(
           gamma0 +
           gamma_species[i] +
           gamma_year[k] + # gamma transition interval 1
-          gamma_herbaceous_flowers * herbaceous_flowers_scaled[j,k] + # flowers starting with flowers year 2 for transition 1
+          gamma_herbaceous_flowers * herbaceous_flowers_scaled[j,k+1] + # flowers starting with flowers year 2 for transition 1
           gamma_specialization * d_scaled[i] +
-          (gamma_interaction_1 * d_scaled[i] * herbaceous_flowers_scaled[j,k]) +
-          gamma_woody_flowers * woody_flowers_scaled[j,k] + 
-          (gamma_interaction_2 * d_scaled[i] * woody_flowers_scaled[j,k])
+          (gamma_interaction_1 * d_scaled[i] * herbaceous_flowers_scaled[j,k+1]) +
+          gamma_woody_flowers * woody_flowers_scaled[j,k+1] + 
+          (gamma_interaction_2 * d_scaled[i] * woody_flowers_scaled[j,k+1])
         
         logit_phi[i,j,k] = 
           phi0 +
