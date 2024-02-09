@@ -5,8 +5,8 @@ library(rstan) # to run analysis
 
 # choose sample sizes and 
 n_species <- 80 # number of species
-n_sites <- 20 # number of sites (must be an even number for simulation code)
-n_years <- 5 # number of years
+n_sites <- 24 # number of sites (must be an even number for simulation code)
+n_years <- 10 # number of years
 n_years_minus1 <- n_years - 1
 n_visits <- 6 # number of surveys per year
 
