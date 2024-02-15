@@ -5,8 +5,8 @@ library(rstan) # to run analysis
 
 # choose sample sizes and 
 n_species <- 80 # number of species
-n_sites <- 24 # number of sites (must be an even number for simulation code)
-n_years <- 5 # number of years
+n_sites <- 20 # number of sites (must be an even number for simulation code)
+n_years <- 4 # number of years
 n_years_minus1 <- n_years - 1
 n_visits <- 6 # number of surveys per year
 
@@ -21,7 +21,7 @@ psi1_0 <- 0 # prob of initial occupancy
 sigma_psi1_species <- 2 # prob of initial occupancy
 psi1_herbaceous_flowers <- 0.6
 psi1_woody_flowers <- 0.4
-psi1_specialization <- -1
+psi1_specialization <- 0
 psi1_interaction_1 <- 0
 psi1_interaction_2 <- 0.5
 
@@ -42,12 +42,12 @@ phi_woody_flowers <- 0
 phi_specialization <- -0.5
 phi_interaction_1 <- 0.5
 phi_interaction_2 <- 0.5
-phi_min = -1 # set these to zero if you want no year heterogeneity
-phi_max = 1
+phi_min = 0 # set these to zero if you want no year heterogeneity
+phi_max = 0
 
 p0 <- -2.5 # probability of detection (logit scaled)
 sigma_p_species <- 1 # species-specific variation
-p_specialization <- -0.25
+p_specialization <- 0
 p_flower_abundance_any <- 0.5 # increase in detection rate moving from one habitat type to the other (logit scaled)
 mu_p_species_date <- 0
 sigma_p_species_date <- 1
@@ -691,8 +691,8 @@ params <- c(#"L_species", "sigma_species",
   "mu_p_species_date_sq", "sigma_p_species_date_sq", 
   "p_flower_abundance_any", 
   
-  "gamma_year",
-  "phi_year",
+  #"gamma_year",
+  #"phi_year",
   
   #"species_richness", 
   "avg_species_richness_control", "avg_species_richness_enhanced", "increase_richness_enhanced",
@@ -771,7 +771,7 @@ parameter_values <-  c(
   mu_p_species_date, sigma_p_species_date, 
   mu_p_species_date_sq, sigma_p_species_date_sq, 
   p_flower_abundance_any, 
-  NA, NA,
+  #NA, NA, # year effects
   NA, NA, NA, NA # 4 generated quantities to track
 )
 
@@ -780,7 +780,7 @@ targets <- as.data.frame(cbind(params, parameter_values))
 
 ## --------------------------------------------------
 ### Run model
-stan_model <- "./dynamic_occupancy_model/models/dynocc3.stan"
+stan_model <- "./dynamic_occupancy_model/models/dynocc4.stan"
 
 ## Call Stan from R
 stan_out_sim <- stan(stan_model,
@@ -972,7 +972,7 @@ df_estimates$parameter_value <- as.numeric(df_estimates$parameter_value)
                      )
     ) +
     scale_y_continuous(str_wrap("Posterior model estimate (logit-scaled)", width = 30),
-                       limits = c(-5, 5)) +
+                       limits = c(-3.5, 3)) +
     guides(color = guide_legend(title = "")) +
     geom_hline(yintercept = 0, lty = "dashed") +
     theme(legend.text=element_text(size=10),

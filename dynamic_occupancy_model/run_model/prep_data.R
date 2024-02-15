@@ -371,7 +371,11 @@ process_raw_data <- function(min_unique_detections) {
     ungroup() %>%
   
     # scale the variable
-    mutate(plant_abundance_scaled = center_scale(mean_annual_plant_abundance)) %>%
+    mutate(plant_abundance_scaled = center_scale(mean_annual_plant_abundance))
+    
+  original_herb_abundance <- plant_abundance_df$mean_annual_plant_abundance
+    
+  plant_abundance_df <- plant_abundance_df %>%
     select(SITE, YEAR, plant_abundance_scaled) %>%
     pivot_wider(names_from = YEAR, values_from = plant_abundance_scaled)
   
@@ -425,7 +429,11 @@ process_raw_data <- function(min_unique_detections) {
     ungroup() %>%
     
     # scale the variable
-    mutate(woody_plant_abundance_scaled = center_scale(mean_annual_woody_plant_abundance)) %>%
+    mutate(woody_plant_abundance_scaled = center_scale(mean_annual_woody_plant_abundance)) 
+  
+  original_woody_abundance <- woody_plant_data_subset$mean_annual_woody_plant_abundance
+  
+  woody_plant_data_subset <- woody_plant_data_subset %>%
     select(SITE, YEAR, woody_plant_abundance_scaled) %>%
     pivot_wider(names_from = YEAR, values_from = woody_plant_abundance_scaled)
   
@@ -519,7 +527,10 @@ process_raw_data <- function(min_unique_detections) {
     woody_flowers_scaled = woody_flowers_scaled,
     herbaceous_flowers_by_survey = herbaceous_flowers_by_survey,
     woody_flowers_by_survey = woody_flowers_by_survey,
-    flowers_any_by_survey = flowers_any_by_survey
+    flowers_any_by_survey = flowers_any_by_survey,
+    
+    original_herb_abundance = original_herb_abundance,
+    original_woody_abundance = original_woody_abundance
     
   ))
   

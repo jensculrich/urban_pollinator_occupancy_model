@@ -77,9 +77,9 @@ params <- c(#"L_species", "sigma_species",
   "W_species_rep")
 
 # MCMC settings
-n_iterations <- 800
+n_iterations <- 1000
 n_thin <- 1
-n_burnin <- 400
+n_burnin <- 500
 n_chains <- 4
 n_cores <- n_chains
 delta = 0.95
@@ -126,7 +126,7 @@ inits <- lapply(1:n_chains, function(i)
 
 ## --------------------------------------------------
 ### Run model
-stan_model <- "./dynamic_occupancy_model/models/dynocc2.stan"
+stan_model <- "./dynamic_occupancy_model/models/dynocc4.stan"
 
 ## Call Stan from R
 set.seed(1)
@@ -142,7 +142,7 @@ stan_out <- stan(stan_model,
                      cores = n_cores)
 
 saveRDS(stan_out, "./dynamic_occupancy_model/model_outputs/stan_out.rds")
-stan_out <- readRDS("./dynamic_occupancy_model/model_outputs/stan_out3.rds")
+#stan_out <- readRDS("./dynamic_occupancy_model/model_outputs/stan_out3.rds")
 
 
 print(stan_out, digits = 3, 
