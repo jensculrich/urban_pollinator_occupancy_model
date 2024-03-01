@@ -201,7 +201,7 @@ model {
   psi1_interaction_2 ~ normal(0, 2); // effect of specialization on response to habitat
   
   // colonization
-  gamma0 ~ normal(0, 2); // persistence intercept
+  gamma0 ~ normal(0, 1); // persistence intercept
   gamma_species_raw ~ std_normal();
   sigma_gamma_species ~ normal(0, 1); 
   gamma_herbaceous_flowers ~ normal(0, 2); // effect of habitat on colonization
@@ -212,7 +212,7 @@ model {
   gamma_year ~ normal(0, 0.5); // year effects
   
   // persistence
-  phi0 ~ normal(0, 2); // global intercept
+  phi0 ~ normal(0, 1); // global intercept
   phi_species_raw ~ std_normal();
   sigma_phi_species ~ normal(0, 1);
   phi_herbaceous_flowers ~ normal(0, 2); // effect of habitat on colonization

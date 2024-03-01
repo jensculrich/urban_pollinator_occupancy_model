@@ -1,7 +1,7 @@
 library(rstan)
 
 source("./dynamic_occupancy_model/run_model/prep_data.R")
-min_unique_detections = 2 # >=
+min_unique_detections = 1 # >=
 my_data <- process_raw_data(min_unique_detections)
 
 stan_out <- readRDS("./dynamic_occupancy_model/model_outputs/stan_out.rds")
@@ -46,7 +46,7 @@ logit <- function(x) log(x/(1-x))
 library(viridis)
 n_bins = 15
 my_palette <- palette(viridis(n = n_bins, option = "C"))
-my_palette_reduced <- rev(c(my_palette[2], my_palette[7]))
+my_palette_reduced <- rev(c(my_palette[1], my_palette[4]))
 
 ## --------------------------------------------------
 ## categorical habitat species richness plot
@@ -58,77 +58,77 @@ X <- seq(1:n_years) # number of years
 
 # mean of eco params
 Y <- c(
-  fit_summary$summary[93,1], # mean species richness year 1
-  fit_summary$summary[94,1], # mean species richness year 2
-  fit_summary$summary[95,1] # mean species richness year 3
+  fit_summary$summary[33,1], # mean species richness year 1
+  fit_summary$summary[34,1], # mean species richness year 2
+  fit_summary$summary[35,1] # mean species richness year 3
 )
 
 # confidence intervals
 lower_95 <- c(
-  fit_summary$summary[93,4], # mean species richness year 1
-  fit_summary$summary[94,4], # mean species richness year 2
-  fit_summary$summary[95,4] # mean species richness year 3
+  fit_summary$summary[33,4], # mean species richness year 1
+  fit_summary$summary[34,4], # mean species richness year 2
+  fit_summary$summary[35,4] # mean species richness year 3
 )
 
 upper_95 <- c(
-  fit_summary$summary[93,8], # mean species richness year 1
-  fit_summary$summary[94,8], # mean species richness year 2
-  fit_summary$summary[95,8] # mean species richness year 3
+  fit_summary$summary[33,8], # mean species richness year 1
+  fit_summary$summary[34,8], # mean species richness year 2
+  fit_summary$summary[35,8] # mean species richness year 3
 )
 
 lower_50 <- c(
-  fit_summary$summary[93,5], # mean species richness year 1
-  fit_summary$summary[94,5], # mean species richness year 2
-  fit_summary$summary[95,5] # mean species richness year 3
+  fit_summary$summary[33,5], # mean species richness year 1
+  fit_summary$summary[34,5], # mean species richness year 2
+  fit_summary$summary[35,5] # mean species richness year 3
 )
 
 upper_50 <- c(
-  fit_summary$summary[93,7], # mean species richness year 1
-  fit_summary$summary[94,7], # mean species richness year 2
-  fit_summary$summary[95,7] # mean species richness year 3
+  fit_summary$summary[33,7], # mean species richness year 1
+  fit_summary$summary[34,7], # mean species richness year 2
+  fit_summary$summary[35,7] # mean species richness year 3
 )
 
 df_estimates_enhanced <- as.data.frame(cbind(X, Y, 
                                              lower_95, upper_95,
                                              lower_50, upper_50)) %>%
-  mutate(habitat = "enhanced")
+  mutate(habitat = "no-mow")
 
 # mean of eco params
 Y <- c(
-  fit_summary$summary[90,1], # mean species richness year 1
-  fit_summary$summary[91,1], # mean species richness year 2
-  fit_summary$summary[92,1] # mean species richness year 3
+  fit_summary$summary[30,1], # mean species richness year 1
+  fit_summary$summary[31,1], # mean species richness year 2
+  fit_summary$summary[32,1] # mean species richness year 3
 )
 
 # confidence intervals
 lower_95 <- c(
-  fit_summary$summary[90,4], # mean species richness year 1
-  fit_summary$summary[91,4], # mean species richness year 2
-  fit_summary$summary[92,4] # mean species richness year 3
+  fit_summary$summary[30,4], # mean species richness year 1
+  fit_summary$summary[31,4], # mean species richness year 2
+  fit_summary$summary[32,4] # mean species richness year 3
 )
 
 upper_95 <- c(
-  fit_summary$summary[90,8], # mean species richness year 1
-  fit_summary$summary[91,8], # mean species richness year 2
-  fit_summary$summary[92,8] # mean species richness year 3
+  fit_summary$summary[30,8], # mean species richness year 1
+  fit_summary$summary[31,8], # mean species richness year 2
+  fit_summary$summary[32,8] # mean species richness year 3
 )
 
 lower_50 <- c(
-  fit_summary$summary[90,5], # mean species richness year 1
-  fit_summary$summary[91,5], # mean species richness year 2
-  fit_summary$summary[92,5] # mean species richness year 3
+  fit_summary$summary[30,5], # mean species richness year 1
+  fit_summary$summary[31,5], # mean species richness year 2
+  fit_summary$summary[32,5] # mean species richness year 3
 )
 
 upper_50 <- c(
-  fit_summary$summary[90,7], # mean species richness year 1
-  fit_summary$summary[91,7], # mean species richness year 2
-  fit_summary$summary[92,7] # mean species richness year 3
+  fit_summary$summary[30,7], # mean species richness year 1
+  fit_summary$summary[31,7], # mean species richness year 2
+  fit_summary$summary[32,7] # mean species richness year 3
 )
 
 df_estimates_control <- as.data.frame(cbind(X, Y, 
                                lower_95, upper_95,
                                lower_50, upper_50)) %>%
-  mutate(habitat = "control")
+  mutate(habitat = "mowed")
 
 df_estimates <- rbind(df_estimates_enhanced, df_estimates_control)
 
@@ -152,7 +152,7 @@ df_estimates$X <- as.factor(df_estimates$X)
      width = 0,
      position=position_dodge(width=0.5),
      size=2.5) +
-  ylim(c(40, 85)) +
+  ylim(c(40, 90)) +
   theme_bw() +
   ylab("species richness") +
   scale_color_manual(values=my_palette_reduced) +

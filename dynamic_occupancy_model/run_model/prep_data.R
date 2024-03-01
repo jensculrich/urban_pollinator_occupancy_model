@@ -67,7 +67,7 @@ process_raw_data <- function(min_unique_detections) {
           axis.text.y = element_text(size = 11)) +
     ggtitle("Total detections per species")
   
-  # total detections (species detected 2 or more unique occasions)
+  # total detections (species detected _ or more unique occasions)
   ggplot(temp, aes(x=fct_infreq(SPECIES))) +
     geom_bar(stat = "count") +
     labs(x = "", y = "Total detections") +
@@ -75,7 +75,7 @@ process_raw_data <- function(min_unique_detections) {
           axis.text.y = element_text(size = 11)) +
     ggtitle(paste0("Total detections per species (for species detected ", min_unique_detections, " or more unique visits)"))
   
-  # unique detections (species detected 2 or more unique occasions)
+  # unique detections (species detected _ or more unique occasions)
   ggplot(mydata_filtered_min_unique, aes(x=fct_infreq(SPECIES))) +
     geom_bar(stat = "count") +
     labs(x = "", y = "Unique detections") +
@@ -215,9 +215,15 @@ process_raw_data <- function(min_unique_detections) {
     select(SITE, YEAR, SAMPLING_ROUND, DATE) %>%
     
     # need to convert dates to julian day of year
-    mutate(DATE = lubridate::yday(as.Date(lubridate::mdy(DATE)))) %>%
+    mutate(DATE = lubridate::yday(as.Date(lubridate::mdy(DATE))),
+           # the first year had an unusually warm spring and things got started earlier
+           # but we didn't visit earlier (in fact later) than other years
+           # potentially account for this shift in phenology by upping the calendar day of year
+           # for year 1?
+           DATE_ADJUSTED = ifelse(YEAR==1, DATE+10, DATE)) %>%
     # need to centre and scale the dates as a predictor variable (z-score)
-    mutate(SCALED_DATE = center_scale(DATE))
+    mutate(SCALED_DATE = center_scale(DATE),
+           SCALED_DATE_ADJUSTED = center_scale(DATE_ADJUSTED))
   
   # initialize a visit array of dimensions n_sites*n_years*n_visits
   scaled_date_array <- array(NA, dim =c(n_sites, n_years, n_visits))
@@ -252,6 +258,38 @@ process_raw_data <- function(min_unique_detections) {
   
   if(length(which(is.na(scaled_date_array))) != 0){
     print("WARNING: missing survey dates for 1 or more site/year/visit combinations!")
+  }
+  
+  # scaled date adjusted array
+  # initialize a visit array of dimensions n_sites*n_years*n_visits
+  scaled_date_adjusted_array <- array(NA, dim =c(n_sites, n_years, n_visits))
+  
+  for(i in 1:n_visits){
+    
+    temp <- visits %>%
+      filter(SAMPLING_ROUND == i) %>%
+      select(SITE, YEAR, SCALED_DATE_ADJUSTED) %>%
+      pivot_wider(names_from = YEAR, values_from = SCALED_DATE_ADJUSTED)
+    
+    if(i %in% 1:6){ # if there were six visits in the year:
+      scaled_date_adjusted_array[,,i] <- as.matrix(temp[,2:(n_years + 1)])
+      
+    } else{ # we didnt survey all sites 7 times in all years so we need to handle differently
+      
+      temp2 <- left_join(site_list, temp) 
+      
+      # stan can't handle NA's
+      # instead we will pick an unfeasible number so that we don't get confused
+      # and then later tell stan to just pass over these values (do not evaluate likelihood)
+      temp2[is.na(temp2)] <- -99
+      
+      temp3 <- pull(temp2[,2])
+      
+      scaled_date_adjusted_array[,2,i] <- temp3
+      scaled_date_adjusted_array[,1,i] <- rep(-99, times=n_sites)
+      scaled_date_adjusted_array[,3,i] <- rep(-99, times=n_sites)
+    }
+    
   }
   
   ## --------------------------------------------------
@@ -352,6 +390,7 @@ process_raw_data <- function(min_unique_detections) {
   plant_data_subset <- plant_data %>%
     filter(SPECIES %in% plants_visited$PLANT_NETTED_FROM_SCI_NAME)
   
+  # abundance
   plant_abundance_df <- plant_data_subset %>%
     
     # calculate abundance per site visit
@@ -372,14 +411,46 @@ process_raw_data <- function(min_unique_detections) {
   
     # scale the variable
     mutate(plant_abundance_scaled = center_scale(mean_annual_plant_abundance))
-    
+  
   original_herb_abundance <- plant_abundance_df$mean_annual_plant_abundance
-    
-  plant_abundance_df <- plant_abundance_df %>%
+  
+  plant_abundance_df_wide <- plant_abundance_df %>%
     select(SITE, YEAR, plant_abundance_scaled) %>%
     pivot_wider(names_from = YEAR, values_from = plant_abundance_scaled)
   
-  herbaceous_flowers_scaled <- as.matrix(plant_abundance_df[2:(n_years+1)])
+  herbaceous_flowers_scaled <- as.matrix(plant_abundance_df_wide[2:(n_years+1)])
+  
+  # diversity
+  plant_diversity_df <- plant_data_subset %>%
+    
+    # calculate abundance per site visit
+    group_by(SITE, YEAR, SAMPLING_ROUND) %>%
+    add_tally() %>%
+    
+    # take one row per site visit
+    slice(1) %>%
+    ungroup() %>%
+    
+    # there could be multiple ways to group and calculate plant data
+    # here grouping by average abundance per year
+    group_by(SITE, YEAR) %>%
+    mutate(mean_annual_plant_diversity = mean(n)) %>%
+    slice(1) %>%
+    ungroup() %>%
+    
+    # scale the variable
+    mutate(plant_diversity_scaled = center_scale(mean_annual_plant_diversity))
+  
+  original_herb_diversity <- plant_diversity_df$mean_annual_plant_diversity
+    
+  plant_diversity_df_wide <- plant_diversity_df %>%
+    select(SITE, YEAR, plant_diversity_scaled) %>%
+    pivot_wider(names_from = YEAR, values_from = plant_diversity_scaled)
+  
+  herbaceous_diversity_scaled <- as.matrix(plant_diversity_df_wide[2:(n_years+1)])
+  
+  # corr between abundance and diversity
+  cor.test(plant_diversity_df$mean_annual_plant_diversity, plant_abundance_df$mean_annual_plant_abundance)
   
   ## --------------------------------------------------
   ## Get site X year flowering plant abundance data (woody plants within survey area)
@@ -421,7 +492,7 @@ process_raw_data <- function(min_unique_detections) {
   woody_plant_data_subset <- full_join(woody_plant_data_subset, site_visits) 
   
   # get mean per site X year
-  woody_plant_data_subset <- woody_plant_data_subset %>%
+  woody_plant_abundance_df <- woody_plant_data_subset %>%
     mutate(log_NUM_FLORAL_UNITS = log(NUM_FLORAL_UNITS + 1)) %>%
     group_by(SITE, YEAR) %>%
     mutate(mean_annual_woody_plant_abundance = mean(log_NUM_FLORAL_UNITS)) %>%
@@ -431,13 +502,58 @@ process_raw_data <- function(min_unique_detections) {
     # scale the variable
     mutate(woody_plant_abundance_scaled = center_scale(mean_annual_woody_plant_abundance)) 
   
-  original_woody_abundance <- woody_plant_data_subset$mean_annual_woody_plant_abundance
+  original_woody_abundance <- woody_plant_abundance_df$mean_annual_woody_plant_abundance
   
-  woody_plant_data_subset <- woody_plant_data_subset %>%
+  woody_plant_data_subset_wide <- woody_plant_abundance_df %>%
     select(SITE, YEAR, woody_plant_abundance_scaled) %>%
     pivot_wider(names_from = YEAR, values_from = woody_plant_abundance_scaled)
   
-  woody_flowers_scaled <- as.matrix(woody_plant_data_subset[2:(n_years+1)])
+  woody_flowers_scaled <- as.matrix(woody_plant_data_subset_wide[2:(n_years+1)])
+  
+  # diversity
+  woody_plant_diversity_df_hits <- woody_plant_data_subset %>%
+    
+    filter(SPECIES != "no flowering species") %>%
+    # calculate abundance per site visit
+    group_by(SITE, YEAR) %>%
+    add_tally() %>%
+ 
+    # take one row per site visit
+    slice(1) %>%
+    ungroup() %>%
+    
+    rename("annual_woody_plant_diversity" = "n") 
+  
+  possible_woody_surveys <- as.data.frame(
+    cbind(rep(year_vector, times=n_sites), 
+    rep(SITE, each = n_years))) %>%
+    rename("YEAR" = "V1",
+            "SITE" = "V2") %>%
+    mutate(YEAR = as.integer(YEAR))
+  
+  woody_plant_diversity_df <- full_join(
+    woody_plant_diversity_df_hits, possible_woody_surveys) %>%
+    mutate(annual_woody_plant_diversity = 
+             replace_na(annual_woody_plant_diversity, 0)) %>%
+
+    # scale the variable
+    mutate(plant_diversity_scaled = center_scale(annual_woody_plant_diversity)) 
+  
+  # now sort in similar fashion as before
+  woody_plant_diversity_df <- with(woody_plant_diversity_df, 
+                                   woody_plant_diversity_df[order(
+                                     SITE, YEAR) , ])
+  
+  original_woody_diversity <- woody_plant_diversity_df$annual_woody_plant_diversity
+  
+  woody_plant_diversity_df_wide <- woody_plant_diversity_df %>%
+    select(SITE, YEAR, plant_diversity_scaled) %>%
+    pivot_wider(names_from = YEAR, values_from = plant_diversity_scaled)
+  
+  woody_diversity_scaled <- as.matrix(woody_plant_diversity_df_wide[2:(n_years+1)])
+  
+  # corr between abundance and diversity
+  cor.test(woody_plant_diversity_df$annual_woody_plant_diversity, woody_plant_abundance_df$mean_annual_woody_plant_abundance)
   
   ## --------------------------------------------------
   ## Get visit specific flowering plant abundance data (for detection covariate)
@@ -521,16 +637,21 @@ process_raw_data <- function(min_unique_detections) {
     visits = visit_vector, # ordered vector of visits
     site_year_visit_count = site_year_visit_count, # matrix containing number of visits per site X year 
     date_scaled = scaled_date_array, # detection covariate (array of scaled julian date of visit)
+    date_adjusted_scaled = scaled_date_adjusted_array, 
     habitat_category = HABITAT_CATEGORY, # occupancy and detection covariate (sites mowed or meadow)
     species_interaction_metrics = species_interaction_metrics,
     herbaceous_flowers_scaled = herbaceous_flowers_scaled,
     woody_flowers_scaled = woody_flowers_scaled,
+    herbaceous_diversity_scaled = herbaceous_diversity_scaled,
+    woody_diversity_scaled = woody_diversity_scaled,
     herbaceous_flowers_by_survey = herbaceous_flowers_by_survey,
     woody_flowers_by_survey = woody_flowers_by_survey,
     flowers_any_by_survey = flowers_any_by_survey,
     
     original_herb_abundance = original_herb_abundance,
-    original_woody_abundance = original_woody_abundance
+    original_woody_abundance = original_woody_abundance,
+    original_herb_diversity = original_herb_diversity,
+    original_woody_diversity = original_woody_diversity
     
   ))
   
