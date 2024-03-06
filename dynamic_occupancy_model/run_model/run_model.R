@@ -48,7 +48,7 @@ cor.test(woody_flowers_scaled, woody_diversity_scaled)
 #date_scaled <- date_adjusted_scaled
 # use the diversity instead of abundance data
 #herbaceous_flowers_scaled <- herbaceous_diversity_scaled
-#woody_flowers_scaled <- woody_diversity_scaled
+woody_flowers_scaled <- woody_diversity_scaled
 
 stan_data <- c("V", "species", "sites", "years", "years_full",
                "n_species", "n_sites", "n_years", "n_years_minus1", "n_visits",
@@ -86,16 +86,16 @@ params <- c(#"L_species", "sigma_species",
   "phi_interaction_1", "phi_interaction_2",
   #"phi_interaction_3",
   
-  "gamma_year",
-  "phi_year",
-  
   "p0", 
   "sigma_p_species", 
   "p_specialization",
   "mu_p_species_date", "sigma_p_species_date", 
   "mu_p_species_date_sq", "sigma_p_species_date_sq", 
   "p_flower_abundance_any", 
-  #"p_year",
+
+  "gamma_year",
+  "phi_year",
+  "p_year",
   
   #"species_richness", 
   "avg_species_richness_control", "avg_species_richness_enhanced", "increase_richness_enhanced",
@@ -103,9 +103,9 @@ params <- c(#"L_species", "sigma_species",
   "psi1_species", "gamma_species", "phi_species", "p_species")
 
 # MCMC settings
-n_iterations <- 1000
+n_iterations <- 300
 n_thin <- 1
-n_burnin <- 500
+n_burnin <- 150
 n_chains <- 4
 n_cores <- n_chains
 delta = 0.97
@@ -152,7 +152,7 @@ inits <- lapply(1:n_chains, function(i)
 
 ## --------------------------------------------------
 ### Run model
-stan_model <- "./dynamic_occupancy_model/models/dynocc5.stan"
+stan_model <- "./dynamic_occupancy_model/models/dynocc7.stan"
 
 ## Call Stan from R
 set.seed(1)
@@ -244,7 +244,7 @@ traceplot(stan_out,
 traceplot(stan_out,  
           pars = c("gamma_year", 
                    "phi_year",
-                   #"p_year"
+                   "p_year"
           ))
 
 pairs(stan_out,  

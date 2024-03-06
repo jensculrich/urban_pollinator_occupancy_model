@@ -1,6 +1,6 @@
-// dynocc model 5 - dynocc 3 but with 
-// persistence as a consequence of previous years flower resources
-// also add in detection year effects as well
+// dynocc model 7 - dynocc 5 but with 
+// categorical habitat covariate for meadows 
+// (to see whether meadows after accounting for woody promote occurrence)
 
 // dynamic multi-species occupancy model for pollinators in urban parks
 // jcu, started nov 23, 2023.
@@ -115,8 +115,8 @@ transformed parameters {
         psi1[i,j] = inv_logit( // probability (0-1) of occurrence in year 1 is equal to..
           psi1_species[species[i]] + // a species specific intercept
           psi1_specialization * d[i] +
-          psi1_herbaceous_flowers * herbaceous_flowers_scaled[j,1] + 
-          (psi1_interaction_1 * d[i] * herbaceous_flowers_scaled[j,1]) +
+          psi1_herbaceous_flowers * habitat_type[j] + 
+          (psi1_interaction_1 * d[i] * habitat_type[j]) +
           psi1_woody_flowers * woody_flowers_scaled[j,1] + 
           (psi1_interaction_2 * d[i] * woody_flowers_scaled[j,1])
           ); // end phi[j,k]
@@ -126,8 +126,8 @@ transformed parameters {
           gamma_year[years[k]] + // effect of first year transition // index of years 1 == time between year 1 and 2
           gamma_specialization * d[i] +
           // colonization depending on incoming year's site conditions (k+1)
-          gamma_herbaceous_flowers * herbaceous_flowers_scaled[j,k+1] + 
-          (gamma_interaction_1 * d[i] * herbaceous_flowers_scaled[j,k+1]) +
+          gamma_herbaceous_flowers * habitat_type[j] + 
+          (gamma_interaction_1 * d[i] * habitat_type[j]) +
           gamma_woody_flowers * woody_flowers_scaled[j,k+1] + 
           (gamma_interaction_2 * d[i] * woody_flowers_scaled[j,k+1])
           ); // end phi[j,k]
@@ -137,8 +137,8 @@ transformed parameters {
           phi_year[years[k]] + // the effect of the first year transition // index 1 == year 2
           phi_specialization * d[i] +
           // persistence depending on outgoing year's site conditions (k)
-          phi_herbaceous_flowers * herbaceous_flowers_scaled[j,k] + 
-          (phi_interaction_1 * d[i] * herbaceous_flowers_scaled[j,k]) +
+          phi_herbaceous_flowers * habitat_type[j] + 
+          (phi_interaction_1 * d[i] * habitat_type[j]) +
           phi_woody_flowers * woody_flowers_scaled[j,k] + 
           (phi_interaction_2 * d[i] * woody_flowers_scaled[j,k]) 
           ); // end phi[j,k]
@@ -272,6 +272,10 @@ generated quantities{
   
   // Could also add: 
   // effects on init occupancy, colonization, and persistence across a range of specialization bins
+  
+  // IMPORTANTLY THIS WAY OF CALCULATING SPECIES RICHNESS BY SITE TYPE
+  // DOESN'T DO IT FOR AVERAGE WOODY PLANT RESOURCES, SO IF WOODY PLANT RESOURCES
+  // ARE MORE ABUNDANT IN ONE SITE TYPE OR THE OTHER THIS WILL NOT ACCOUNT FOR THAT
   
   // Diversity estimation
   // number of species at each site in each year
