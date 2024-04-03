@@ -2,7 +2,8 @@ library(tidyverse)
 
 source("./dynamic_occupancy_model/run_model/prep_data.R")
 min_unique_detections = 1 # >=
-my_data <- process_raw_data(min_unique_detections)
+filter_nonnative_woody = FALSE
+my_data <- process_raw_data(min_unique_detections, filter_nonnative_woody)
 
 
 ## --------------------------------------------------
@@ -34,17 +35,36 @@ original_woody_abundance <- my_data$original_woody_abundance
 mean_herb_by_site <- as.data.frame(rowMeans(herbaceous_flowers_scaled))
 mean_woody_by_site <- as.data.frame(rowMeans(woody_flowers_scaled))  
 
+original_herb_abundance2 <- original_herb_abundance %>% 
+  as.data.frame() %>%
+  mutate(grp = 1 + (row_number()-1) %/% 3) %>% 
+  group_by(grp) %>% 
+  summarise(across(everything(), mean, na.rm = TRUE)) %>% 
+  select(-grp) %>%
+  rename("herb_original" = ".")
+
+original_woody_abundance2 <- original_woody_abundance %>% 
+  as.data.frame() %>%
+  mutate(grp = 1 + (row_number()-1) %/% 3) %>% 
+  group_by(grp) %>% 
+  summarise(across(everything(), mean, na.rm = TRUE)) %>% 
+  select(-grp) %>%
+  rename("woody_original" = ".")
+
 # read in site data to join in df
 sites <- read.csv("./data/sites.csv", fileEncoding="latin1")
 
 sites <- sites[order(sites$site),]
 
-sites_2 <- cbind(sites, mean_herb_by_site, mean_woody_by_site)
+sites_2 <- cbind(sites, mean_herb_by_site, mean_woody_by_site, 
+                 original_herb_abundance2, original_woody_abundance2)
 
 cor.test(sites_2$'rowMeans(herbaceous_flowers_scaled)', sites_2$'rowMeans(woody_flowers_scaled)')
 
 # rename long column names
-colnames(sites_2) <- c('site','latitude','longitude', 'category', 'mean_herb_scaled', 'mean_woody_scaled') 
+colnames(sites_2) <- c('site','latitude','longitude', 'category', 
+                       'mean_herb_scaled', 'mean_woody_scaled',
+                       'mean_herb', 'mean_woody') 
 
 # write the csv file
 write.csv(sites_2, "./data/sites_2.csv")

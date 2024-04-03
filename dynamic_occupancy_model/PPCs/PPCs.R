@@ -53,7 +53,7 @@ W_df <- as.data.frame(cbind(species_names, W_species)) %>%
   mutate(W_species = as.numeric(W_species))
 
 # get W distributions from model
-#stan_out <- readRDS("./dynamic_occupancy_model/model_outputs/stan_out.rds")
+stan_out <- readRDS("./dynamic_occupancy_model/model_outputs/stan_out_binary_habitat.rds")
 #fit_summary <- rstan::summary(stan_out_sim)
 fit_summary <- rstan::summary(stan_out)
 
@@ -74,7 +74,7 @@ start = 1 # which species to start at (hard to see them all at once)
 # start at 1, 37, and 73 is pretty good for visualization
 n = 36 # how many species to plot (36 is a good number to look at the species in 3 slices)
 
-stan_fit_first_W <- 39 # this changes depending on how many params you tracked
+stan_fit_first_W <- 46 # this changes depending on how many params you tracked
 
 df_estimates <- data.frame(X = numeric(), 
                            Y = numeric(), 

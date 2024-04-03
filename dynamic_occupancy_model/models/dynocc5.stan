@@ -216,7 +216,7 @@ model {
   gamma_specialization ~ normal(0, 2);
   gamma_interaction_1 ~ normal(0, 2); // baseline effect of habitat 
   gamma_interaction_2 ~ normal(0, 2); // effect of specialization on response to habitat
-  gamma_year ~ normal(0, 0.5); // year effects
+  gamma_year ~ normal(0, 0.25); // year effects
   
   // persistence
   phi0 ~ normal(0, 1); // global intercept
@@ -227,7 +227,7 @@ model {
   phi_specialization ~ normal(0, 2);
   phi_interaction_1 ~ normal(0, 2); // baseline effect of habitat 
   phi_interaction_2 ~ normal(0, 2); // effect of specialization on response to habitat
-  phi_year ~ normal(0, 0.5);
+  phi_year ~ normal(0, 0.25);
   
   // detection
   p0 ~ normal(0, 2); // global intercept
@@ -241,7 +241,7 @@ model {
   mu_p_species_date_sq ~ normal(0, 2); // mean
   sigma_p_species_date_sq ~ cauchy(0, 2); // variation
   p_flower_abundance_any ~ normal(0, 2); // effect of survey visit flower abundance on detection
-  p_year ~ normal(0, 0.5);
+  p_year ~ normal(0, 0.25);
   
   // LIKELIHOOD
   for(i in 1:n_species){
@@ -276,47 +276,13 @@ generated quantities{
   // Diversity estimation
   // number of species at each site in each year
   int z_simmed[n_species, n_sites, n_years]; // simulate occurrence
-  int species_richness[n_sites, n_years]; // site/year species richness
-  real avg_species_richness_enhanced[n_years]; // average across sites
-  real avg_species_richness_control[n_years]; // average across sites
-  real increase_richness_enhanced[n_years]; // difference in average species richness in each year
-  
+
   for(i in 1:n_species){
    for(j in 1:n_sites){
      for(k in 1:n_years){
           z_simmed[i,j,k] = bernoulli_rng(psi[i,j,k]); 
       }    
     }
-  }
-  
-  // Initialize avg_species_richness
-  for(k in 1:n_years){
-    avg_species_richness_control[k] = 0;
-    avg_species_richness_enhanced[k] = 0;
-  }
-  
-  // summed number of species occurring in site/year
-  for(j in 1:n_sites){
-    for(k in 1:n_years){
-      
-      // first calc site/year specific species richness
-      species_richness[j,k] = sum(z_simmed[,j,k]);
-      
-      // use habitat type as a switch for whether or not you will add it to the species richness group
-      avg_species_richness_control[k] = avg_species_richness_control[k] + ((1 - habitat_type[j]) *  species_richness[j,k]);
-      avg_species_richness_enhanced[k] = avg_species_richness_enhanced[k] + (habitat_type[j] *  species_richness[j,k]);
-      
-    }
-  }
-  
-  for(k in 1:n_years){
-    // average out species richness by number of sites (1/2 of total sites were in each category)
-    avg_species_richness_control[k] = avg_species_richness_control[k] / (n_sites / 2.0);
-    avg_species_richness_enhanced[k] = avg_species_richness_enhanced[k] / (n_sites / 2.0);
-  }
-  
-  for(k in 1:n_years){
-    increase_richness_enhanced[k] = avg_species_richness_enhanced[k] - avg_species_richness_control[k];
   }
   
   //

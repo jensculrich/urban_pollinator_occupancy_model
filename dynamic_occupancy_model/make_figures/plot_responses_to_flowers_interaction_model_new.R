@@ -4,12 +4,15 @@ library(gridExtra)
 
 source("./dynamic_occupancy_model/run_model/prep_data.R")
 min_unique_detections = 1 # >=
-my_data <- process_raw_data(min_unique_detections)
+filter_nonnative_woody = FALSE
+my_data <- process_raw_data(min_unique_detections, filter_nonnative_woody)
 
-stan_out <- readRDS("./dynamic_occupancy_model/model_outputs/stan_out.rds")
+stan_out <- readRDS("./dynamic_occupancy_model/model_outputs/stan_out_binary_habitat.rds")
 
 fit_summary <- rstan::summary(stan_out)
 View(cbind(1:nrow(fit_summary$summary), fit_summary$summary)) # View to see which row corresponds to the parameter of interest
+
+habitat_binary = TRUE # if true, build the herb plots with x axis range from 0, 1
 
 ## --------------------------------------------------
 ### Pull out data
@@ -84,6 +87,9 @@ tmp <- as.data.frame(stan_out) # take estimates from each HMC step as a df
 n_samp <- length(tmp[,1]) # how many samples do we have from the HMC run?
 pred_length <- 100 # divide each covariate axis into some interval steps
 
+
+xlabel = "log(herbaceous flower abundance / 20m^2)"
+
 ## --------------------------------------------------
 # get some prediction secquence data
 
@@ -102,6 +108,16 @@ original_woody <- seq(min(original_woody_diversity),
                       length.out = pred_length) # reasonable prediction range
 woody_pred <- (original_woody - mean(original_woody_diversity)) / sd(original_woody_diversity) # unscale the dates
 
+
+
+## --------------------------------------------------
+# global plotting options (alternative if using binary hab categories)
+
+if(habitat_binary == TRUE){
+  original_herb <- as.numeric(0:1) # reasonable prediction range 
+  herb_pred <- original_herb
+  xlabel <- ""
+}
 
 ## --------------------------------------------------
 # colonization
@@ -125,6 +141,9 @@ for(i in 1:n_samp){
   predC[,i,2] <- ilogit( # woody flower trend
     # gamma0 +
     tmp[i,8] + 
+      
+      tmp[i,3]*1 + # for a meadow park
+      
       # gamma_herbaceous_flowers*x +
       tmp[i,11]*woody_pred
   )
@@ -145,6 +164,9 @@ for(i in 1:n_samp){
     predSpec[,i,2,j] <- ilogit( # herbaceous flower trend
       # gamma0 +
       tmp[i,8] + 
+        
+        tmp[i,3]*1 + # for a meadow park
+        
         # gamma_herbaceous_flowers*x +
         tmp[i,11] * woody_pred +
         # gamma_specialization*d[i] + 
@@ -187,12 +209,18 @@ p <- ggplot(data = herb_df, aes(original_herb, gamma_herb_community_mean)) +
   ylim(c(0, 1)) +
   theme_bw() +
   ylab("colonization rate \n(community average)") +
-  xlab("log(herbaceous flower abundance / 20m^2)") +
+  xlab(xlabel) +
+  scale_x_continuous(limits = c(-0.1,1.1), breaks = c(0,1), labels = c(
+    "0" = "conventional", "1" = "enhanced")) +
+  scale_y_continuous(limits = c(0,1),
+                     breaks = c(0, 0.25, 0.5, 0.75, 1),
+                     labels = scales::percent 
+                     ) +
   scale_fill_manual(values=my_palette) +
   scale_colour_manual(values=my_palette) +
   theme(legend.position = "none",
-        axis.text.x = element_text(size = 16),
-        axis.text.y = element_text(size = 16, angle=45, vjust=-0.5),
+        axis.text.x = element_text(size = 20),
+        axis.text.y = element_text(size = 18, angle=45, vjust=-0.5),
         axis.title.x = element_text(size=18),
         axis.title.y = element_text(size = 18),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -223,12 +251,18 @@ p2 <- ggplot(data = herb_df_spec, aes(original_herb, mean, fill=specialization_b
   ylim(c(0, 1)) +
   theme_bw() +
   ylab("colonization rate \n(by diet specialization)") +
-  xlab("log(herbaceous flower abundance / 20m^2)") +
+  xlab(xlabel) +
+  scale_x_continuous(limits = c(-0.1,1.1), breaks = c(0,1), labels = c(
+    "0" = "conventional", "1" = "enhanced")) +
+  scale_y_continuous(limits = c(0,1),
+                     breaks = c(0, 0.25, 0.5, 0.75, 1),
+                     labels = scales::percent 
+  ) +
   scale_fill_manual(values=my_palette) +
   scale_colour_manual(values=my_palette) +
   theme(legend.position = "none",
-        axis.text.x = element_text(size = 16),
-        axis.text.y = element_text(size = 16, angle=45, vjust=-0.5),
+        axis.text.x = element_text(size = 20),
+        axis.text.y = element_text(size = 18, angle=45, vjust=-0.5),
         axis.title.x = element_text(size=18),
         axis.title.y = element_text(size = 18),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -262,11 +296,15 @@ q <- ggplot(data = woody_df, aes(original_woody, gamma_woody_community_mean)) +
   theme_bw() +
   ylab("colonization rate \n(community average)") +
   xlab("log(woody flower abundance / 100m^2)") +
+  scale_y_continuous(limits = c(0,1),
+                     breaks = c(0, 0.25, 0.5, 0.75, 1),
+                     labels = scales::percent 
+  ) +
   scale_fill_manual(values=my_palette) +
   scale_colour_manual(values=my_palette) +
   theme(legend.position = "none",
-        axis.text.x = element_text(size = 16),
-        axis.text.y = element_text(size = 16, angle=45, vjust=-0.5),
+        axis.text.x = element_text(size = 20),
+        axis.text.y = element_text(size = 18, angle=45, vjust=-0.5),
         axis.title.x = element_text(size=18),
         axis.title.y = element_text(size = 18),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -298,11 +336,15 @@ q2 <- ggplot(data = woody_df_spec, aes(original_woody, mean, fill=specialization
   theme_bw() +
   ylab("colonization rate \n(by diet specialization)") +
   xlab("log(woody flower abundance / 100m^2)") +
+  scale_y_continuous(limits = c(0,1),
+                     breaks = c(0, 0.25, 0.5, 0.75, 1),
+                     labels = scales::percent 
+  ) +
   scale_fill_manual(values=my_palette) +
   scale_colour_manual(values=my_palette) +
   theme(legend.position = "none",
-        axis.text.x = element_text(size = 16),
-        axis.text.y = element_text(size = 16, angle=45, vjust=-0.5),
+        axis.text.x = element_text(size = 20),
+        axis.text.y = element_text(size = 18, angle=45, vjust=-0.5),
         axis.title.x = element_text(size=18),
         axis.title.y = element_text(size = 18),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -333,6 +375,9 @@ for(i in 1:n_samp){
   predC[,i,2] <- ilogit( # woody flower trend
     # gamma0 +
     tmp[i,15] + 
+      
+      tmp[i,3]*1 + # for a meadow park
+      
       # gamma_herbaceous_flowers*x +
       tmp[i,18]*woody_pred
   )
@@ -353,6 +398,9 @@ for(i in 1:n_samp){
     predSpec[,i,2,j] <- ilogit( # herbaceous flower trend
       # gamma0 +
       tmp[i,15] + 
+        
+        tmp[i,3]*1 + # for a meadow park
+        
         # gamma_herbaceous_flowers*x +
         tmp[i,18] * woody_pred +
         # gamma_specialization*d[i] + 
@@ -395,12 +443,18 @@ r <- ggplot(data = herb_df, aes(original_herb, phi_herb_community_mean)) +
   ylim(c(0, 1)) +
   theme_bw() +
   ylab("persistence rate \n(community average)") +
-  xlab("log(herbaceous flower abundance / 20m^2)") +
+  xlab(xlabel) +
+  scale_x_continuous(limits = c(-0.1,1.1), breaks = c(0,1), labels = c(
+    "0" = "conventional", "1" = "enhanced")) +
+  scale_y_continuous(limits = c(0,1),
+                     breaks = c(0, 0.25, 0.5, 0.75, 1),
+                     labels = scales::percent 
+  ) +
   scale_fill_manual(values=my_palette) +
   scale_colour_manual(values=my_palette) +
   theme(legend.position = "none",
-        axis.text.x = element_text(size = 16),
-        axis.text.y = element_text(size = 16, angle=45, vjust=-0.5),
+        axis.text.x = element_text(size = 20),
+        axis.text.y = element_text(size = 18, angle=45, vjust=-0.5),
         axis.title.x = element_text(size=18),
         axis.title.y = element_text(size = 18),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -431,12 +485,18 @@ r2 <- ggplot(data = herb_df_spec, aes(original_herb, mean, fill=specialization_b
   ylim(c(0, 1)) +
   theme_bw() +
   ylab("persistence rate \n(by diet specialization)") +
-  xlab("log(herbaceous flower abundance / 20m^2)") +
+  xlab(xlabel) +
+  scale_x_continuous(limits = c(-0.1,1.1), breaks = c(0,1), labels = c(
+    "0" = "conventional", "1" = "enhanced")) +
+  scale_y_continuous(limits = c(0,1),
+                     breaks = c(0, 0.25, 0.5, 0.75, 1),
+                     labels = scales::percent 
+  ) +
   scale_fill_manual(values=my_palette) +
   scale_colour_manual(values=my_palette) +
   theme(legend.position = "none",
-        axis.text.x = element_text(size = 16),
-        axis.text.y = element_text(size = 16, angle=45, vjust=-0.5),
+        axis.text.x = element_text(size = 20),
+        axis.text.y = element_text(size = 18, angle=45, vjust=-0.5),
         axis.title.x = element_text(size=18),
         axis.title.y = element_text(size = 18),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -470,11 +530,15 @@ s <- ggplot(data = woody_df, aes(original_woody, phi_woody_community_mean)) +
   theme_bw() +
   ylab("persistence rate \n(community average)") +
   xlab("log(woody flower abundance / 100m^2)") +
+  scale_y_continuous(limits = c(0,1),
+                     breaks = c(0, 0.25, 0.5, 0.75, 1),
+                     labels = scales::percent 
+  ) +
   scale_fill_manual(values=my_palette) +
   scale_colour_manual(values=my_palette) +
   theme(legend.position = "none",
-        axis.text.x = element_text(size = 16),
-        axis.text.y = element_text(size = 16, angle=45, vjust=-0.5),
+        axis.text.x = element_text(size = 20),
+        axis.text.y = element_text(size = 18, angle=45, vjust=-0.5),
         axis.title.x = element_text(size=18),
         axis.title.y = element_text(size = 18),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -506,11 +570,15 @@ s2 <- ggplot(data = woody_df_spec, aes(original_woody, mean, fill=specialization
   theme_bw() +
   ylab("persistence rate \n(by diet specialization)") +
   xlab("log(woody flower abundance / 100m^2)") +
+  scale_y_continuous(limits = c(0,1),
+                     breaks = c(0, 0.25, 0.5, 0.75, 1),
+                     labels = scales::percent 
+  ) +
   scale_fill_manual(values=my_palette) +
   scale_colour_manual(values=my_palette) +
   theme(legend.position = "none",
-        axis.text.x = element_text(size = 16),
-        axis.text.y = element_text(size = 16, angle=45, vjust=-0.5),
+        axis.text.x = element_text(size = 20),
+        axis.text.y = element_text(size = 18, angle=45, vjust=-0.5),
         axis.title.x = element_text(size=18),
         axis.title.y = element_text(size = 18),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -541,6 +609,9 @@ for(i in 1:n_samp){
   predC[,i,2] <- ilogit( # woody flower trend
     # gamma0 +
     tmp[i,1] + 
+      
+      tmp[i,3]*1 + # for a meadow park
+      
       # gamma_herbaceous_flowers*x +
       tmp[i,4]*woody_pred
   )
@@ -561,6 +632,9 @@ for(i in 1:n_samp){
     predSpec[,i,2,j] <- ilogit( # herbaceous flower trend
       # gamma0 +
       tmp[i,1] + 
+        
+        tmp[i,3]*1 + # for a meadow park
+        
         # gamma_herbaceous_flowers*x +
         tmp[i,4] * woody_pred +
         # gamma_specialization*d[i] + 
@@ -603,12 +677,18 @@ t <- ggplot(data = herb_df, aes(original_herb, psi1_herb_community_mean)) +
   ylim(c(0, 1)) +
   theme_bw() +
   ylab("initial occurrence rate \n(community average)") +
-  xlab("log(herbaceous flower abundance / 20m^2)") +
+  xlab(xlabel) +
+  scale_x_continuous(limits = c(-0.1,1.1), breaks = c(0,1), labels = c(
+    "0" = "conventional", "1" = "enhanced")) +
+  scale_y_continuous(limits = c(0,1),
+                     breaks = c(0, 0.25, 0.5, 0.75, 1),
+                     labels = scales::percent 
+  ) +
   scale_fill_manual(values=my_palette) +
   scale_colour_manual(values=my_palette) +
   theme(legend.position = "none",
-        axis.text.x = element_text(size = 16),
-        axis.text.y = element_text(size = 16, angle=45, vjust=-0.5),
+        axis.text.x = element_text(size = 20),
+        axis.text.y = element_text(size = 18, angle=45, vjust=-0.5),
         axis.title.x = element_text(size=18),
         axis.title.y = element_text(size = 18),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -639,12 +719,18 @@ t2 <- ggplot(data = herb_df_spec, aes(original_herb, mean, fill=specialization_b
   ylim(c(0, 1)) +
   theme_bw() +
   ylab("initial occurrence rate \n(by diet specialization)") +
-  xlab("log(herbaceous flower abundance / 20m^2)") +
+  xlab(xlabel) +
+  scale_x_continuous(limits = c(-0.1,1.1), breaks = c(0,1), labels = c(
+    "0" = "conventional", "1" = "enhanced")) +
+  scale_y_continuous(limits = c(0,1),
+                     breaks = c(0, 0.25, 0.5, 0.75, 1),
+                     labels = scales::percent 
+  ) +
   scale_fill_manual(values=my_palette) +
   scale_colour_manual(values=my_palette) +
   theme(legend.position = "none",
-        axis.text.x = element_text(size = 16),
-        axis.text.y = element_text(size = 16, angle=45, vjust=-0.5),
+        axis.text.x = element_text(size = 20),
+        axis.text.y = element_text(size = 18, angle=45, vjust=-0.5),
         axis.title.x = element_text(size=18),
         axis.title.y = element_text(size = 18),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -676,11 +762,15 @@ u <- ggplot(data = woody_df, aes(original_woody, psi1_woody_community_mean)) +
   theme_bw() +
   ylab("initial occurrence rate \n(community average)") +
   xlab("log(woody flower abundance / 100m^2)") +
+  scale_y_continuous(limits = c(0,1),
+                     breaks = c(0, 0.25, 0.5, 0.75, 1),
+                     labels = scales::percent 
+  ) +
   scale_fill_manual(values=my_palette) +
   scale_colour_manual(values=my_palette) +
   theme(legend.position = "none",
-        axis.text.x = element_text(size = 16),
-        axis.text.y = element_text(size = 16, angle=45, vjust=-0.5),
+        axis.text.x = element_text(size = 20),
+        axis.text.y = element_text(size = 18, angle=45, vjust=-0.5),
         axis.title.x = element_text(size=18),
         axis.title.y = element_text(size = 18),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -712,11 +802,15 @@ u2 <- ggplot(data = woody_df_spec, aes(original_woody, mean, fill=specialization
   theme_bw() +
   ylab("initial occurrence rate \n(by diet specialization)") +
   xlab("log(woody flower abundance / 100m^2)") +
+  scale_y_continuous(limits = c(0,1),
+                     breaks = c(0, 0.25, 0.5, 0.75, 1),
+                     labels = scales::percent 
+  ) +
   scale_fill_manual(values=my_palette) +
   scale_colour_manual(values=my_palette) +
   theme(legend.position = "none",
-        axis.text.x = element_text(size = 16),
-        axis.text.y = element_text(size = 16, angle=45, vjust=-0.5),
+        axis.text.x = element_text(size = 20),
+        axis.text.y = element_text(size = 18, angle=45, vjust=-0.5),
         axis.title.x = element_text(size=18),
         axis.title.y = element_text(size = 18),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank(),

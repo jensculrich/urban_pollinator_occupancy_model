@@ -4,8 +4,9 @@
 library(rstan)
 
 source("./dynamic_occupancy_model/run_model/prep_data.R")
-min_unique_detections = 1 # >=
-my_data <- process_raw_data(min_unique_detections)
+min_unique_detections = 1 
+filter_nonnative_woody = FALSE
+my_data <- process_raw_data(min_unique_detections, filter_nonnative_woody)
 
 ## --------------------------------------------------
 ### Prepare data for model
@@ -37,9 +38,11 @@ woody_diversity_scaled <- my_data$woody_diversity_scaled
 herbaceous_flowers_by_survey <- my_data$herbaceous_flowers_by_survey
 woody_flowers_by_survey <- my_data$woody_flowers_by_survey
 flowers_any_by_survey <- my_data$flowers_any_by_survey
+woody_flowers_scaled_all_years <- my_data$woody_flowers_scaled_all_years
+preestablished <- my_data$preestablished
 
 # could do more detailed variable correlation summaries
-cor.test(woody_flowers_scaled, woody_diversity_scaled)
+cor.test(herbaceous_flowers_scaled, woody_flowers_scaled)
 
 ## --------------------------------------------------
 ### Prep data and tweak model options
@@ -48,13 +51,12 @@ cor.test(woody_flowers_scaled, woody_diversity_scaled)
 #date_scaled <- date_adjusted_scaled
 # use the diversity instead of abundance data
 #herbaceous_flowers_scaled <- herbaceous_diversity_scaled
-woody_flowers_scaled <- woody_diversity_scaled
+#woody_flowers_scaled <- woody_diversity_scaled
 
-stan_data <- c("V", "species", "sites", "years", "years_full",
+stan_data <- c("V", "species", "sites", "years", "years_full", 
                "n_species", "n_sites", "n_years", "n_years_minus1", "n_visits",
                "habitat_type", "date_scaled", "d", "degree",
                "herbaceous_flowers_scaled", 
-               #"herbaceous_diversity_scaled", 
                "woody_flowers_scaled", 
                "flowers_any_by_survey"
 ) 
@@ -65,50 +67,42 @@ params <- c(#"L_species", "sigma_species",
   "psi1_0", 
   "sigma_psi1_species",
   "psi1_herbaceous_flowers", "psi1_woody_flowers", 
-  #"psi1_herbaceous_diversity", 
   "psi1_specialization",
   "psi1_interaction_1", "psi1_interaction_2",
-  #"psi1_interaction_3",
-  
+
   "gamma0", 
   "sigma_gamma_species",
   "gamma_herbaceous_flowers", "gamma_woody_flowers", 
-  #"gamma_herbaceous_diversity",
   "gamma_specialization",
   "gamma_interaction_1", "gamma_interaction_2", 
-  #"gamma_interaction_3", 
-  
+
   "phi0", 
   "sigma_phi_species",
   "phi_herbaceous_flowers", "phi_woody_flowers", 
-  #"phi_herbaceous_diversity", 
   "phi_specialization",
   "phi_interaction_1", "phi_interaction_2",
-  #"phi_interaction_3",
-  
+
   "p0", 
   "sigma_p_species", 
   "p_specialization",
   "mu_p_species_date", "sigma_p_species_date", 
   "mu_p_species_date_sq", "sigma_p_species_date_sq", 
   "p_flower_abundance_any", 
-
+  
   "gamma_year",
   "phi_year",
   "p_year",
   
-  #"species_richness", 
-  "avg_species_richness_control", "avg_species_richness_enhanced", "increase_richness_enhanced",
   "W_species_rep",
   "psi1_species", "gamma_species", "phi_species", "p_species")
 
 # MCMC settings
-n_iterations <- 300
+n_iterations <- 1000
 n_thin <- 1
-n_burnin <- 150
+n_burnin <- 500
 n_chains <- 4
 n_cores <- n_chains
-delta = 0.97
+delta = 0.95
 
 ## Initial values
 # given the number of parameters, the chains need some decent initial values
@@ -167,7 +161,7 @@ stan_out <- stan(stan_model,
                      open_progress = FALSE,
                      cores = n_cores)
 
-saveRDS(stan_out, "./dynamic_occupancy_model/model_outputs/stan_out.rds")
+saveRDS(stan_out, "./dynamic_occupancy_model/model_outputs/stan_out_habitat_binary.rds")
 #stan_out <- readRDS("./dynamic_occupancy_model/model_outputs/stan_out3.rds")
 
 
@@ -245,7 +239,7 @@ traceplot(stan_out,
           pars = c("gamma_year", 
                    "phi_year",
                    "p_year"
-          ))
+                   ))
 
 pairs(stan_out,  
           pars = c(

@@ -204,8 +204,8 @@ model {
   psi1_herbaceous_flowers ~ normal(0, 2); // effect of habitat on colonization
   psi1_woody_flowers ~ normal(0, 2); // effect of habitat on colonization
   psi1_specialization ~ normal(0, 2);
-  psi1_interaction_1 ~ normal(0, 2); // baseline effect of habitat 
-  psi1_interaction_2 ~ normal(0, 2); // effect of specialization on response to habitat
+  psi1_interaction_1 ~ normal(0, 1); // baseline effect of habitat 
+  psi1_interaction_2 ~ normal(0, 1); // effect of specialization on response to habitat
   
   // colonization
   gamma0 ~ normal(0, 1); // persistence intercept
@@ -214,9 +214,9 @@ model {
   gamma_herbaceous_flowers ~ normal(0, 2); // effect of habitat on colonization
   gamma_woody_flowers ~ normal(0, 2); // effect of habitat on colonization
   gamma_specialization ~ normal(0, 2);
-  gamma_interaction_1 ~ normal(0, 2); // baseline effect of habitat 
-  gamma_interaction_2 ~ normal(0, 2); // effect of specialization on response to habitat
-  gamma_year ~ normal(0, 0.5); // year effects
+  gamma_interaction_1 ~ normal(0, 1); // baseline effect of habitat 
+  gamma_interaction_2 ~ normal(0, 1); // effect of specialization on response to habitat
+  gamma_year ~ normal(0, 0.25); // year effects
   
   // persistence
   phi0 ~ normal(0, 1); // global intercept
@@ -225,9 +225,9 @@ model {
   phi_herbaceous_flowers ~ normal(0, 2); // effect of habitat on colonization
   phi_woody_flowers ~ normal(0, 2); // effect of habitat on colonization
   phi_specialization ~ normal(0, 2);
-  phi_interaction_1 ~ normal(0, 2); // baseline effect of habitat 
-  phi_interaction_2 ~ normal(0, 2); // effect of specialization on response to habitat
-  phi_year ~ normal(0, 0.5);
+  phi_interaction_1 ~ normal(0, 1); // baseline effect of habitat 
+  phi_interaction_2 ~ normal(0, 1); // effect of specialization on response to habitat
+  phi_year ~ normal(0, 0.25);
   
   // detection
   p0 ~ normal(0, 2); // global intercept
@@ -241,7 +241,7 @@ model {
   mu_p_species_date_sq ~ normal(0, 2); // mean
   sigma_p_species_date_sq ~ cauchy(0, 2); // variation
   p_flower_abundance_any ~ normal(0, 2); // effect of survey visit flower abundance on detection
-  p_year ~ normal(0, 0.5);
+  p_year ~ normal(0, 0.25);
   
   // LIKELIHOOD
   for(i in 1:n_species){
