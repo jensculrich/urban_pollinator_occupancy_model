@@ -74,7 +74,7 @@ seq_scaled <- seq(min(species_interaction_metrics$d_scaled),
 hist(d)
 par(mar = c(5, 5, 3, 3)) # Set the margin on all sides to 2
 hist(d, axes = TRUE, xlim = c(0, 1),
-     ylab = "Frequency", xlab = "Species specialization (d')", 
+     ylab = "Number of species", xlab = "Specialization (d')", 
      main = "", 
      col = my_palette, breaks = seq_original, 
      freq=TRUE, right = FALSE,
@@ -142,7 +142,7 @@ for(i in 1:n_samp){
     # gamma0 +
     tmp[i,8] + 
       
-      tmp[i,3]*1 + # for a meadow park
+      tmp[i,10]*1 + # for an enhanced park
       
       # gamma_herbaceous_flowers*x +
       tmp[i,11]*woody_pred
@@ -165,7 +165,7 @@ for(i in 1:n_samp){
       # gamma0 +
       tmp[i,8] + 
         
-        tmp[i,3]*1 + # for a meadow park
+        tmp[i,10]*1 + # for a enhanced park
         
         # gamma_herbaceous_flowers*x +
         tmp[i,11] * woody_pred +
@@ -376,7 +376,7 @@ for(i in 1:n_samp){
     # gamma0 +
     tmp[i,15] + 
       
-      tmp[i,3]*1 + # for a meadow park
+      tmp[i,17]*1 + # for an enhanced park
       
       # gamma_herbaceous_flowers*x +
       tmp[i,18]*woody_pred
@@ -399,7 +399,7 @@ for(i in 1:n_samp){
       # gamma0 +
       tmp[i,15] + 
         
-        tmp[i,3]*1 + # for a meadow park
+        tmp[i,17]*1 + # for an enhanced park
         
         # gamma_herbaceous_flowers*x +
         tmp[i,18] * woody_pred +

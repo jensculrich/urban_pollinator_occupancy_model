@@ -273,10 +273,6 @@ generated quantities{
   // Could also add: 
   // effects on init occupancy, colonization, and persistence across a range of specialization bins
   
-  // IMPORTANTLY THIS WAY OF CALCULATING SPECIES RICHNESS BY SITE TYPE
-  // DOESN'T DO IT FOR AVERAGE WOODY PLANT RESOURCES, SO IF WOODY PLANT RESOURCES
-  // ARE MORE ABUNDANT IN ONE SITE TYPE OR THE OTHER THIS WILL NOT ACCOUNT FOR THAT
-  
   // Diversity estimation
   // number of species at each site in each year
   int z_simmed[n_species, n_sites, n_years]; // simulate occurrence

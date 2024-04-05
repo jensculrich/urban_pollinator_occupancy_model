@@ -146,6 +146,7 @@ inits <- lapply(1:n_chains, function(i)
 
 ## --------------------------------------------------
 ### Run model
+# dynocc7 is currently the final form
 stan_model <- "./dynamic_occupancy_model/models/dynocc7.stan"
 
 ## Call Stan from R
