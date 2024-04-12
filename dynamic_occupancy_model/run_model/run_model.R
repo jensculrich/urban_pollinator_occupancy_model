@@ -163,7 +163,7 @@ stan_out <- stan(stan_model,
                      cores = n_cores)
 
 saveRDS(stan_out, "./dynamic_occupancy_model/model_outputs/stan_out_habitat_binary.rds")
-#stan_out <- readRDS("./dynamic_occupancy_model/model_outputs/stan_out3.rds")
+stan_out <- readRDS("./dynamic_occupancy_model/model_outputs/stan_out_habitat_binary.rds")
 
 
 print(stan_out, digits = 3, 
@@ -181,7 +181,7 @@ print(stan_out, digits = 3,
       ))
 
 print(stan_out, digits = 3, 
-      pars = c( "p0",# "sigma_p_species", 
+      pars = c( "p0", "sigma_p_species", 
                 "p_specialization",
                 "p_flower_abundance_any",
                 "mu_p_species_date", "sigma_p_species_date", 
@@ -195,7 +195,7 @@ print(stan_out, digits = 3,
       ))
 
 print(stan_out,  
-          pars = c("L_species", "sigma_species"
+          pars = c("gamma_year"
           ))
 
 # for continuous model
@@ -244,6 +244,9 @@ traceplot(stan_out,
 
 pairs(stan_out,  
           pars = c(
+            "psi1_0","sigma_psi1_species",
+            "psi1_herbaceous_flowers", "psi1_woody_flowers", "psi1_specialization",
+            "psi1_interaction_1", "psi1_interaction_2"
           ))
 
 print(stan_out, digits = 3, pars = c("P_species"))

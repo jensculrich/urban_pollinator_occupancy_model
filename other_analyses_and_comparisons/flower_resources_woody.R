@@ -42,6 +42,12 @@ mydata <- mydata %>%
 
   filter(SHRUB_OR_TREE == "y") 
 
+counts <- mydata %>%
+  group_by(SPECIES) %>%
+  mutate(total = sum(NUM_FLORAL_UNITS)) %>%
+  slice(1)
+
+
 ## Get unique species and sites
 # create an alphabetized list of all species encountered across all sites*intervals*visits
 species_list <- mydata %>%

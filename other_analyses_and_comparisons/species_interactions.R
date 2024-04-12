@@ -108,3 +108,6 @@ species_metrics <- specieslevel(A, level="lower", index=c("degree", "normalised 
 
 hist(species_metrics$d)
 hist(species_metrics$degree)
+
+mean(species_metrics$d)
+sd(species_metrics$d)

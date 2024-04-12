@@ -2,7 +2,7 @@ library(tidyverse) # organization tools
 library(lubridate) # prep survey date data 
 library(bipartite) # calculate species interaction metrics
 
-process_raw_data <- function(min_unique_detections, filter_nonnative_woody) {
+process_raw_data <- function(min_unique_detections) {
 
   ## --------------------------------------------------
   ## Operation Functions
@@ -389,8 +389,8 @@ process_raw_data <- function(min_unique_detections, filter_nonnative_woody) {
   # now filter out plants that were never visited by pollinators (considered not to be of high value for pollinators)
   plant_data_subset <- plant_data %>%
     filter(SPECIES %in% plants_visited$PLANT_NETTED_FROM_SCI_NAME)
-
-  # abundance per site x year
+  
+  # abundance
   plant_abundance_df <- plant_data_subset %>%
     
     # calculate abundance per site visit
@@ -458,7 +458,7 @@ process_raw_data <- function(min_unique_detections, filter_nonnative_woody) {
   # read data
   woody_plant_data <- read.csv("./data/flower_resources_woody.csv")
   
-  # perform some initial filters on the prelim data
+  # perform some initial filters on the unfinished prelim data
   woody_plant_data <- woody_plant_data %>% 
     
     # Reduce sampling rounds in year 1 by 1 (they start at 2 since we did a weird prelim survey first)
@@ -468,7 +468,7 @@ process_raw_data <- function(min_unique_detections, filter_nonnative_woody) {
     mutate(SPECIES = replace_na(SPECIES, "No woody flowers"),
            NUM_FLORAL_UNITS = replace_na(NUM_FLORAL_UNITS, 0)) %>%
 
-    filter(SHRUB_OR_TREE == "y") # filter out counted the plants that were not shrub/tree
+    filter(SHRUB_OR_TREE == "y") 
   
   site_visits <- as.data.frame(cbind(
     rep(site_vector, each=3*6), rep(1:6, times=18*3), rep(1:3, each = 6, times=3), 
@@ -488,41 +488,8 @@ process_raw_data <- function(min_unique_detections, filter_nonnative_woody) {
   woody_plant_data_subset <- woody_plant_data %>%
     filter(SPECIES %in% plants_visited$PLANT_NETTED_FROM_SCI_NAME)
   
-  nonnative_woody_species = c("Prunus laurocerasus", "Sorbus aucuparia", "Sorbus hybrida",
-                              "Rubus armeniacus", "Tilia cordata")
-  
-  if(filter_nonnative_woody == TRUE){
-    woody_plant_data_subset <- woody_plant_data_subset %>%
-      filter(! SPECIES %in% nonnative_woody_species)
-  }
-  
   # join all possible site visits back in to add zeros
   woody_plant_data_subset <- full_join(woody_plant_data_subset, site_visits) 
-  
-  # get mean per site X year
-  woody_plant_abundance_df_all_years <- woody_plant_data_subset %>%
-    mutate(log_NUM_FLORAL_UNITS = log(NUM_FLORAL_UNITS + 1)) %>%
-    group_by(SITE, YEAR) %>%
-    mutate(mean_annual_woody_plant_abundance = mean(log_NUM_FLORAL_UNITS)) %>%
-    slice(1) %>%
-    group_by(SITE) %>%
-    mutate(mean_woody_plant_abundance = mean(mean_annual_woody_plant_abundance))%>%
-    slice(1) %>%
-    ungroup() %>%
-    
-    # scale the variable
-    mutate(all_years_woody_plant_abundance_scaled = center_scale(mean_woody_plant_abundance)) 
-  
-  original_woody_abundance_all_years <- woody_plant_abundance_df_all_years$all_years_woody_plant_abundance_scaled
-  
-  # get woody resources averaged across all three years of measuring
-  woody_flowers_scaled_all_years <- as.vector(
-    woody_plant_abundance_df_all_years$all_years_woody_plant_abundance_scaled)
-  
-  woody_flowers_scaled_all_years <- as.matrix(cbind(
-                                      woody_flowers_scaled_all_years,
-                                      woody_flowers_scaled_all_years, 
-                                      woody_flowers_scaled_all_years))
   
   # get mean per site X year
   woody_plant_abundance_df <- woody_plant_data_subset %>%
@@ -656,19 +623,6 @@ process_raw_data <- function(min_unique_detections, filter_nonnative_woody) {
   flowers_any_by_survey = (woody_flowers_by_survey + herbaceous_flowers_by_survey) / 2
   
   ## --------------------------------------------------
-  # were the meadows pre-established before the study?
-  
-  # china creek, mem south, and oak meadows were pre-established
-  preestablished <- as.numeric(
-                    c(0, 0, 1, 0, 
-                      0, 0, 0, 0,
-                      1, 0, 1, 0,
-                      0, 0, 0, 0, 
-                      0, 0)
-  )
-  
-  
-  ## --------------------------------------------------
   ## Return stuff
   return(list(
     
@@ -697,12 +651,7 @@ process_raw_data <- function(min_unique_detections, filter_nonnative_woody) {
     original_herb_abundance = original_herb_abundance,
     original_woody_abundance = original_woody_abundance,
     original_herb_diversity = original_herb_diversity,
-    original_woody_diversity = original_woody_diversity,
-    
-    woody_flowers_scaled_all_years = woody_flowers_scaled_all_years,
-    original_woody_abundance_all_years = original_woody_abundance_all_years,
-    
-    preestablished = preestablished
+    original_woody_diversity = original_woody_diversity
     
   ))
   

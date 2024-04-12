@@ -57,7 +57,8 @@ my_palette <- palette(viridis(n = n_bins, option = "viridis"))
 ## --------------------------------------------------
 ## get prediction range
 
-n_draws = 2000 # number of samples from the posteriors
+# n_draws = 50 # small number for testing bc it does take a few minutes to simulate results
+n_draws = nrow(list_of_draws) # number of samples from the posteriors
 
 pred_length = 2
 
@@ -84,7 +85,7 @@ occurrence_simmed <- array(data = NA, dim=c(n_species, pred_length, n_years))
 
 # expected values for a range of species and sites with range of herbaceous flowers
 # BUT with average woody flower
-random_draws_from_posterior = sample(1:nrow(list_of_draws), n_draws) 
+random_draws_from_posterior = seq(length.out=n_draws)
 
 richness = array(data = NA, dim=c( pred_length, n_years, n_draws))
 psi <- array(data = NA, dim=c(n_species, pred_length, n_years_minus1))
@@ -105,7 +106,7 @@ for(draw in 1:n_draws){
                 #species_effects[species[i],1] + // a species specific intercept
                 # start at first row of species effects
                 # then each next species will be + 4 + i
-                list_of_draws[rand,(145+(i-1))] +
+                list_of_draws[rand,(144+(i-1))] +
                 #psi1_herbaceous_flowers * herbaceous_flowers_scaled[j,1] + 
                 list_of_draws[rand,3] * herb_pred[j] + 
                 #psi1_specialization * d[i] +
@@ -135,7 +136,7 @@ for(draw in 1:n_draws){
               #species_effects[species[i],1] + // a species specific intercept
               # start at first row of species effects
               # then each next species will be + 4 + i
-              list_of_draws[rand,(357+(i-1))] +
+              list_of_draws[rand,(358+(i-1))] +
               #psi1_herbaceous_flowers * herbaceous_flowers_scaled[j,1] + 
               list_of_draws[rand,17] * herb_pred[j] + 
               #psi1_specialization * d[i] +
@@ -316,9 +317,9 @@ df1_t <- as.data.frame(cbind((rep(1, pred_length)), herb_pred,
          "upper_95" = "V7") 
 
 df2_t <- as.data.frame(cbind((rep(2, pred_length)), herb_pred,
-                           mean_t[,1],
-                           lower_50_t[,1], upper_50_t[,1],
-                           lower_95_t[,1], upper_95_t[,1],
+                           mean_t[,2],
+                           lower_50_t[,2], upper_50_t[,2],
+                           lower_95_t[,2], upper_95_t[,2],
                            original_herb))  %>%
   rename("year" = "V1",
          "mean" = "V3",
@@ -358,7 +359,8 @@ df_t <- rbind(df1_t, df2_t) %>%
    theme_bw() +
    ylab("Average turnover rate") +
    theme(
-         legend.position = "none",
+     legend.position = "bottom",
+     legend.text = element_text(size = 18),
          axis.text.x = element_text(size = 18),
          axis.text.y = element_text(size = 18, angle=45, vjust=-0.5),
          axis.title.x = element_text(size=20),
@@ -383,7 +385,7 @@ occurrence_simmed_woody <- array(data = NA, dim=c(n_species, pred_length, n_year
 
 # expected values for a range of species and sites with range of herbaceous flowers
 # BUT with average woody flower
-random_draws_from_posterior = sample(1:nrow(list_of_draws), n_draws) 
+random_draws_from_posterior =  seq(length.out=n_draws)
 
 richness_woody = array(data = NA, dim=c( pred_length, n_years, n_draws))
 psi_woody <- array(data = NA, dim=c(n_species, pred_length, n_years_minus1))
@@ -405,7 +407,7 @@ for(draw in 1:n_draws){
               #species_effects[species[i],1] + // a species specific intercept
               # start at first row of species effects
               # then each next species will be + 4 + i
-              list_of_draws[rand,(145+(i-1))] +
+              list_of_draws[rand,(144+(i-1))] +
               # for an herb enahcnement site
               list_of_draws[rand,3] * 1 + 
               #psi1_specialization * d[i] +
@@ -439,7 +441,7 @@ for(draw in 1:n_draws){
               #species_effects[species[i],1] + // a species specific intercept
               # start at first row of species effects
               # then each next species will be + 4 + i
-              list_of_draws[rand,(357+(i-1))] +
+              list_of_draws[rand,(358+(i-1))] +
               # for an herb enahcnement site
               list_of_draws[rand,17] * 1 +
               #psi1_specialization * d[i] +
@@ -526,9 +528,9 @@ df1_woody <- as.data.frame(cbind((rep(1, pred_length)), woody_pred,
 
 
 df2_woody <- as.data.frame(cbind((rep(2, pred_length)), woody_pred,
-                                 mean_woody[,1],
-                                 lower_50_woody[,1], upper_50_woody[,1],
-                                 lower_95_woody[,1], upper_95_woody[,1],
+                                 mean_woody[,2],
+                                 lower_50_woody[,2], upper_50_woody[,2],
+                                 lower_95_woody[,2], upper_95_woody[,2],
                                  original_woody))  %>%
   rename("year" = "V1",
          "mean" = "V3",
@@ -538,9 +540,9 @@ df2_woody <- as.data.frame(cbind((rep(2, pred_length)), woody_pred,
          "upper_95" = "V7") 
 
 df3_woody <- as.data.frame(cbind((rep(3, pred_length)), woody_pred,
-                                 mean_woody[,1],
-                                 lower_50_woody[,1], upper_50_woody[,1],
-                                 lower_95_woody[,1], upper_95_woody[,1],
+                                 mean_woody[,3],
+                                 lower_50_woody[,3], upper_50_woody[,3],
+                                 lower_95_woody[,3], upper_95_woody[,3],
                                  original_woody))  %>%
   rename("year" = "V1",
          "mean" = "V3",
@@ -573,7 +575,7 @@ df_woody <- rbind(df1_woody, df2_woody, df3_woody) %>%
      position=position_dodge(width=0.5),
      size=2.5) +
    scale_colour_manual(name = "",
-                       labels=c("avg. woody enhancement",
+                       labels=c("avg. woody enhancement\n",
                                 "above avg. \nwoody enhancement"),
                        values=my_palette[1:2]) +
    ylim(c(15, 110)) +
@@ -623,9 +625,9 @@ df1_t_woody <- as.data.frame(cbind((rep(1, pred_length)), woody_pred,
          "upper_95" = "V7") 
 
 df2_t_woody <- as.data.frame(cbind((rep(2, pred_length)), woody_pred,
-                             mean_t_woody[,1],
-                             lower_50_t_woody[,1], upper_50_t_woody[,1],
-                             lower_95_t_woody[,1], upper_95_t_woody[,1],
+                             mean_t_woody[,2],
+                             lower_50_t_woody[,2], upper_50_t_woody[,2],
+                             lower_95_t_woody[,2], upper_95_t_woody[,2],
                              original_woody))  %>%
   rename("year" = "V1",
          "mean" = "V3",
@@ -665,7 +667,8 @@ df_t_woody <- rbind(df1_t_woody, df2_t_woody) %>%
    theme_bw() +
    ylab("Average turnover rate") +
    theme(
-     legend.position = "none",
+     legend.position = "bottom",
+     legend.text = element_text(size = 18),
      axis.text.x = element_text(size = 18),
      axis.text.y = element_text(size = 18, angle=45, vjust=-0.5),
      axis.title.x = element_text(size=20),
@@ -683,3 +686,433 @@ grid.arrange(r, s, ncol=2)
 
 #-------------------------------------------------------------------------------
 grid.arrange(p, q, r, s, ncol=2)
+
+
+
+#-------------------------------------------------------------------------------
+# single species turnover
+
+n_test_species <- 4
+
+species_numbers <- c(27, 59, 28, 3) 
+# b rufo, llasi knereri, b sitkensis, andrena crat
+
+#species_numbers <- c(22, 59, 69, 8) 
+# b impatiens, lasi knereri, megachile angelarum, andrena miserabilis
+
+psi1_expected <- array(data = NA, dim=c(n_test_species, pred_length))
+gamma_expected <- array(data = NA, dim=c(n_test_species, pred_length, n_years_minus1))
+phi_expected <- array(data = NA, dim=c(n_test_species, pred_length, n_years_minus1))
+
+# expected values for a range of species and sites with range of herbaceous flowers
+# BUT with average woody flower
+random_draws_from_posterior = seq(length.out=n_draws)
+
+psi <- array(data = NA, dim=c(n_test_species, pred_length, n_years_minus1))
+turnover <- array(data = NA, dim=c(n_test_species, pred_length, n_years_minus1, n_draws))
+
+for(draw in 1:n_draws){
+  
+  rand <- random_draws_from_posterior[draw]
+  
+  # expected occurrence in year 1
+  for(i in 1:n_test_species){
+    for(j in 1:pred_length){
+      for(k in 2:n_years){
+        
+        psi1_expected[i,j] =
+          ilogit(#psi1_0 +
+            list_of_draws[rand,1] + 
+              #species_effects[species[i],1] + // a species specific intercept
+              # start at first row of species effects
+              # then each next species will be + 4 + i
+              list_of_draws[rand,(144+(species_numbers[i]-1))] +
+              #psi1_herbaceous_flowers * herbaceous_flowers_scaled[j,1] + 
+              list_of_draws[rand,3] * herb_pred[j] + 
+              #psi1_specialization * d[i] +
+              list_of_draws[rand,5] * d[species_numbers[i]] + 
+              #(psi1_interaction_1 * d[i] * herbaceous_flowers_scaled[j,1]) +
+              list_of_draws[rand,6] * d[species_numbers[i]] * herb_pred[j] 
+          )
+        
+        gamma_expected[i,j,k-1] =
+          ilogit(#gamma0 +
+            list_of_draws[rand,8] + 
+              #species_effects[species[i],1] + // a species specific intercept
+              # start at first row of species effects
+              # then each next species will be + 4 + i
+              list_of_draws[rand,(251+(species_numbers[i]-1))] +
+              #psi1_herbaceous_flowers * herbaceous_flowers_scaled[j,1] + 
+              list_of_draws[rand,10] * herb_pred[j] + 
+              #psi1_specialization * d[i] +
+              list_of_draws[rand,12] * d[species_numbers[i]] + 
+              #(psi1_interaction_1 * d[i] * herbaceous_flowers_scaled[j,1]) +
+              list_of_draws[rand,13] * d[species_numbers[i]] * herb_pred[j] 
+          )
+        
+        phi_expected[i,j,k-1] =
+          ilogit(#phi0 +
+            list_of_draws[rand,15] + 
+              #species_effects[species[i],1] + // a species specific intercept
+              # start at first row of species effects
+              # then each next species will be + 4 + i
+              list_of_draws[rand,(358+(species_numbers[i]-1))] +
+              #psi1_herbaceous_flowers * herbaceous_flowers_scaled[j,1] + 
+              list_of_draws[rand,17] * herb_pred[j] + 
+              #psi1_specialization * d[i] +
+              list_of_draws[rand,19] * d[species_numbers[i]] + 
+              #(psi1_interaction_1 * d[i] * herbaceous_flowers_scaled[j,1]) +
+              list_of_draws[rand,20] * d[species_numbers[i]] * herb_pred[j]
+          )
+        
+        if(k == 2){
+          # calculate occurrence based on transition from first year
+          psi[i,j,k-1] = psi1_expected[i,j] * phi_expected[i,j,k-1] + 
+            (1 - psi1_expected[i,j]) * gamma_expected[i,j,k-1]
+          
+          turnover[i,j,k-1,draw] <- 
+            ((1-psi1_expected[i,j]) * gamma_expected[i,j,k-1]) / 
+            psi[i,j,1]
+          
+        } else{
+          # calculate occurrence based on transition from first year
+          psi[i,j,k-1] = psi[i,j,k-2] * phi_expected[i,j,k-1] + 
+            (1 - psi[i,j,k-2]) * gamma_expected[i,j,k-1]
+          
+          turnover[i,j,k-1,draw] <- 
+            ((1-psi[i,j,k-2]) * gamma_expected[i,j,k-1]) / 
+            psi[i,j,2]
+        }
+      } 
+    }
+  }
+  
+} 
+
+## --------------------------------------------------
+## turnover summary
+
+mean_t = array(dim= c(n_test_species, pred_length, n_years_minus1))
+lower_50_t = array(dim= c(n_test_species, pred_length, n_years_minus1))
+upper_50_t = array(dim= c(n_test_species, pred_length, n_years_minus1))
+lower_95_t = array(dim= c(n_test_species, pred_length, n_years_minus1))
+upper_95_t = array(dim= c(n_test_species, pred_length, n_years_minus1))
+
+for(i in 1:n_test_species){
+  for(j in 1:pred_length){
+    for(k in 1:n_years_minus1){
+      quants_t = as.vector(quantile(turnover[i,j,k,], probs = c(0.10, 0.25, 0.50, 0.75, 0.90)))
+      
+      mean_t[i,j,k] = quants_t[3]
+      lower_50_t[i,j,k] = quants_t[2]
+      upper_50_t[i,j,k] = quants_t[4]
+      lower_95_t[i,j,k] = quants_t[1]
+      upper_95_t[i,j,k] = quants_t[5]
+    }
+  }
+}
+
+test_species_names <- as.factor(species_names[species_numbers[]])
+#test_species_names <- as.factor(c(1,2,3,4))
+
+df_t <- as.data.frame(
+  # year 1 without enhancement
+  cbind((rep(1, pred_length)), herb_pred[1],
+                             mean_t[,1,1],
+                             lower_50_t[,1,1], upper_50_t[,1,1],
+                             lower_95_t[,1,1], upper_95_t[,1,1]
+                             )) %>%
+  # year 1 w enhancement
+  rbind(., as.data.frame(cbind((rep(1, pred_length)), herb_pred[2],
+                               mean_t[,2,1],
+                               lower_50_t[,2,1], upper_50_t[,2,1],
+                               lower_95_t[,2,1], upper_95_t[,2,1]
+  ))
+  ) %>%
+  # year 2 without enhancement
+  rbind(., as.data.frame(cbind((rep(2, pred_length)), herb_pred[1],
+                               mean_t[,1,2],
+                               lower_50_t[,1,2], upper_50_t[,1,2],
+                               lower_95_t[,1,2], upper_95_t[,1,2]
+  ))
+  ) %>%
+  # year 2 w enhancement
+  rbind(., as.data.frame(cbind((rep(2, pred_length)), herb_pred[2],
+                               mean_t[,2,2],
+                               lower_50_t[,2,2], upper_50_t[,2,2],
+                               lower_95_t[,2,2], upper_95_t[,2,2]
+  ))
+  ) %>%
+  
+  # add species names
+  cbind(., test_species_names) %>%
+  
+  rename("year" = "V1",
+         "herb_pred" = "V2",
+         "mean" = "V3",
+         "lower_50" = "V4",
+         "upper_50" = "V5",
+         "lower_95" = "V6",
+         "upper_95" = "V7",
+         "species" = "test_species_names") %>%
+  mutate(year = as.factor(year),
+         herb_pred = as.factor(herb_pred)) %>%
+  mutate(species = fct_relevel(species, "Andrena crataegi", 
+                               "Lasioglossum knereri",
+                               "Bombus sitkensis",
+                               "Bombus rufocinctus"
+                               ))
+
+## --------------------------------------------------
+## Draw turnover plot
+
+(u  <- ggplot(data = df_t, aes(year, mean, colour=as.factor(herb_pred))) +
+   scale_x_discrete(name="Year", breaks = c(1, 2),
+                    labels=c("2021/2022", "2022/2023"
+                    )) +
+   geom_point(size = 4, position=position_dodge(width=0.5)) +
+   geom_errorbar(
+     aes(ymin = lower_95, ymax = upper_95),
+     width = 0.1,
+     position=position_dodge(width=0.5),
+     size=1) +
+   geom_errorbar(
+     aes(ymin = lower_50, ymax = upper_50),
+     width = 0,
+     position=position_dodge(width=0.5),
+     size=2.5) +
+   scale_colour_manual(name = "",
+                       labels=c("control",
+                                "herb. enhancement"),
+                       values=my_palette[3:4]) +
+   scale_y_continuous(limits = c(0,1),
+                      breaks = c(0, 0.5, 1),
+                      labels = scales::percent 
+   ) +
+   theme_bw() +
+   ylab("Turnover rate") +
+   facet_wrap(~species) +
+   theme(
+     legend.position = "bottom",
+     legend.text = element_text(size = 18),
+     axis.text.x = element_text(size = 18),
+     axis.text.y = element_text(size = 18, angle=45, vjust=-0.5),
+     axis.title.x = element_text(size=20),
+     axis.title.y = element_text(size = 20),
+     strip.text.x = element_text(size = 16, face="italic", colour = "black", angle = 0),
+     panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+     panel.background = element_blank(), axis.line = element_line(colour = "black"))
+)
+
+## --------------------------------------------------
+## now do it with woody
+
+psi1_expected <- array(data = NA, dim=c(n_test_species, pred_length))
+gamma_expected <- array(data = NA, dim=c(n_test_species, pred_length, n_years_minus1))
+phi_expected <- array(data = NA, dim=c(n_test_species, pred_length, n_years_minus1))
+
+# expected values for a range of species and sites with range of herbaceous flowers
+# BUT with average woody flower
+random_draws_from_posterior = seq(length.out=n_draws)
+
+psi <- array(data = NA, dim=c(n_test_species, pred_length, n_years_minus1))
+turnover <- array(data = NA, dim=c(n_test_species, pred_length, n_years_minus1, n_draws))
+
+for(draw in 1:n_draws){
+  
+  rand <- random_draws_from_posterior[draw]
+  
+  # expected occurrence in year 1
+  for(i in 1:n_test_species){
+    for(j in 1:pred_length){
+      for(k in 2:n_years){
+        
+        psi1_expected[i,j] =
+          ilogit(#psi1_0 +
+            list_of_draws[rand,1] + 
+              #species_effects[species[i],1] + // a species specific intercept
+              # start at first row of species effects
+              # then each next species will be + 4 + i
+              list_of_draws[rand,(144+(species_numbers[i]-1))] +
+              # for an herb enahcnement site
+              list_of_draws[rand,3] * 1 + 
+              #psi1_specialization * d[i] +
+              list_of_draws[rand,5] * d[species_numbers[i]] + 
+              #psi1_woody_flowers * woody_flowers_scaled[j,1] +
+              list_of_draws[rand,4] * woody_pred[j] + 
+              #(psi1_interaction_2 * d[i] * woody_flowers_scaled[j,1])
+              list_of_draws[rand,7] * d[species_numbers[i]] * woody_pred[j]
+          )
+        
+        gamma_expected[i,j,k-1] =
+          ilogit(#gamma0 +
+            list_of_draws[rand,8] + 
+              #species_effects[species[i],1] + // a species specific intercept
+              # start at first row of species effects
+              # then each next species will be + 4 + i
+              list_of_draws[rand,(251+(species_numbers[i]-1))] +
+              # for an herb enahcnement site
+              list_of_draws[rand,10] * 1 +
+              #psi1_specialization * d[i] +
+              list_of_draws[rand,12] * d[species_numbers[i]] + 
+              #psi1_woody_flowers * woody_flowers_scaled[j,1] +
+              list_of_draws[rand,11] * woody_pred[j] + 
+              #(psi1_interaction_2 * d[i] * woody_flowers_scaled[j,1])
+              list_of_draws[rand,14] * d[species_numbers[i]] * woody_pred[j]
+          )
+        
+        phi_expected[i,j,k-1] =
+          ilogit(#phi0 +
+            list_of_draws[rand,15] + 
+              #species_effects[species[i],1] + // a species specific intercept
+              # start at first row of species effects
+              # then each next species will be + 4 + i
+              list_of_draws[rand,(358+(species_numbers[i]-1))] +
+              # for an herb enahcnement site
+              list_of_draws[rand,17] * 1 +
+              #psi1_specialization * d[i] +
+              list_of_draws[rand,19] * d[species_numbers[i]] + 
+              #psi1_woody_flowers * woody_flowers_scaled[j,1] +
+              list_of_draws[rand,18] * woody_pred[j] + 
+              #(psi1_interaction_2 * d[i] * woody_flowers_scaled[j,1])
+              list_of_draws[rand,21] * d[species_numbers[i]] * woody_pred[j]
+          )
+        
+        if(k == 2){
+          # calculate occurrence based on transition from first year
+          psi[i,j,k-1] = psi1_expected[i,j] * phi_expected[i,j,k-1] + 
+            (1 - psi1_expected[i,j]) * gamma_expected[i,j,k-1]
+          
+          turnover[i,j,k-1,draw] <- 
+            ((1-psi1_expected[i,j]) * gamma_expected[i,j,k-1]) / 
+            psi[i,j,1]
+          
+        } else{
+          # calculate occurrence based on transition from first year
+          psi[i,j,k-1] = psi[i,j,k-2] * phi_expected[i,j,k-1] + 
+            (1 - psi[i,j,k-2]) * gamma_expected[i,j,k-1]
+          
+          turnover[i,j,k-1,draw] <- 
+            ((1-psi[i,j,k-2]) * gamma_expected[i,j,k-1]) / 
+            psi[i,j,2]
+        }
+      } 
+    }
+  }
+  
+} 
+
+## --------------------------------------------------
+## turnover summary
+
+mean_t = array(dim= c(n_test_species, pred_length, n_years_minus1))
+lower_50_t = array(dim= c(n_test_species, pred_length, n_years_minus1))
+upper_50_t = array(dim= c(n_test_species, pred_length, n_years_minus1))
+lower_95_t = array(dim= c(n_test_species, pred_length, n_years_minus1))
+upper_95_t = array(dim= c(n_test_species, pred_length, n_years_minus1))
+
+for(i in 1:n_test_species){
+  for(j in 1:pred_length){
+    for(k in 1:n_years_minus1){
+      quants_t = as.vector(quantile(turnover[i,j,k,], probs = c(0.10, 0.25, 0.50, 0.75, 0.90)))
+      
+      mean_t[i,j,k] = quants_t[3]
+      lower_50_t[i,j,k] = quants_t[2]
+      upper_50_t[i,j,k] = quants_t[4]
+      lower_95_t[i,j,k] = quants_t[1]
+      upper_95_t[i,j,k] = quants_t[5]
+    }
+  }
+}
+
+test_species_names <- as.factor(species_names[species_numbers[]])
+#test_species_names <- as.factor(c(1,2,3,4))
+
+df_t <- as.data.frame(
+  # year 1 without enhancement
+  cbind((rep(1, pred_length)), herb_pred[1],
+        mean_t[,1,1],
+        lower_50_t[,1,1], upper_50_t[,1,1],
+        lower_95_t[,1,1], upper_95_t[,1,1]
+  )) %>%
+  # year 1 w enhancement
+  rbind(., as.data.frame(cbind((rep(1, pred_length)), herb_pred[2],
+                               mean_t[,2,1],
+                               lower_50_t[,2,1], upper_50_t[,2,1],
+                               lower_95_t[,2,1], upper_95_t[,2,1]
+  ))
+  ) %>%
+  # year 2 without enhancement
+  rbind(., as.data.frame(cbind((rep(2, pred_length)), herb_pred[1],
+                               mean_t[,1,2],
+                               lower_50_t[,1,2], upper_50_t[,1,2],
+                               lower_95_t[,1,2], upper_95_t[,1,2]
+  ))
+  ) %>%
+  # year 2 w enhancement
+  rbind(., as.data.frame(cbind((rep(2, pred_length)), herb_pred[2],
+                               mean_t[,2,2],
+                               lower_50_t[,2,2], upper_50_t[,2,2],
+                               lower_95_t[,2,2], upper_95_t[,2,2]
+  ))
+  ) %>%
+  
+  # add species names
+  cbind(., test_species_names) %>%
+  
+  rename("year" = "V1",
+         "herb_pred" = "V2",
+         "mean" = "V3",
+         "lower_50" = "V4",
+         "upper_50" = "V5",
+         "lower_95" = "V6",
+         "upper_95" = "V7",
+         "species" = "test_species_names") %>%
+  mutate(year = as.factor(year),
+         herb_pred = as.factor(herb_pred)) %>%
+  mutate(species = fct_relevel(species, "Andrena crataegi", 
+                               "Lasioglossum knereri",
+                               "Bombus sitkensis",
+                               "Bombus rufocinctus"
+  ))
+
+## --------------------------------------------------
+## Draw turnover plot
+
+(v  <- ggplot(data = df_t, aes(year, mean, colour=as.factor(herb_pred))) +
+   scale_x_discrete(name="Year", breaks = c(1, 2),
+                    labels=c("2021/2022", "2022/2023"
+                    )) +
+   geom_point(size = 4, position=position_dodge(width=0.5)) +
+   geom_errorbar(
+     aes(ymin = lower_95, ymax = upper_95),
+     width = 0.1,
+     position=position_dodge(width=0.5),
+     size=1) +
+   geom_errorbar(
+     aes(ymin = lower_50, ymax = upper_50),
+     width = 0,
+     position=position_dodge(width=0.5),
+     size=2.5) +
+   scale_colour_manual(name = "",
+                       labels=c("avg. woody enhancement",
+                                "above avg. \nwoody enhancement"),
+                       values=my_palette[1:2]) +
+   scale_y_continuous(limits = c(0,1),
+                      breaks = c(0, 0.5, 1),
+                      labels = scales::percent 
+   ) +
+   theme_bw() +
+   ylab("Turnover rate") +
+   facet_wrap(~species) +
+   theme(
+     legend.position = "bottom",
+     legend.text = element_text(size = 18),
+     axis.text.x = element_text(size = 18),
+     axis.text.y = element_text(size = 18, angle=45, vjust=-0.5),
+     axis.title.x = element_text(size=20),
+     axis.title.y = element_text(size = 20),
+     strip.text.x = element_text(size = 16, face="italic", colour = "black", angle = 0),
+     panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+     panel.background = element_blank(), axis.line = element_line(colour = "black"))
+)

@@ -2,7 +2,7 @@ library(reshape2)
 library(tidyverse)
 
 max_unique_detections = 500 # can lower this to filter off the top if too many species to plot in one page
-min_unique_detections = 2
+min_unique_detections = 1
 
 # read data
 mydata <- read.csv("./data/pollinator_data.csv")
@@ -20,9 +20,10 @@ mydata_filtered <- mydata %>%
   filter(!SPECIES %in% c("Apis mellifera","undetermined", "undetermined/unconfirmed ID"))  %>%
   
   # Reduce sampling rounds in year 1 by 1 (they start at 2 since we did a weird prelim survey first)
-  mutate(SAMPLING_ROUND = as.integer(ifelse(YEAR==1, as.integer(SAMPLING_ROUND) - 1, as.integer(SAMPLING_ROUND)))) %>%
+  mutate(SAMPLING_ROUND = as.integer(ifelse(YEAR==1, as.integer(SAMPLING_ROUND) - 1, as.integer(SAMPLING_ROUND)))) 
+#%>%
   
-  filter(is.na(NO_ID_RESOLUTION))
+  #filter(is.na(NO_ID_RESOLUTION))
 
 
 

@@ -416,6 +416,7 @@ plants_visited <- pollinator_data %>%
 
 ggplot(plants_visited, aes(x=PLANT_NETTED_FROM_SCI_NAME, y=log_n)) +
   geom_col() +
+  ylim(c(0, 7)) +
   labs(x = "Plant species", y="log(number of detected interactions)") +
   theme(axis.text.x = element_text(angle = 45, hjust=1)) +
   ggtitle("Total interactions per species")

@@ -24,9 +24,11 @@ mydata_filtered <- mydata %>%
   filter(!SPECIES %in% c("Apis mellifera","undetermined", "undetermined/unconfirmed ID"))  %>%
   
   # Reduce sampling rounds in year 1 by 1 (they start at 2 since we did a weird prelim survey first)
-  mutate(SAMPLING_ROUND = as.integer(ifelse(YEAR==1, as.integer(SAMPLING_ROUND) - 1, as.integer(SAMPLING_ROUND))))%>%
+  mutate(SAMPLING_ROUND = as.integer(ifelse(YEAR==1, as.integer(SAMPLING_ROUND) - 1, as.integer(SAMPLING_ROUND))))
+
+#%>%
   
-  filter(!is.na(NO_ID_RESOLUTION))
+ # filter(!is.na(NO_ID_RESOLUTION))
 
 ## --------------------------------------------------
 ## Let's compare abundances
