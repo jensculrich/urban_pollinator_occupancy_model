@@ -2,7 +2,7 @@ library(tidyverse) # organization tools
 library(lubridate) # prep survey date data 
 library(bipartite) # calculate species interaction metrics
 
-process_raw_data <- function(min_unique_detections) {
+process_raw_data <- function(min_unique_detections, filter_nonnative_woody) {
 
   ## --------------------------------------------------
   ## Operation Functions
@@ -28,13 +28,13 @@ process_raw_data <- function(min_unique_detections) {
     
     # Filter by SPECIES
     # Remove some others until resolved for final analyses
-    filter(!SPECIES %in% c("Bombus sp.","Eupeodes sp.", "Sphaerophoria sp."))  %>%
+    filter(!SPECIES %in% c("Bombus sp.","Eupeodes sp.", "Sphaerophoria sp.", "Osmia sp."))  %>%
     
     # Reduce sampling rounds in year 1 by 1 (they start at 2 since we did a weird prelim survey first)
     mutate(SAMPLING_ROUND = as.integer(ifelse(YEAR==1, as.integer(SAMPLING_ROUND) - 1, as.integer(SAMPLING_ROUND)))) %>%
   
     # for now we will filter out survey round 7 in year 2 (6 / 18 sites visited a 7th time)
-    filter(SAMPLING_ROUND <7)
+    filter(SAMPLING_ROUND < 7)
   
   # number of unique species
   (length(unique(mydata_filtered$SPECIES)))
@@ -209,6 +209,7 @@ process_raw_data <- function(min_unique_detections) {
   visits <- mydata %>%
     # Reduce sampling rounds in year 1 by 1 (they start at 2 since we did a weird prelim survey first)
     mutate(SAMPLING_ROUND = as.integer(ifelse(YEAR==1, as.integer(SAMPLING_ROUND) - 1, as.integer(SAMPLING_ROUND)))) %>%
+    filter(SAMPLING_ROUND < 7) %>%
     group_by(SAMPLING_ROUND, YEAR, SITE) %>% # one unique row per site*species*visit combination
     slice(1) %>%
     ungroup() %>%

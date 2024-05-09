@@ -3,9 +3,9 @@
 
 library(rstan)
 
-source("./dynamic_occupancy_model/run_model/prep_data.R")
 min_unique_detections = 1 
 filter_nonnative_woody = FALSE
+source("./dynamic_occupancy_model/run_model/prep_data.R")
 my_data <- process_raw_data(min_unique_detections, filter_nonnative_woody)
 
 ## --------------------------------------------------
@@ -42,7 +42,7 @@ woody_flowers_scaled_all_years <- my_data$woody_flowers_scaled_all_years
 preestablished <- my_data$preestablished
 
 # could do more detailed variable correlation summaries
-cor.test(herbaceous_flowers_scaled, woody_flowers_scaled)
+cor.test(herbaceous_diversity_scaled, herbaceous_flowers_scaled)
 
 ## --------------------------------------------------
 ### Prep data and tweak model options
@@ -97,9 +97,9 @@ params <- c(#"L_species", "sigma_species",
   "psi1_species", "gamma_species", "phi_species", "p_species")
 
 # MCMC settings
-n_iterations <- 1000
+n_iterations <- 4000
 n_thin <- 1
-n_burnin <- 500
+n_burnin <- 2000
 n_chains <- 4
 n_cores <- n_chains
 delta = 0.95
@@ -162,8 +162,8 @@ stan_out <- stan(stan_model,
                      open_progress = FALSE,
                      cores = n_cores)
 
-saveRDS(stan_out, "./dynamic_occupancy_model/model_outputs/stan_out_habitat_binary.rds")
-stan_out <- readRDS("./dynamic_occupancy_model/model_outputs/stan_out_habitat_binary.rds")
+saveRDS(stan_out, "./dynamic_occupancy_model/model_outputs/stan_out.rds")
+stan_out <- readRDS("./dynamic_occupancy_model/model_outputs/stan_out.rds")
 
 
 print(stan_out, digits = 3, 
