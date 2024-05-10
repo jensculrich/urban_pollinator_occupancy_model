@@ -13,9 +13,6 @@
 // year == k
 // visit == l
 
-// let's try fitting this model with no partial-pooling of species effects
-// (species all get their own intercept terms)
-
 data {
   
   int<lower=0> n_species; // number of species
@@ -269,9 +266,6 @@ model {
 } // end model
 
 generated quantities{
-  
-  // Could also add: 
-  // effects on init occupancy, colonization, and persistence across a range of specialization bins
   
   // Diversity estimation
   // number of species at each site in each year
