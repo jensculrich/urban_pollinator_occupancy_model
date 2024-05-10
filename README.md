@@ -11,7 +11,7 @@
 ## data are stored in ./data/:
 - flower_resources_herb_quadrat.csv (the data that was collected on flower counts in the herb enhancements or analogous lawn space)
 - flower_resources_woody.csv (the data that was collected on flower counts from woody plants)
-- sites.csv (lat/long and landscape buffer impervious surface and tree canopy cover summaries for each of the 18 park sites)
+- land_cover_by_site_reduced.csv (lat/long and landscape buffer impervious surface and tree canopy cover summaries for each of the 18 park sites)
 - pollinator_data.csv (pollinator detections and the plants that they were recorded interacting with)
 - metada.doc (contains detailed descriptions of column names from each data file)
 
