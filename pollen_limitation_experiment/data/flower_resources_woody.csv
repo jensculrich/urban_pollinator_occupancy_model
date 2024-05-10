@@ -1,0 +1,708 @@
+YEAR,SAMPLING_ROUND,DATE,SITE,SPECIES,NUM_FLORAL_UNITS,SHRUB_OR_TREE
+1,2,5.17.2021,balaclava,Prunus laurocerasus,78768,y
+1,2,5.17.2021,balaclava,Prunus sp.,20,y
+1,2,5.20.2021,bobolink,Crataegus monogyna,161280,y
+1,2,5.18.2021,china creek,Aesculus hippocastanum,166320,y
+1,2,5.18.2021,china creek,Cornus kousa,34,y
+1,2,5.20.2021,falaise,Caltha palustris,22,
+1,2,5.20.2021,falaise,Cornus sericea,66234,y
+1,2,5.20.2021,falaise,Cytisus scoparius,909,y
+1,2,5.20.2021,falaise,Gaultheria shallon,17,y
+1,2,5.20.2021,falaise,Lonicera involucrata,1216,y
+1,2,5.20.2021,falaise,Maianthemum dilatatum,32,
+1,2,5.20.2021,falaise,Physocarpus capitatus,19712,y
+1,2,5.20.2021,falaise,Rosa nutkana,161,y
+1,2,5.20.2021,falaise,Rubus parviflorus,14,y
+1,2,5.20.2021,falaise,Rubus spectabilis,59,y
+1,2,5.20.2021,falaise,Rubus spectabilis,21,y
+1,2,5.20.2021,falaise,Symphoricarpos albus,2,y
+1,2,5.19.2021,gordon,Lupinus polyphyllus,259,
+1,2,5.19.2021,gordon,Myosotis sylvatica,96,
+1,2,5.19.2021,gordon,Rosa sp.,10,y
+1,2,5.19.2021,gordon,Salvia rosmarinus,20,y
+1,2,5.19.2021,gordon,Vaccinium corymbosum,70,y
+1,2,5.19.2021,gordon,Viburnum plicatum,550,y
+1,2,5.18.2021,kensington,Sorbus hybrida,4120,y
+1,2,5.17.2021,locarno,Acer circinatum,15498,y
+1,2,5.17.2021,locarno,Aesculus hippocastanum,844322,y
+1,2,5.17.2021,locarno,Cornus nuttallii,161,y
+1,2,5.17.2021,locarno,Crataegus monogyna,273240,y
+1,2,5.17.2021,locarno,Cytisus scoparius,315,y
+1,2,5.17.2021,locarno,Gaultheria shallon,3917,y
+1,2,5.17.2021,locarno,Rhododendron macrophyllum,2491,y
+1,2,5.17.2021,locarno,Rubus spectabilis,52,y
+1,2,5.18.2021,moberly,Centranthus ruber,38,
+1,2,5.18.2021,moberly,Lavandula angustifolia,49,
+1,2,5.18.2021,moberly,Myosotis sylvatica,150,
+1,2,5.18.2021,moberly,Symphoricarpos albus,132,y
+1,2,5.17.2021,oak meadows,Cytisus scoparius,11779,y
+1,2,5.17.2021,prince of wales,Acer circinatum,932,y
+1,2,5.17.2021,prince of wales,Crataegus douglasii,3550,y
+1,2,5.18.2021,queen elizabeth,Acer circinatum,14369,y
+1,2,5.18.2021,queen elizabeth,Cornus kousa,291,y
+1,2,5.18.2021,queen elizabeth,Hesperis matronalis,41,
+1,2,5.18.2021,queen elizabeth,Ilex aquifolium,5096,y
+1,2,5.18.2021,queen elizabeth,Laburnum anagyroides,5250,y
+1,2,5.17.2021,quilchena,Aesculus hippocastanum,12000,y
+1,2,5.17.2021,quilchena,Magnolia X soulangeana,1,y
+1,2,5.18.2021,rupert,NA,NA,
+1,2,5.20.2021,slocan,NA,NA,
+1,2,5.19.2021,memorial south,Aesculus hippocastanum,72128,y
+1,2,5.19.2021,memorial south,Cornus sericea,44,y
+1,2,5.17.2021,west memorial,Acer circinatum,2304,y
+1,2,5.17.2021,west memorial,Gaultheria shallon,504,y
+1,2,5.17.2021,west memorial,Ilex aquifolium,6500,y
+1,2,5.17.2021,west memorial,Lonicera ciliosa,217,y
+1,2,5.17.2021,west memorial,Rubus parviflorus,20,y
+1,2,5.17.2021,west memorial,Rubus ursinus,313,y
+1,2,5.17.2021,winona,NA,NA,
+1,2,5.19.2021,killarney,NA,NA,
+1,3,6.2.2021,balaclava,NA,NA,
+1,3,6.2.2021,bobolink,NA,NA,
+1,3,6.2.2021,china creek,NA,NA,
+1,3,6.2.2021,falaise,Gaultheria shallon,130,y
+1,3,6.2.2021,falaise,Iris pseudacorus,14,
+1,3,6.2.2021,falaise,Lonicera involucrata,864,y
+1,3,6.2.2021,falaise,Lupinus polyphyllus,84,
+1,3,6.2.2021,falaise,Philadelphus lewisii,108,y
+1,3,6.2.2021,falaise,Physocarpus capitatus,44000,y
+1,3,6.2.2021,falaise,Rosa nutkana,316,y
+1,3,6.2.2021,falaise,Rosa pisocarpa,164,y
+1,3,6.2.2021,falaise,Rubus armeniacus,223,y
+1,3,6.2.2021,falaise,Rubus parviflorus,152,y
+1,3,6.2.2021,falaise,Symphoricarpos albus,2825,y
+1,3,6.2.2021,gordon,Aegopodium podagraria,266,
+1,3,6.2.2021,gordon,Paeonia officinalis,7,y
+1,3,6.2.2021,gordon,Salvia officinalis,1008,
+1,3,6.2.2021,kensington,Allium schoenoprasum,84,
+1,3,6.2.2021,kensington,Brassica oleracea,10,
+1,3,6.2.2021,kensington,Lobularia maritima,364,
+1,3,6.2.2021,killarney,NA,NA,
+1,3,6.2.2021,locarno,Aesculus hippocastanum,3180,y
+1,3,6.2.2021,locarno,Crataegus monogyna,14352,y
+1,3,6.2.2021,locarno,Cytisus scoparius,583,y
+1,3,6.2.2021,locarno,Gaultheria shallon,1112,y
+1,3,6.2.2021,locarno,Rhododendron macrophyllum,952,y
+1,3,6.1.2021,moberly,Centranthus ruber,8280,
+1,3,6.1.2021,moberly,Lavandula angustifolia,26,
+1,3,6.1.2021,moberly,Liriodendron tulipifera,560,y
+1,3,6.1.2021,moberly,Symphoricarpos albus,1560,y
+1,3,6.1.2021,oak meadows,Cytisus scoparius,353,y
+1,3,6.1.2021,oak meadows,Prunus virginiana,3744,y
+1,3,6.1.2021,oak meadows,Rubus armeniacus,24,y
+1,3,6.2.2021,prince of wales,NA,NA,
+1,3,6.1.2021,queen elizabeth,NA,NA,
+1,3,6.1.2021,quilchena,Cornus sericea,2340,y
+1,3,6.2.2021,slocan,NA,NA,
+1,3,6.2.2021,memorial south,Robinia pseudoacacia,295200,y
+1,3,6.2.2021,west memorial,Gaultheria shallon,164,y
+1,3,6.2.2021,west memorial,Lonicera ciliosa,12,y
+1,3,6.2.2021,west memorial,Physocarpus capitatus,4796,y
+1,3,6.1.2021,winona,NA,NA,
+1,3,6.2.2021,rupert,NA,NA,
+1,4,6.22.2021,balaclava,NA,NA,
+1,4,6.17.2021,bobolink,NA,NA,
+1,4,6.18.2021,china creek,NA,0,
+1,4,6.21.2021,falaise,Holodiscus discolor,54375,y
+1,4,6.21.2021,falaise,Iris pseudacorus,20,
+1,4,6.21.2021,falaise,Philadelphus lewisii,434,y
+1,4,6.21.2021,falaise,Rubus armeniacus,6400,y
+1,4,6.21.2021,falaise,Spiraea douglasii,65088,y
+1,4,6.21.2021,falaise,Symphoricarpos albus,1100,y
+1,4,6.21.2021,gordon,Rosa sp.,4,y
+1,4,6.21.2021,gordon,Salvia officinalis,105,y
+1,4,6.18.2021,kensington,Eschscholzia californica,12,
+1,4,6.18.2021,kensington,Lavendula angustifolia,2912,
+1,4,6.18.2021,kensington,Lobularia maritima,4980,
+1,4,6.17.2021,killarney,NA,NA,
+1,4,6.22.2021,locarno,Rhododendron macrophyllum,21,y
+1,4,6.22.2021,locarno,Rubus armeniacus,994,y
+1,4,6.18.2021,moberly,Centranthus ruber,7200,
+1,4,6.18.2021,moberly,Hebe buxifolia,14688,y
+1,4,6.18.2021,moberly,Liriodendron tulipifera,696,y
+1,4,6.18.2021,moberly,Symphoricarpos albus,1494,y
+1,4,6.18.2021,moberly,Tanacetum camphoratum,1518,
+1,4,6.17.2021,oak meadows,Lupinus polyphyllus,49660,
+1,4,6.17.2021,oak meadows,Rubus armeniacus,402,y
+1,4,6.22.2021,prince of wales,NA,NA,
+1,4,6.17.2021,queen elizabeth,Cotoneaster lucidus,2112,y
+1,4,6.22.2021,quilchena,NA,NA,
+1,4,6.22.2021,rupert,NA,NA,
+1,4,6.21.2021,slocan,NA,NA,
+1,4,6.16.2021,memorial south,NA,NA,
+1,4,6.18.2021,west memorial,Gaultheria shallon,277,y
+1,4,6.18.2021,west memorial,Physocarpus capitatus,14,y
+1,4,6.18.2021,west memorial,Rubus armeniacus,6,y
+1,4,6.18.2021,west memorial,Solanum dulcamara,46,
+1,4,6.18.2021,winona,NA,NA,
+1,5,7.5.2021,balaclava,NA,NA,
+1,5,7.5.2021,bobolink,NA,NA,
+1,5,7.13.2021,china creek,Spiraea japonica,1500,y
+1,5,7.5.2021,falaise,Chamaenerion angustifolium,1056,
+1,5,7.5.2021,falaise,Cornus sericea,175,y
+1,5,7.5.2021,falaise,Lythrum salicaria,200,
+1,5,7.5.2021,falaise,Rubus armeniacus,68,y
+1,5,7.5.2021,falaise,Spiraea douglasii,249050,y
+1,5,7.5.2021,falaise,Symphoricarpos albus,3040,y
+1,5,7.5.2021,gordon,Epilobium canum,64,
+1,5,7.5.2021,gordon,Lavandula angustifolia,5600,
+1,5,7.5.2021,gordon,Silene coronaria,132,
+1,5,7.5.2021,killarney,NA,NA,
+1,5,7.6.2021,locarno,Rubus armeniacus,67,y
+1,5,7.6.2021,locarno,Stellaria media,477,
+1,5,7.2.2021,moberly,Achillea milleflolium,917,
+1,5,7.2.2021,moberly,Centranthus ruber,309,
+1,5,7.2.2021,moberly,Hebe buxifolia,174,y
+1,5,7.2.2021,moberly,Symphoricarpos albus,210,y
+1,5,7.2.2021,moberly,Tanacetum camphoratum,3206,
+1,5,7.2.2021,oak meadows,Cirsium arvense,62,
+1,5,7.2.2021,oak meadows,Lotus corniculatus,540,
+1,5,7.2.2021,oak meadows,Lupinus polyphyllus,168,
+1,5,7.2.2021,oak meadows,Malva moschata,4,
+1,5,7.2.2021,oak meadows,Rubus armeniacus,96,y
+1,5,7.6.2021,prince of wales,Magnolia virginiana,7,y
+1,5,7.5.2021,queen elizabeth,Cyclamen dulcamara,9,
+1,5,7.5.2021,queen elizabeth,Oenanthe sarmentosa,38250,
+1,5,7.5.2021,queen elizabeth,Rubus armeniacus,10,y
+1,5,7.6.2021,quilchena,NA,NA,
+1,5,7.13.2021,rupert,NA,NA,
+1,5,7.14.2021,kensington,NA,NA,
+1,5,7.5.2021,slocan,Tilia cordata,585000,y
+1,5,7.2.2021,memorial south,NA,NA,
+1,5,7.6.2021,west memorial,Rubus armeniacus,8,y
+1,5,7.5.2021,winona,Rorippa palustris,1080,
+1,6,7.16.2021,balaclava,NA,NA,
+1,6,7.29.2021,bobolink,NA,NA,
+1,6,7.27.2021,china creek,NA,NA,
+1,6,7.24.2021,falaise,Cirsium arvense,140,
+1,6,7.24.2021,falaise,Clematis vitalba,570,y
+1,6,7.24.2021,falaise,Epilobium angustifolium,378,
+1,6,7.24.2021,falaise,Lythrum salicaria,6750,
+1,6,7.24.2021,falaise,Rubus armeniacus,3,y
+1,6,7.24.2021,falaise,Spiraea douglasii,4725,y
+1,6,7.24.2021,falaise,Symphoricarpos albus,720,y
+1,6,7.24.2021,falaise,Vicia cracca,896,
+1,6,7.22.2021,gordon,NA,NA,
+1,6,7.29.2021,kensington,NA,NA,
+1,6,7.29.2021,killarney,NA,NA,
+1,6,7.20.2021,locarno,Buddleja davidii,4264,y
+1,6,7.20.2021,locarno,Cirsium arvense,3,
+1,6,7.20.2021,locarno,Rubus armeniacus,5,y
+1,6,7.20.2021,locarno,Tanacetum vulgare,270,
+1,6,7.16.2021,moberly,Achillea millefolium,2096,
+1,6,7.16.2021,moberly,Centranthus ruber,54,
+1,6,7.16.2021,moberly,Hebe buxifolia,28,
+1,6,7.16.2021,moberly,Symphoricarpos albus,468,
+1,6,7.16.2021,moberly,Vicia cracca,84,
+1,6,7.21.2021,oak meadows,NA,NA,
+1,6,7.16.2021,prince of wales,Magnolia virginiana,3,
+1,6,7.21.2021,queen elizabeth,Catalpa bignonioides,2520,y
+1,6,7.21.2021,queen elizabeth,Cirsium arvense,285,
+1,6,7.21.2021,queen elizabeth,Cyclamen dulcamara,8,
+1,6,7.21.2021,queen elizabeth,Lotus corniculatus,29,
+1,6,7.21.2021,queen elizabeth,Oenanthe sarmentosa,4712,
+1,6,7.16.2021,quilchena,NA,NA,
+1,6,7.27.2021,rupert,NA,NA,
+1,6,7.24.2021,slocan,NA,NA,
+1,6,7.22.2021,memorial south,NA,NA,
+1,6,7.20.2021,west memorial,Agastache foeniculum,629,
+1,6,7.16.2021,winona,NA,NA,
+1,7,8.9.2021,balaclava,NA,NA,
+1,7,7.29.2021,bobolink,NA,NA,
+1,7,8.10.2021,bobolink,NA,NA,
+1,7,8.19.2021,china creek,NA,NA,
+1,7,8.10.2021,falaise,Achillea milleflolium,2090,
+1,7,8.10.2021,falaise,Chamaenerion angustifolium,342,
+1,7,8.10.2021,falaise,Cirsium arvense,133,
+1,7,8.10.2021,falaise,Clematis vitalba,14,y
+1,7,8.10.2021,falaise,Lotus corniculatus,130,
+1,7,8.10.2021,falaise,Lythrum salicaria,10350,
+1,7,8.10.2021,falaise,Rubus armeniacus,6,y
+1,7,8.10.2021,falaise,Spiraea douglasii,304,y
+1,7,8.10.2021,falaise,Symphoricarpos albus,93,y
+1,7,8.10.2021,falaise,Vicia cracca,240,
+1,7,8.19.2021,gordon,NA,NA,
+1,7,8.10.2021,moberly,NA,NA,
+1,7,8.19.2021,kensington,NA,NA,
+1,7,8.10.2021,killarney,NA,NA,
+1,7,8.17.2021,locarno,NA,NA,
+1,7,8.10.2021,oak meadows,NA,NA,
+1,7,8.19.2021,prince of wales,NA,NA,
+1,7,8.10.2021,queen elizabeth,NA,NA,
+1,7,8.11.2021,quilchena,NA,NA,
+1,7,8.10.2021,rupert,NA,NA,
+1,7,8.10.2021,slocan,NA,NA,
+1,7,8.10.2021,memorial south,NA,NA,
+1,7,8.19.2021,west memorial,NA,NA,
+1,7,8.10.22,winona,NA,NA,
+2,1,5.3.2022,balaclava,Prunus laurocerasus,140120,y
+2,1,5.3.2022,balaclava,Prunus sp.,23260,y
+2,1,5.5.2022,bobolink,NA,0,
+2,1,5.4.2022,china creek,Aesculus hippocastanum,12216,y
+2,1,5.4.2022,falaise,Acer campestre ,5365,y
+2,1,5.4.2022,falaise,Caltha leptosepala,550,
+2,1,5.4.2022,falaise,Lonicera involucrata,4612,y
+2,1,5.4.2022,falaise,Mahonia aquifolium,658,y
+2,1,5.4.2022,falaise,Malus domestica,13,y
+2,1,5.4.2022,falaise,Ribes sanguinium,670,y
+2,1,5.4.2022,falaise,Rubus spectabilis,979,y
+2,1,5.5.2022,gordon,Syringa sp.,415,
+2,1,5.5.2022,gordon,Malus domestica,1468,y
+2,1,5.5.2022,gordon,Salvia rosmarinus,1152,y
+2,1,5.5.2022,gordon,Viburnum plicatum,3980,y
+2,1,5.4.2022,kensington,Acer campestre ,6182,y
+2,1,5.4.2022,kensington,Acer platanoides,346857,y
+2,1,5.4.2022,kensington,Alyssum murale,292,
+2,1,5.4.2022,kensington,Cheiranthus cheiri,23,
+2,1,5.4.2022,kensington,Zelkova serrata,49392,y
+2,1,5.5.2022,killarney,Acer circinatum,325,y
+2,1,5.8.2022,locarno,Acer circinatum,16718,y
+2,1,5.8.2022,locarno,Acer macrophyllum,8828,y
+2,1,5.8.2022,locarno,Aesculus hippocastanum,78688,y
+2,1,5.8.2022,locarno,Cornus nuttallii,3913,y
+2,1,5.8.2022,locarno,Mahonia aquifolium,76,y
+2,1,5.8.2022,locarno,Prunus laurocerasus,44488,y
+2,1,5.8.2022,locarno,Rhododendron macrophyllum,4787,y
+2,1,5.8.2022,locarno,Rubus spectabilis,522,y
+2,1,5.3.2022,moberly,Acer macrophyllum,600000,y
+2,1,5.3.2022,moberly,Acer platanoides,1625,y
+2,1,5.3.2022,oak meadows,Acer circinatum,88,y
+2,1,5.3.2022,oak meadows,Acer platanoides,11495,y
+2,1,5.3.2022,oak meadows,Amelanchier alnifolia,1879,y
+2,1,5.3.2022,oak meadows,Cytisus scoparius,67,y
+2,1,5.3.2022,oak meadows,Malus domestica,22424,y
+2,1,5.3.2022,oak meadows,Prunus emarginata,85824,y
+2,1,5.2.2022,prince of wales,Acer circinatum,125,y
+2,1,5.2.2022,prince of wales,Acer sp.,500,y
+2,1,5.2.2022,prince of wales,Prunus sp.,274400,y
+2,1,5.3.2022,queen elizabeth,Acer circinatum,30652,y
+2,1,5.3.2022,queen elizabeth,Cornus kousa,672,y
+2,1,5.3.2022,queen elizabeth,Osmanthus X burkwoodii,8250,y
+2,1,5.3.2022,queen elizabeth,Prunus sp.,52011,y
+2,1,5.2.2022,quilchena,Acer campestre ,115340,y
+2,1,5.2.2022,quilchena,Magnolia X soulangeana,94,y
+2,1,5.4.2022,rupert,Acer platanoides,80270,y
+2,1,5.4.2022,rupert,Malus domestica,52160,y
+2,1,5.4.2022,rupert,Prunus sp.,225264,y
+2,1,5.4.2022,rupert,Zelkova serrata,237,y
+2,1,5.5.2022,slocan,Malus domestica,1012,y
+2,1,5.5.2022,slocan,Prunus shirofugen,1398,y
+2,1,5.5.2022,slocan,Prunus sp.,637,y
+2,1,5.4.2022,memorial south,Acer circinatum,8184,y
+2,1,5.4.2022,memorial south,Acer macrophyllum,91000,y
+2,1,5.4.2022,memorial south,Magnolia X soulangeana,54,y
+2,1,5.4.2022,memorial south,Prunus sp.,117900,y
+2,1,5.3.2022,west memorial,Acer circinatum,2981,y
+2,1,5.3.2022,west memorial,Acer macrophyllum,24247,y
+2,1,5.3.2022,west memorial,Acer platanoides,183561,y
+2,1,5.3.2022,west memorial,Cornus nuttallii,2180,y
+2,1,5.3.2022,west memorial,Mahonia aquifolium,3065,y
+2,1,5.3.2022,west memorial,Malus domestica,366,y
+2,1,5.3.2022,west memorial,Prunus serrulata,685,y
+2,1,5.3.2022,west memorial,Ribes sanguinium,12,y
+2,1,5.3.2022,west memorial,Rubus spectabilis,2,y
+2,1,5.3.2022,winona,NA,0,
+2,2,5.16.2022,balaclava,Prunus laurocerasus,228480,y
+2,2,5.16.2022,balaclava,Prunus sp.,512,y
+2,2,5.20.2022,bobolink,Sorbus aucuparia,38760,y
+2,2,5.19.2022,china creek,Aesculus hippocastanum,104160,y
+2,2,5.21.2022,falaise,Caltha palustris,136,
+2,2,5.21.2022,falaise,Cornus sericea,16099,y
+2,2,5.21.2022,falaise,Lonicera involucrata,216,y
+2,2,5.21.2022,falaise,Physocarpus capitatus,8,y
+2,2,5.21.2022,falaise,Rubus spectabilis,427,y
+2,2,5.20.2022,gordon,Malus domestica,54,y
+2,2,5.20.2022,gordon,Salvia rosmarinus,360,y
+2,2,5.20.2022,gordon,Sorbus aucuparia,500,y
+2,2,5.20.2022,gordon,Syringa sp.,3888,y
+2,2,5.20.2022,gordon,Viburnum plicatum,432,y
+2,2,5.19.2022,kensington,Alyssum murale,96,
+2,2,5.19.2022,kensington,Cheiranthus cheiri,68,
+2,2,5.19.2022,kensington,Sorbus aucuparia,11368,y
+2,2,5.19.2022,kensington,Sorbus hybrida,318,y
+2,2,5.20.2022,killarney,Acer circinatum,44,y
+2,2,5.16.2022,locarno,Acer circinatum,190,y
+2,2,5.16.2022,locarno,Acer circinatum,7632,y
+2,2,5.16.2022,locarno,Aesculus hippocastanum,131040,y
+2,2,5.16.2022,locarno,Cornus nuttallii,828,y
+2,2,5.16.2022,locarno,Malus fusca,136,y
+2,2,5.16.2022,locarno,Prunus laurocerasus,99360,y
+2,2,5.16.2022,locarno,Rhododendron macrophyllum,1476,y
+2,2,5.16.2022,locarno,Rubus spectabilis,507,y
+2,2,5.16.2022,locarno,Rubus ursinus,15,y
+2,2,5.16.2022,locarno,Sorbus aucuparia,128,y
+2,2,5.17.2022,moberly,NA,0,
+2,2,5.17.2022,oak meadows,Acer circinatum,425,y
+2,2,5.17.2022,oak meadows,Amelanchier alnifolia,87,y
+2,2,5.17.2022,oak meadows,Crataegus douglasii,171,y
+2,2,5.17.2022,oak meadows,Cytisus scoparius,307,y
+2,2,5.17.2022,oak meadows,Malus domestica,48,y
+2,2,5.17.2022,oak meadows,Malus fusca,1549,y
+2,2,5.17.2022,oak meadows,Prunus virginiana,10508,y
+2,2,5.16.2022,prince of wales,NA,0,
+2,2,5.19.2022,queen elizabeth,Acer circinatum,21120,y
+2,2,5.19.2022,queen elizabeth,Cornus kousa,436,y
+2,2,5.19.2022,queen elizabeth,Osmanthus X burkwoodii,688,y
+2,2,5.17.2022,quilchena,Aesculus hippocastanum,454560,y
+2,2,5.17.2022,quilchena,Magnolia X soulangeana,30,y
+2,2,5.21.2022,rupert,NA,0,
+2,2,5.20.2022,slocan,Malus domestica,1728,y
+2,2,5.20.2022,memorial south,Aesculus hippocastanum,31920,y
+2,2,5.20.2022,memorial south,Cornus kousa,93,y
+2,2,5.20.2022,memorial south,Crataegus monogyna,4,y
+2,2,5.20.2022,memorial south,Laburnum anagyroides,11016,y
+2,2,5.20.2022,memorial south,Lonicera japonica,325,y
+2,2,5.20.2022,memorial south,Magnolia X soulangeana,26,y
+2,2,5.16.2022,west memorial,Acer circinatum,2706,y
+2,2,5.16.2022,west memorial,Acer circinatum,768,y
+2,2,5.16.2022,west memorial,Acer macrophyllum,4092,y
+2,2,5.16.2022,west memorial,Acer platanoides,1008,y
+2,2,5.16.2022,west memorial,Amelanchier alnifolia,144,y
+2,2,5.16.2022,west memorial,Cornus nuttallii,816,y
+2,2,5.16.2022,west memorial,Mahonia aquifolium,15,y
+2,2,5.16.2022,west memorial,Malus domestica,1394,y
+2,2,5.16.2022,west memorial,Malus fusca,396,y
+2,2,5.17.2022,winona,NA,0,
+2,3,5.30.2022,balaclava,Prunus laurocerasus,8190,y
+2,3,6.7.2022,bobolink,Ceanothus cultivar,16,y
+2,3,5.31.2022,china creek,Aesculus hippocastanum,40872,y
+2,3,5.31.2022,falaise,Cornus sericea,319645,y
+2,3,5.31.2022,falaise,Physocarpus capitatus,17960,y
+2,3,5.31.2022,falaise,Rosa nutkana,104,y
+2,3,5.31.2022,falaise,Rosa pisocarpa,6,y
+2,3,5.31.2022,falaise,Rubus parviflorus,211,y
+2,3,5.31.2022,falaise,Rubus spectabilis,195,y
+2,3,5.31.2022,falaise,Symphoricarpos albus,36,y
+2,3,6.7.2022,gordon,Rosa sp.,6,y
+2,3,6.7.2022,gordon,Salvia officinalis,125,y
+2,3,5.31.2022,kensington,Sorbus hybrida,4365,y
+2,3,5.31.2022,killarney,NA,0,
+2,3,5.30.2022,locarno,Aesculus hippocastanum,74560,y
+2,3,5.30.2022,locarno,Crataegus monogyna,47616,y
+2,3,5.30.2022,locarno,Gaultheria shallon,734,y
+2,3,5.30.2022,locarno,Prunus serotina,80,y
+2,3,5.30.2022,locarno,Rhododendron macrophyllum,2223,y
+2,3,5.30.2022,locarno,Rubus spectabilis,51,y
+2,3,5.30.2022,locarno,Rubus ursinus,4,y
+2,3,5.30.2022,locarno,Sorbus aucuparia,84,y
+2,3,5.30.2022,moberly,Centranthus ruber,32,
+2,3,5.30.2022,moberly,Symphoricarpos albus,14,y
+2,3,5.30.2022,oak meadows,Crataegus douglasii,18,y
+2,3,5.30.2022,oak meadows,Cytisus scoparius,52,y
+2,3,5.30.2022,oak meadows,Rubus ursinus,4,y
+2,3,5.30.2022,oak meadows,Sorbus aria,17280,y
+2,3,5.30.2022,prince of wales,Crataegus douglasii,1037,y
+2,3,5.30.2022,queen elizabeth,Acer circinatum,1080,y
+2,3,5.30.2022,queen elizabeth,Ilex aquifolium,576,y
+2,3,5.30.2022,queen elizabeth,Laburnum anagyroides,3444,y
+2,3,5.30.2022,quilchena,Aesculus hippocastanum,61440,y
+2,3,5.31.2022,rupert,NA,0,
+2,3,5.31.2022,slocan,Prunus sp.,10,y
+2,3,5.30.2022,memorial south,Acer tataricum,613,y
+2,3,5.30.2022,memorial south,Aesculus hippocastanum,22408,y
+2,3,5.30.2022,memorial south,Cornus kousa,71,y
+2,3,5.30.2022,memorial south,Cornus sericea,448,y
+2,3,5.30.2022,memorial south,Crataegus monogyna,2526,y
+2,3,5.30.2022,memorial south,Laburnum anagyroides,126846,y
+2,3,5.30.2022,memorial south,Lonicera japonica,32,y
+2,3,5.30.2022,west memorial,Rhamnus purshiana,396,y
+2,3,5.30.2022,west memorial,Gaultheria shallon,48,y
+2,3,5.30.2022,west memorial,Ilex aquifolium,3936,y
+2,3,5.30.2022,west memorial,Malus fusca,16,y
+2,3,5.30.2022,west memorial,Rubus parviflorus,72,y
+2,3,5.30.2022,west memorial,Rubus ursinus,18,y
+2,3,5.30.2022,winona,NA,0,
+2,4,6.10.2022,balaclava,Prunus laurocerasus,188,y
+2,4,6.20.2022,bobolink,NA,0,
+2,4,6.15.2022,china creek,NA,0,
+2,4,6.17.2022,falaise,Gaultheria shallon,24,y
+2,4,6.17.2022,falaise,Philadelphus lewisii,676,y
+2,4,6.17.2022,falaise,Physocarpus capitatus,47476,y
+2,4,6.17.2022,falaise,Rosa nutkana,140,y
+2,4,6.17.2022,falaise,Rosa pisocarpa,270,y
+2,4,6.17.2022,falaise,Rubus parviflorus,52,y
+2,4,6.17.2022,falaise,Symphoricarpos albus,3372,y
+2,4,6.20.2022,gordon,NA,0,
+2,4,6.15.202,kensington,NA,0,
+2,4,6.20.2022,killarney,NA,0,
+2,4,6.10.2022,locarno,Gaultheria shallon,496,y
+2,4,6.10.202,locarno,Rhododendron macrophyllum,52,y
+2,4,6.10.2022,locarno,Rubus armeniacus,4,y
+2,4,6.10.202,locarno,Rubus spectabilis,2,y
+2,4,6.14.202,moberly,Liriodendron tulipifera,512,y
+2,4,6.14.2022,moberly,Symphoricarpos albus,3909,y
+2,4,6.17.2022,oak meadows,Rubus armeniacus,20,y
+2,4,6.17.2022,oak meadows,Rubus ursinus,2,y
+2,4,6.13.2022,prince of wales,NA,0,
+2,4,6.13.2022,queen elizabeth,Acer circinatum,396,y
+2,4,6.13.2022,quilchena,Cornus sericea,3240,y
+2,4,6.20.2022,rupert,NA,0,
+2,4,6.20.2022,slocan,NA,0,
+2,4,6.14.2022,memorial south,NA,0,
+2,4,6.13.202,west memorial,Gaultheria shallon,300,y
+2,4,6.13.2022,west memorial,Ilex aquifolium,720,y
+2,4,6.13.2022,west memorial,Physocarpus capitatus,3150,y
+2,4,6.13.2022,west memorial,Rubus parviflorus,2,y
+2,4,6.13.2022,winona,NA,0,
+2,5,7.11.2022,oak meadows,Rubus armeniacus,371,y
+2,5,7.11.2022,memorial south,NA,0,
+2,5,7.12.2022,china creek,NA,0,
+2,5,7.12.2022,rupert,NA,0,
+2,5,7.12.2022,slocan,NA,0,
+2,5,7.8.2022,moberly,Tanacetum camphoratum,882,
+2,5,7.8.2022,moberly,Symphoricarpos albus,280,y
+2,5,7.8.2022,bobolink,NA,0,
+2,5,7.8.2022,killarney,NA,0,
+2,5,7.8.2022,falaise,Epilobium angustifolium,382,
+2,5,7.8.2022,falaise,Spiraea douglasii,212520,y
+2,5,7.8.2022,falaise,Rubus spectabilis,1,y
+2,5,7.8.2022,falaise,Symphoricarpos albus,2692,y
+2,5,7.8.2022,falaise,Holodiscus discolor,151032,y
+2,5,7.8.2022,falaise,Philadelphus lewisii,28,y
+2,5,7.8.2022,falaise,Lythrum salicaria,75,
+2,5,7.8.2022,falaise,Rubus armeniacus,7,y
+2,5,7.11.2022,winona,Rubus armeniacus,30,y
+2,5,7.11.2022,queen elizabeth,Rubus armeniacus,420,y
+2,5,7.13.2022,locarno,Rubus armeniacus,114,y
+2,5,7.13.2022,locarno,Gaultheria shallon,5,y
+2,5,7.13.2022,west memorial,Holodiscus discolor,2077,y
+2,5,7.13.2022,balaclava,NA,0,
+2,5,7.13.2022,prince of wales,Rosaceae sp.,182,y
+2,5,7.13.2022,quilchena,NA,0,
+2,5,7.14.2022,kensington,NA,0,
+2,5,7.14.2022,gordon,NA,0,
+2,6,7.27.2022,locarno,Rubus armeniacus,12,y
+2,6,7.27.2022,west memorial,NA,0,
+2,6,7.28.2022,balaclava,NA,0,
+2,6,7.28.2022,quilchena,NA,0,
+2,6,7.28.2022,oak meadows,Rubus armeniacus,16,y
+2,6,7.28.2022,winona,NA,0,
+2,6,7.29.2022,bobolink,NA,0,
+2,6,7.29.2022,killarney,NA,0,
+2,6,7.29.2022,falaise,Spiraea douglasii,32810,y
+2,6,7.29.2022,falaise,Symphoricarpos albus,400,y
+2,6,7.29.2022,falaise,Lythrum salicaria,3968,
+2,6,7.29.2022,falaise,Epilobium angustifolium,700,
+2,6,7.29.2022,falaise,Clematis vitalba,2736,
+2,6,8.1.22,moberly,Symphoricarpos albus,644,y
+2,6,8.1.22,gordon,NA,0,
+2,6,8.1.22,memorial south,Cornus sericea,675,y
+2,6,8.1.22,kensington,NA,0,
+2,6,8.1.22,slocan,Tilia cordata,1,y
+2,6,8.2.22,china creek,NA,0,
+2,6,8.2.22,rupert,NA,0,
+2,6,8.2.22,queen elizabeth,Catalpa bignonioides,36800,y
+2,6,8.2.22,prince of wales,NA,0,
+3,1,5.1.2023,locarno,Prunus laurocerasus,6451,y
+3,1,5.1.2023,locarno,Acer circinatum,96,y
+3,1,5.1.2023,locarno,Cornus nuttallii,132,y
+3,1,5.1.2023,locarno,Prunus sp.,152,y
+3,1,5.1.2023,locarno,Rubus spectabilis,253,y
+3,1,5.1.2023,west memorial,Prunus sp.,1620,y
+3,1,5.1.2023,west memorial,Malus domestica,102,y
+3,1,5.1.2023,west memorial,Acer circinatum,144,y
+3,1,5.1.2023,west memorial,Mahonia aquifolium,934,y
+3,1,5.1.2023,west memorial,Rubus spectabilis,7,y
+3,1,5.1.2023,west memorial,Vaccinium parvifolium,1572,y
+3,1,5.1.2023,west memorial,Acer platanoides,2016,y
+3,1,5.1.2023,west memorial,Cornus nuttallii,5,y
+3,1,5.1.2023,balaclava,Prunus sp.,21620,y
+3,1,5.1.2023,prince of wales,Prunus sp.,30280,y
+3,1,5.2.2023,quilchena,Magnolia X soulangeana,30,y
+3,1,5.2.2023,quilchena,Acer campestre ,403200,y
+3,1,5.2.2023,winona,NA,NA,
+3,1,5.3.2023,queen elizabeth,Osmanthus X burkwoodii,570240,y
+3,1,5.3.2023,queen elizabeth,Acer circinatum,1960,y
+3,1,5.3.2023,queen elizabeth,Prunus sp.,17010,y
+3,1,5.3.2023,oak meadows,Malus domestica,1184,y
+3,1,5.3.2023,oak meadows,Prunus sp.,5616,y
+3,1,5.3.2023,oak meadows,Prunus emarginata,10345,y
+3,1,5.3.2023,oak meadows,Ribes sanguinium,1092,y
+3,1,5.3.2023,oak meadows,Amelanchier alnifolia,5478,y
+3,1,5.3.2023,oak meadows,Acer circinatum,36,y
+3,1,5.3.2023,oak meadows,Acer platanoides,4374,y
+3,1,5.4.2023,moberly,Mahonia aquifolium,5,y
+3,1,5.4.2023,memorial south,Acer circinatum,990,y
+3,1,5.4.2023,memorial south,Prunus sp.,579640,y
+3,1,5.4.2023,memorial south,Ribes sanguinium,51,y
+3,1,5.8.2023,falaise,Mahonia aquifolium,2300,y
+3,1,5.8.2023,falaise,Malus domestica,85,y
+3,1,5.8.2023,falaise,Ribes sanguinium,2288,y
+3,1,5.8.2023,falaise,Lonicera involucrata,228,y
+3,1,5.8.2023,falaise,Rubus spectabilis,619,y
+3,1,5.8.2023,falaise,Caltha palustris,650,y
+3,1,5.8.2023,rupert,Acer tataricum,175,y
+3,1,5.8.2023,rupert,Prunus sp.,24000,y
+3,1,5.8.2023,rupert,Malus domestica,1000,y
+3,1,5.8.2023,bobolink,NA,NA,
+3,1,5.8.2023,killarney,Malus domestica,40,y
+3,1,5.8.2023,killarney,Acer circinatum,925,y
+3,1,5.8.2023,gordon,Malus domestica,95,y
+3,1,5.8.2023,gordon,Salvia rosmarinus,250,y
+3,1,5.10.2023,kensington,NA,NA,
+3,1,5.10.2023,china creek,Aesculus hippocastanum,14720,y
+3,2,5.10.2023,quilchena,Magnolia X soulangeana,41,y
+3,2,5.10.2023,quilchena,Aesculus hippocastanum,41280,y
+3,2,5.10.2023,quilchena,Acer campestre ,161280,y
+3,2,5.12.2023,memorial south,Acer circinatum,13200,y
+3,2,5.12.2023,memorial south,Magnolia X soulangeana,4,y
+3,2,5.12.2023,memorial south,Lonicera japonica,315,y
+3,2,5.12.2023,memorial south,Aesculus hippocastanum,5200,y
+3,2,5.12.2023,moberly,NA,NA,
+3,2,5.12.2023,oak meadows,Prunus emarginata,9930,y
+3,2,5.12.2023,oak meadows,Prunus virginiana,22206,y
+3,2,5.12.2023,oak meadows,Amelanchier alnifolia,49,y
+3,2,5.12.2023,oak meadows,Ribes sanguinium,30,y
+3,2,5.12.2023,oak meadows,Malus domestica,1020,y
+3,2,5.12.2023,oak meadows,Acer circinatum,1120,y
+3,2,5.12.2023,oak meadows,Crataegus douglasii,366,y
+3,2,5.12.2023,oak meadows,Malus fusca,206,y
+3,2,5.15.2023,locarno,Acer circinatum,14500,y
+3,2,5.15.2023,locarno,Cornus nuttallii,110,y
+3,2,5.15.2023,locarno,Prunus laurocerasus,2100,y
+3,2,5.15.2023,locarno,Rhododendron macrophyllum,2244,y
+3,2,5.15.2023,locarno,Wisteria sp.,864,y
+3,2,5.15.2023,locarno,Sorbus aucuparia,800,y
+3,2,5.15.2023,locarno,Rubus spectabilis,100,y
+3,2,5.15.2023,locarno,Crataegus monogyna,84,y
+3,2,5.15.2023,locarno,Aesculus hippocastanum,55296,y
+3,2,5.15.2023,locarno,Rubus ursinus,24,y
+3,2,5.15.2023,balaclava,Prunus laurocerasus,1689600,y
+3,2,5.15.2023,west memorial,Vaccinium parvifolium,141,y
+3,2,5.15.2023,west memorial,Cornus nuttallii,5,y
+3,2,5.15.2023,west memorial,Malus domestica,1381,y
+3,2,5.15.2023,west memorial,Malus fusca,25,y
+3,2,5.15.2023,west memorial,Ilex aquifolium,2650,y
+3,2,5.15.2023,west memorial,Rubus ursinus,5,y
+3,2,5.15.2023,west memorial,Rubus parvifolium ,12,y
+3,2,5.15.2023,west memorial,Acer circinatum,30,y
+3,2,5.15.2023,west memorial,Rhamnus purshiana,96,y
+3,2,5.15.2023,prince of wales,Crataegus douglasii,35840,y
+3,2,5.16.2023,queen elizabeth,Osmanthus X burkwoodii,1300,y
+3,2,5.16.2023,queen elizabeth,Ilex aquifolium,16,y
+3,2,5.16.2023,queen elizabeth,Laburnum anagyroides,1536,y
+3,2,5.16.2023,queen elizabeth,Acer circinatum,9300,y
+3,2,5.16.2023,queen elizabeth,Prunus sp.,1192,y
+3,2,5.16.2023,winona,NA,NA,
+3,2,5.16.2023,china creek,Aesculus hippocastanum,29000,y
+3,2,5.16.2023,kensington,Sorbus hybrida,2670,y
+3,2,5.16.2023,kensington,Sorbus aucuparia,750,y
+3,2,5.17.2023,slocan,Prunus sp.,750,y
+3,2,5.17.2023,falaise,Rosa nutkana,16,y
+3,2,5.17.2023,falaise,Cornus sericea,32650,y
+3,2,5.17.2023,falaise,Rubus spectabilis,536,y
+3,2,5.17.2023,falaise,Rubus parvifolium ,6,y
+3,2,5.17.2023,falaise,Lonicera involucrata,306,y
+3,2,5.17.2023,falaise,Physocarpus capitatus,418,y
+3,2,5.17.2023,falaise,Rosa pisocarpa,7,y
+3,2,5.17.2023,Rupert,NA,NA,
+3,2,5.17.2023,gordon,Viburnum plicatum,400,y
+3,2,5.17.2023,gordon,Salvia rosmarinus,300,y
+3,2,5.19.2023,bobolink,NA,NA,
+3,2,5.19.2023,killarney,NA,NA,
+3,3,5.25.2023,locarno,Rhododendron macrophyllum,1892,y
+3,3,5.25.2023,locarno,Wisteria sp.,1296,y
+3,3,5.25.2023,locarno,Gaultheria shallon,360,y
+3,3,5.25.2023,locarno,Prunus serotina,2232,y
+3,3,5.25.2023,locarno,Aesculus hippocastanum,18432,y
+3,3,5.25.2023,west memorial,Rubus parvifolium ,6,y
+3,3,5.25.2023,west memorial,Rubus ursinus,120,y
+3,3,5.25.2023,west memorial,Ilex aquifolium,200,y
+3,3,5.25.2023,balaclava,NA,NA,
+3,3,5.25.2023,prince of wales,Crataegus douglasii,400,y
+3,3,5.25.2023,quilchena,Cornus sericea,418,y
+3,3,5.25.2023,quilchena,Aesculus hippocastanum,13600,y
+3,3,5.26.2023,oak meadows,Rubus ursinus,71,y
+3,3,5.26.2023,oak meadows,Sambucus racemosa,800,y
+3,3,5.26.2023,oak meadows,Prunus serotina,15120,y
+3,3,5.26.2023,queen elizabeth,NA,NA,
+3,3,5.26.2023,winona,NA,NA,
+3,3,5.26.2023,kensington,NA,NA,
+3,3,5.29.2023,china creek,Aesculus hippocastanum,9184,y
+3,3,5.29.2023,memorial south,Robinia pseudoacacia,2524000,y
+3,3,5.29.2023,memorial south,Cornus sericea,120,y
+3,3,5.29.2023,memorial south,Acer tataricum,75,y
+3,3,5.29.2023,moberly,Symphoricarpos albus,2400,y
+3,3,5.29.2023,killarney,NA,NA,
+3,3,6.1.2023,rupert,NA,NA,
+3,3,6.1.2023,falaise,Physocarpus capitatus,182016,y
+3,3,6.1.2023,falaise,Symphoricarpos albus,952,y
+3,3,6.1.2023,falaise,Cornus sericea,92,y
+3,3,6.1.2023,falaise,Rosa nutkana,242,y
+3,3,6.1.2023,falaise,Rubus parvifolium ,154,y
+3,3,6.1.2023,falaise,Rubus spectabilis,12,y
+3,3,6.1.2023,falaise,Rosa pisocarpa,140,y
+3,3,6.1.2023,falaise,Philadelphus lewisii,160,y
+3,3,6.1.2023,slocan,NA,NA,
+3,3,6.1.2023,bobolink,Robinia pseudoacacia,48384,y
+3,3,6.2.2023,gordon,NA,NA,
+3,4,6.22.2023,kensington,NA,NA,
+3,4,6.22.2023,killarney,NA,NA,
+3,4,6.22.2023,bobolink,NA,NA,
+3,4,6.26.2023,gordon,NA,NA,
+3,4,6.26.2023,rupert,NA,NA,
+3,4,6.26.2023,falaise,Holodiscus discolor,1872000,y
+3,4,6.26.2023,falaise,Symphoricarpos albus,2164,y
+3,4,6.26.2023,falaise,Rubus discolor,160,y
+3,4,6.26.2023,falaise,Spiraea douglasii,32112,y
+3,4,6.26.2023,falaise,Epilobium angostifolium,676,
+3,4,6.26.2023,slocan,NA,NA,
+3,4,6.26.2023,china creek,NA,NA,
+3,4,6.27.2023,locarno,Rubus armeniacus,264,y
+3,4,6.27.2023,locarno,Gaultheria shallon,144,y
+3,4,6.27.2023,west memorial,NA,NA,
+3,4,6.27.2023,balaclava,NA,NA,
+3,4,6.27.2023,prince of wales,NA,NA,
+3,4,6.28.2023,quilchena,NA,NA,
+3,4,6.28.2023,oak meadows,Rubus armeniacus,360,y
+3,4,6.28.2023,queen elizabeth,NA,NA,
+3,4,6.28.2023,moberly,Symphoricarpos albus,850,y
+3,4,6.29.2023,memorial south,NA,NA,
+3,4,6.29.2023,winona,Rubus armeniacus,48,y
+3,5,7.13.2023,oak meadows,Rubus armeniacus,6,y
+3,5,7.13.2023,oak meadows,Symphoricarpos albus,24,y
+3,5,7.13.2023,kensington,NA,NA,
+3,5,7.13.2023,killarney,NA,NA,
+3,5,7.13.2023,bobolink,NA,NA,
+3,5,7.14.2023,moberly,Symphoricarpos albus,262,y
+3,5,7.14.2023,quilchena,NA,NA,
+3,5,7.14.2023,prince of wales,NA,NA,
+3,5,7.14.2023,balaclava,NA,NA,
+3,5,7.14.2023,west memorial,NA,NA,
+3,5,7.14.2023,locarno,Rubus armeniacus,10,y
+3,5,7.21.2023,queen elizabeth,NA,NA,
+3,5,7.21.2023,winona,Rubus armeniacus,10,y
+3,5,7.21.2023,memorial south,NA,NA,
+3,5,7.21.2023,gordon,NA,NA,
+3,5,7.26.2023,china creek,NA,NA,
+3,5,7.26.2023,rupert,NA,NA,
+3,5,7.26.2023,falaise,Clematis vitalba,459,
+3,5,7.26.2023,falaise,Lythrum salicaria,280,
+3,5,7.26.2023,falaise,Spiraea douglasii,1600,y
+3,5,7.26.2023,falaise,Symphoricarpos albus,106,y
+3,5,7.26.2023,falaise,Epilobium angostifolium,900,
+3,5,7.26.2023,falaise,Rubus armeniacus,8,y
+3,5,7.26.2023,slocan,NA,NA,
+3,6,7.27.2023,locarno,Rubus armeniacus,5,y
+3,6,7.27.2023,west memorial,NA,NA,
+3,6,7.27.2023,balaclava,NA,NA,
+3,6,7.27.2023,prince of wales,NA,NA,
+3,6,8.1.2023,queen elizabeth,NA,NA,
+3,6,8.1.2023,oak meadows,Symphoricarpos albus,128,y
+3,6,8.1.2023,oak meadows,Rubus armeniacus,5,y
+3,6,8.1.2023,winona,Rubus armeniacus,4,y
+3,6,8.1.2023,moberly,Symphoricarpos albus,190,y
+3,6,8.1.2023,memorial south,NA,NA,
+3,6,8.2.2023,china creek,NA,NA,
+3,6,8.2.2023,rupert,NA,NA,
+3,6,8.2.2023,falaise,Symphoricarpos albus,52,y
+3,6,8.2.2023,falaise,Epilobium angostifolium,234,
+3,6,8.2.2023,falaise,Clematis vitalba,118,
+3,6,8.2.2023,falaise,Lythrum salicaria,144,
+3,6,8.2.2023,falaise,Rubus armeniacus,3,y
+3,6,8.2.2023,slocan,NA,NA,
+3,6,8.3.2023,kensington,NA,NA,
+3,6,8.3.2023,killarney,NA,NA,
+3,6,8.3.2023,bobolink,NA,NA,
+3,6,8.3.2023,gordon,Rosa sp.,2,y
+3,6,7.27.2023,quilchena,NA,NA,

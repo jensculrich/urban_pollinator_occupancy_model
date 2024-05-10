@@ -147,7 +147,7 @@ inits <- lapply(1:n_chains, function(i)
 ## --------------------------------------------------
 ### Run model
 # dynocc7 is currently the final form
-stan_model <- "./dynamic_occupancy_model/models/dynocc7.stan"
+stan_model <- "./dynamic_occupancy_model/models/final_model.stan"
 
 ## Call Stan from R
 set.seed(1)
@@ -195,7 +195,7 @@ print(stan_out, digits = 3,
       ))
 
 print(stan_out,  
-          pars = c("gamma_year"
+          pars = c("p_year"
           ))
 
 # for continuous model
