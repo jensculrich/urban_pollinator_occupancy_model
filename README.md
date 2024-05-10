@@ -14,6 +14,7 @@
 - land_cover_by_site_reduced.csv (lat/long and landscape buffer impervious surface and tree canopy cover summaries for each of the 18 park sites)
 - pollinator_data.csv (pollinator detections and the plants that they were recorded interacting with)
 - metada.doc (contains detailed descriptions of column names from each data file)
+- Pollen limitation data are stored in a separate folder. Navigate to this directory to access: ./pollen_limitation_experiment/data/clarkia_pollination_data_2022.csv.
 
 ## To conduct the occupancy model analysis:
 - navigate to ./dynamic_occupancy_model/run_model/run_model.R
