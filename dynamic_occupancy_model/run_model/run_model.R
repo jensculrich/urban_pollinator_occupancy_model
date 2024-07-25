@@ -6,7 +6,7 @@ library(rstan)
 min_unique_detections = 1 
 filter_nonnative_woody = FALSE
 supplement_interactions = TRUE
-cluster_interactions_at_family = FALSE
+cluster_interactions_at_genus = TRUE
 source("./dynamic_occupancy_model/run_model/prep_data.R")
 my_data <- process_raw_data(min_unique_detections, filter_nonnative_woody)
 
@@ -37,10 +37,10 @@ if(supplement_interactions == TRUE){
   d <- species_interaction_metrics$d_scaled
   degree <- species_interaction_metrics$degree_scaled
 }
-# replace with family level specialization?
-if(cluster_interactions_at_family == TRUE){
-  d <- species_interaction_metrics$d_scaled_supplemented_family
-  degree <- species_interaction_metrics$degree_scaled_supplemented_family
+# replace with genus level specialization?
+if(cluster_interactions_at_genus == TRUE){
+  d <- species_interaction_metrics$d_scaled_supplemented_genus
+  degree <- species_interaction_metrics$degree_scaled_supplemented_genus
 }
 species_names <- my_data$species
 site_names <- my_data$sites
@@ -180,7 +180,7 @@ saveRDS(stan_out, "./dynamic_occupancy_model/model_outputs/stan_out.rds")
 stan_out <- readRDS("./dynamic_occupancy_model/model_outputs/stan_out.rds")
 
 
-print(stan_out, digits = 3, 
+print(stan_out, probs = c(0.025, 0.05, 0.25, 0.5, 0.75, 0.95, 0.975), digits = 3, 
       pars = c("psi1_0", #sigma_psi1_species",
                "psi1_herbaceous_flowers", "psi1_woody_flowers", "psi1_specialization",
                "psi1_interaction_1", "psi1_interaction_2",

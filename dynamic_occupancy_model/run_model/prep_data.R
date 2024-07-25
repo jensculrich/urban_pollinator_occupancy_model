@@ -184,30 +184,6 @@ process_raw_data <- function(min_unique_detections, filter_nonnative_woody) {
   }
   
   ## --------------------------------------------------
-  ## make an matrix (site by year) containing the number of total surveys that occurred
-  # this will allow us to have a variable likelihood function that takes 7 visits for site X year combos visited 7 times
-  # or 6 visits for site X year combos visited only 6 times (most of the combos are 6 annual visits)
-  
-  temp <- mydata %>%
-    group_by(SITE, YEAR, SAMPLING_ROUND) %>%
-    slice(1) %>%
-    ungroup() %>%
-    select(SITE, YEAR, SAMPLING_ROUND) %>%
-    
-    # Reduce sampling rounds in year 1 by 1 (they start at 2 since we did a weird prelim survey first)
-    mutate(SAMPLING_ROUND = as.integer(ifelse(YEAR==1, as.integer(SAMPLING_ROUND) - 1, as.integer(SAMPLING_ROUND))))  %>%
-    group_by(SITE, YEAR) %>%
-    mutate(num_surveys = max(SAMPLING_ROUND)) %>%
-    slice(1) %>%
-    ungroup() %>%
-    
-    pivot_wider(., names_from = YEAR, values_from = num_surveys) 
-    
-  site_year_visit_count <- as.matrix(temp[1:n_sites, 3:(3 + n_years - 1)])
-  
-  rm(temp)
-  
-  ## --------------------------------------------------
   ## make an array of the scaled visit dates which will be used as a detection covariate
   
   # need to get all dates from all sites not just those with detections
@@ -386,7 +362,8 @@ process_raw_data <- function(min_unique_detections, filter_nonnative_woody) {
              pollinator_species = gsub('Eupeodes lapponicus', 'Lapposyrphus lapponicus', pollinator_species),
              pollinator_species = gsub('Lasioglossum titusi', 'Lasioglossum titusii', pollinator_species),
              pollinator_species = gsub('Melissodes microsticta', 'Melissodes microstictus', pollinator_species),
-             pollinator_species = gsub('Allograpta micrura', 'Fazia macrura', pollinator_species)
+             pollinator_species = gsub('Allograpta micrura', 'Fazia macrura', pollinator_species),
+             pollinator_species = gsub('Merodon Merodon equestris', 'Merodon equestris', pollinator_species),
              )
     
     
@@ -395,16 +372,41 @@ process_raw_data <- function(min_unique_detections, filter_nonnative_woody) {
     # or where they used a narrower taxonomic scope than I did
     extra_interactions <- extra_interactions %>%
       mutate(plant_species = gsub('^Achillea$', 'Achillea_millefolium', plant_species),
+             plant_species = gsub('Buddleja davidii', 'Buddleja', plant_species),
+             plant_species = gsub('Buddleja globosa', 'Buddleja', plant_species),
+             plant_species = gsub('Buddleja spp.', 'Buddleja', plant_species),
              plant_species = gsub('Brassica - yellow', 'Brassica_sp.', plant_species),
+             plant_species = gsub('^Centaurea (garden)$', 'Centaurea', plant_species),
+             plant_species = gsub('Cerastium (garden)', 'Cerastium arvense', plant_species),
+             plant_species = gsub('^Centaurea sp.$', 'Centaurea', plant_species),
+             plant_species = gsub('Chamaenerion angustifolium', 'Chamerion angustifolium', plant_species),
+             plant_species = gsub('^Cirsium vulgare$', 'Cirsium vulgaris', plant_species),
+             plant_species = gsub('Clematis', 'Clematis vitalba', plant_species),
+             plant_species = gsub('^Coreopsis$', 'Coreopsis_lanceolata', plant_species),
+             plant_species = gsub('Craetagus douglasii', 'Crataegus douglasii', plant_species),
+             plant_species = gsub('^Digitalis$', 'Digitalis purpurea', plant_species),
+             plant_species = gsub('^Echinacea$', 'Echinacea purpurea', plant_species),
+             plant_species = gsub('^Fragaria chiloensis$', 'Fragaria', plant_species),
+             plant_species = gsub('^Fragaria virginiana$', 'Fragaria', plant_species),
+             plant_species = gsub('^Hypericum$', 'Hypericum_perforatum', plant_species),
+             plant_species = gsub('^Iris$', 'Iris sp.', plant_species),
+             plant_species = gsub('^Lamium$', 'Lamium purpureum', plant_species),
+             plant_species = gsub('^Lamium purpureum (invasive)$', 'Lamium purpureum', plant_species),
+             plant_species = gsub('^Limnanthes$', 'Limnanthes douglasii', plant_species),
+             plant_species = gsub('^Limnanthes douglassi$', 'Limnanthes douglasii', plant_species),
              plant_species = gsub('Malus fusca', 'Malus', plant_species),
              plant_species = gsub('Papaver sp', 'Papaver_sp.', plant_species),
              plant_species = gsub('Rubus discolor', 'Rubus_armeniacus', plant_species),
+             plant_species = gsub('Rubus parviflora', 'Rubus_parviflorus', plant_species),
+             plant_species = gsub('Sedum sp. spathulifolium', 'sp.', plant_species),
+             plant_species = gsub('Sedum spurium', 'sp.', plant_species),
              plant_species = gsub('Trifolium pratens', 'Trifolium_pratense', plant_species),
              plant_species = gsub('Sedum', 'Sedum_sp.', plant_species),
              plant_species = gsub('Sorbus aucuparia', 'Sorbus', plant_species),
              plant_species = gsub('Sorbus hybrida', 'Sorbus', plant_species),
              plant_species = gsub('^Spiraea sp. douglasii ssp. Douglasii$', 'Spiraea_sp.', plant_species),
              plant_species = gsub('^Spirea sp. douglasii ssp. Douglasii$', 'Spiraea_sp.', plant_species),
+             plant_species = gsub('^Spirea douglasii ssp. Douglasii$', 'Spiraea_sp.', plant_species),
              plant_species = gsub('^Spiraea$', 'Spiraea_sp.', plant_species),
              plant_species = gsub('^Rhododendron$', 'Rhododendron_macrophyllum', plant_species),
              plant_species = gsub('^Rudbeckia$', 'Rudbeckia_hirta', plant_species),
@@ -414,7 +416,10 @@ process_raw_data <- function(min_unique_detections, filter_nonnative_woody) {
     
     # and reduce the resolution on some of my obs
     interactions_df2 <- interactions_df2 %>% 
-      mutate(plant_species = gsub('Campanula rapunculoides', 'Campanula', plant_species),
+      mutate(plant_species = gsub('Buddleja davidii', 'Buddleja', plant_species),
+             plant_species = gsub('Campanula rapunculoides', 'Campanula', plant_species),
+             plant_species = gsub('^Centaurea cyanus$', 'Centaurea', plant_species),
+             plant_species = gsub('Dianthus barbatus', 'Dianthus', plant_species),
              plant_species = gsub('Hyacinthoides non-scripta', 'Hyacinthoides', plant_species),
              plant_species = gsub('Malus domestica', 'Malus', plant_species),
              plant_species = gsub('Malus fusca', 'Malus', plant_species),
@@ -428,17 +433,28 @@ process_raw_data <- function(min_unique_detections, filter_nonnative_woody) {
     # group by species, and calculate number of plants per species
     extra_interactions_df <- extra_interactions %>%
       #filter(ecosystem != "Shrub-Steppe") %>% # interactions not comparable from different ecosystem?
+      # only use th interactions from BC (not Oregon and Washington)
+      filter(latitude > 48) %>%
       # replace "_" with " " to match my data
       mutate(pollinator_species = gsub('_', ' ', pollinator_species),
              plant_species = gsub('_', ' ', plant_species)) %>%
       select(pollinator_species, plant_species) %>%
-      filter(pollinator_species %in% species_vector) %>%
+      filter(pollinator_species %in% species_vector) 
+    %>%
       rbind(., interactions_df2) %>%
       group_by(pollinator_species, plant_species) %>% 
       add_tally() %>%
       rename("connection_strength" = "n") %>%
       slice(1) %>%
       ungroup() 
+    
+    # get number of total interactions per plant species
+    interactions_per_plant_species <- extra_interactions_df %>%
+      group_by(plant_species) %>%
+      mutate(total_interactions = sum(connection_strength)) %>%
+      slice(1) %>%
+      ungroup %>%
+      select(plant_species, total_interactions)
     
     # get all of the plant species that pollinators were recorded to interact with
     plant_species_orig <- mydata_filtered %>%
@@ -511,17 +527,18 @@ process_raw_data <- function(min_unique_detections, filter_nonnative_woody) {
     text(x = 3, y = -1, # Coordinates
          label = paste0("Pearson's R = ", signif(cor, 3)))
     
-  ## --------------------------------------------------
-  ## Cluster interactions at the family level SUPPLEMENTED WITH ELIZABETH ELLE'S INTERACTION DATA
   
+    ## --------------------------------------------------
+    ## Species interactions at the genus level SUPPLEMENTED WITH ELIZABETH ELLE'S INTERACTION DATA
+    
     # group by species, and calculate number of plants per species
     interactions_df2 <- mydata_filtered %>% 
       rename("pollinator_species" = "SPECIES",
-             "plant_species" = "PLANT_NETTED_FROM_SCI_NAME",
-             "plant_family" = "PLANT_NETTED_FROM_FAMILY")  %>% 
-      select(pollinator_species, plant_family, plant_species)
+             "plant_species" = "PLANT_NETTED_FROM_SCI_NAME")  %>% 
+      select(pollinator_species, plant_species)
     
-    extra_interactions <- read.csv("./data/elle_data/interaction_data.csv")
+    extra_interactions <- read.csv("./data/elle_data_2/reduced_pollinator_plant.csv") %>%
+      mutate(pollinator_species = paste(pollinator_genus, pollinator_species, sep = " "))
     
     # prep the data so it is formatted similarly
     
@@ -530,107 +547,149 @@ process_raw_data <- function(min_unique_detections, filter_nonnative_woody) {
     # I use the term "morph 1" while Elle uses the term "sp 1", so they should never match
     # but unfortunately this means we can't bolster our interaction detections for these pollinators
     
-    # rename some pollinator species used in the Elle dataset
+    # rename some species used in the Elle dataset
     # either where they used a different naming concept
     # or where they used a narrower taxonomic scope than I did
     extra_interactions <- extra_interactions %>%
-      mutate(pollinator_species = gsub('Bombus_bifarius', 'Bombus_vancouverensis', pollinator_species),
-             pollinator_species = gsub('Bombus_californicus', 'Bombus_fervidus_(californicus)', pollinator_species),
-             pollinator_species = gsub('Coelioxys_porterae', 'Coelioxys_sp.', pollinator_species),
-             pollinator_species = gsub('Eumerus_sp', 'Eumerus_sp.', pollinator_species),
-             pollinator_species = gsub('Eumerus_narcissi', 'Eumerus_sp.', pollinator_species),
-             pollinator_species = gsub('Eupeodes_lapponicus', 'Lapposyrphus_lapponicus', pollinator_species),
-             pollinator_species = gsub('Melissodes_microsticta', 'Melissodes_microstictus', pollinator_species)
+      mutate(pollinator_species = gsub('Bombus bifarius', 'Bombus vancouverensis', pollinator_species),
+             pollinator_species = gsub('Bombus californicus', 'Bombus fervidus (californicus)', pollinator_species),
+             pollinator_species = gsub('Coelioxys porterae', 'Coelioxys sp.', pollinator_species),
+             pollinator_species = gsub('Eumerus sp', 'Eumerus sp.', pollinator_species),
+             pollinator_species = gsub('Eumerus narcissi', 'Eumerus sp.', pollinator_species),
+             pollinator_species = gsub('Eupeodes lapponicus', 'Lapposyrphus lapponicus', pollinator_species),
+             pollinator_species = gsub('Lasioglossum titusi', 'Lasioglossum titusii', pollinator_species),
+             pollinator_species = gsub('Melissodes microsticta', 'Melissodes microstictus', pollinator_species),
+             pollinator_species = gsub('Allograpta micrura', 'Fazia macrura', pollinator_species),
+             pollinator_species = gsub('Merodon Merodon equestris', 'Merodon equestris', pollinator_species),
       )
+    
     
     # rename some plant species used in the Elle dataset
     # either where they used a different naming concept
     # or where they used a narrower taxonomic scope than I did
     extra_interactions <- extra_interactions %>%
-      mutate(plant_species = gsub('Achillea', 'Achillea_millefolium', plant_species),
-             plant_species = gsub('Brassica_-_yellow', 'Brassica_sp.', plant_species),
-             plant_species = gsub('Papaver_sp', 'Papaver_sp.', plant_species),
-             plant_species = gsub('Rubus_discolor', 'Rubus_armeniacus', plant_species),
-             plant_species = gsub('Trifolium_pratens', 'Trifolium_pratense', plant_species),
+      mutate(plant_species = gsub('^Achillea$', 'Achillea_millefolium', plant_species),
+             plant_species = gsub('Buddleja davidii', 'Buddleja', plant_species),
+             plant_species = gsub('Buddleja globosa', 'Buddleja', plant_species),
+             plant_species = gsub('Buddleja spp.', 'Buddleja', plant_species),
+             plant_species = gsub('Brassica - yellow', 'Brassica_sp.', plant_species),
+             plant_species = gsub('^Centaurea (garden)$', 'Centaurea', plant_species),
+             plant_species = gsub('Cerastium (garden)', 'Cerastium arvense', plant_species),
+             plant_species = gsub('^Centaurea sp.$', 'Centaurea', plant_species),
+             plant_species = gsub('Chamaenerion angustifolium', 'Chamerion angustifolium', plant_species),
+             plant_species = gsub('^Cirsium vulgare$', 'Cirsium vulgaris', plant_species),
+             plant_species = gsub('Clematis', 'Clematis vitalba', plant_species),
+             plant_species = gsub('^Coreopsis$', 'Coreopsis_lanceolata', plant_species),
+             plant_species = gsub('Craetagus douglasii', 'Crataegus douglasii', plant_species),
+             plant_species = gsub('^Digitalis$', 'Digitalis purpurea', plant_species),
+             plant_species = gsub('^Echinacea$', 'Echinacea purpurea', plant_species),
+             plant_species = gsub('^Fragaria chiloensis$', 'Fragaria', plant_species),
+             plant_species = gsub('^Fragaria virginiana$', 'Fragaria', plant_species),
+             plant_species = gsub('^Hypericum$', 'Hypericum_perforatum', plant_species),
+             plant_species = gsub('^Iris$', 'Iris sp.', plant_species),
+             plant_species = gsub('^Lamium$', 'Lamium purpureum', plant_species),
+             plant_species = gsub('^Lamium purpureum (invasive)$', 'Lamium purpureum', plant_species),
+             plant_species = gsub('^Limnanthes$', 'Limnanthes douglasii', plant_species),
+             plant_species = gsub('^Limnanthes douglassi$', 'Limnanthes douglasii', plant_species),
+             plant_species = gsub('Malus fusca', 'Malus', plant_species),
+             plant_species = gsub('Papaver sp', 'Papaver_sp.', plant_species),
+             plant_species = gsub('Rubus discolor', 'Rubus_armeniacus', plant_species),
+             plant_species = gsub('Rubus parviflora', 'Rubus_parviflorus', plant_species),
+             plant_species = gsub('Sedum sp. spathulifolium', 'sp.', plant_species),
+             plant_species = gsub('Sedum spurium', 'sp.', plant_species),
+             plant_species = gsub('Trifolium pratens', 'Trifolium_pratense', plant_species),
              plant_species = gsub('Sedum', 'Sedum_sp.', plant_species),
-             plant_species = gsub('Spirea_douglasii_ssp_Douglasii', 'Spiraea_sp.', plant_species),
-             plant_species = gsub('Spirea', 'Spiraea_sp.', plant_species),
-             plant_species = gsub('Rudbeckia_fulgida', 'Rudbeckia_hirta', plant_species)
+             plant_species = gsub('Sorbus aucuparia', 'Sorbus', plant_species),
+             plant_species = gsub('Sorbus hybrida', 'Sorbus', plant_species),
+             plant_species = gsub('^Spiraea sp. douglasii ssp. Douglasii$', 'Spiraea_sp.', plant_species),
+             plant_species = gsub('^Spirea sp. douglasii ssp. Douglasii$', 'Spiraea_sp.', plant_species),
+             plant_species = gsub('^Spirea douglasii ssp. Douglasii$', 'Spiraea_sp.', plant_species),
+             plant_species = gsub('^Spiraea$', 'Spiraea_sp.', plant_species),
+             plant_species = gsub('^Rhododendron$', 'Rhododendron_macrophyllum', plant_species),
+             plant_species = gsub('^Rudbeckia$', 'Rudbeckia_hirta', plant_species),
+             plant_species = gsub('Rudbeckia fulgida', 'Rudbeckia_hirta', plant_species)
       )
     
     
     # and reduce the resolution on some of my obs
     interactions_df2 <- interactions_df2 %>% 
-      mutate(plant_species = gsub('Campanula rapunculoides', 'Campanula', plant_species),
+      mutate(plant_species = gsub('Buddleja davidii', 'Buddleja', plant_species),
+             plant_species = gsub('Campanula rapunculoides', 'Campanula', plant_species),
+             plant_species = gsub('^Centaurea cyanus$', 'Centaurea', plant_species),
+             plant_species = gsub('Dianthus barbatus', 'Dianthus', plant_species),
              plant_species = gsub('Hyacinthoides non-scripta', 'Hyacinthoides', plant_species),
              plant_species = gsub('Malus domestica', 'Malus', plant_species),
              plant_species = gsub('Malus fusca', 'Malus', plant_species),
              plant_species = gsub('Salvia nemorosa', 'Salvia', plant_species),
              plant_species = gsub('Salvia sp.', 'Salvia', plant_species),
+             plant_species = gsub('Sorbus aucuparia', 'Sorbus', plant_species),
+             plant_species = gsub('Sorbus hybrida', 'Sorbus', plant_species),
              plant_species = gsub('Spiraea douglasii', 'Spiraea sp.', plant_species)
       )
     
-    
     # group by species, and calculate number of plants per species
     extra_interactions_df <- extra_interactions %>%
-      filter(ecosystem != "Shrub-Steppe") %>% # interactions not comparable from different ecosystem?
-      filter(plant_family != "") %>%
+      #filter(ecosystem != "Shrub-Steppe") %>% # interactions not comparable from different ecosystem?
+      # only use th interactions from BC (not Oregon and Washington)
+      filter(latitude > 48) %>%
       # replace "_" with " " to match my data
       mutate(pollinator_species = gsub('_', ' ', pollinator_species),
              plant_species = gsub('_', ' ', plant_species)) %>%
-      select(pollinator_species, plant_family, plant_species) %>%
+      select(pollinator_species, plant_species) %>%
       filter(pollinator_species %in% species_vector) %>%
       rbind(., interactions_df2) %>%
-      group_by(pollinator_species, plant_family) %>% 
+      # now add the genus (first word of plant_species)
+      mutate(plant_genus = word(plant_species, 1)) %>% 
+      group_by(pollinator_species, plant_genus) %>% 
       add_tally() %>%
       rename("connection_strength" = "n") %>%
       slice(1) %>%
-      ungroup() 
+      ungroup() %>%
+      select(-plant_species)
     
-    # get all of the plant species that pollinators were recorded to interact with
-    plant_species_orig <- mydata_filtered %>%
-      group_by(PLANT_NETTED_FROM_FAMILY) %>%
+    # get all of the plant genera that pollinators were recorded to interact with
+    plant_genus_orig <- mydata_filtered %>%
+      group_by(PLANT_NETTED_FROM_GENUS) %>%
       slice(1) %>% # take one row per species (the name of each species)
       ungroup() %>%
-      select(PLANT_NETTED_FROM_FAMILY) %>% # extract species names column as vector
-      rename("plant_family" = "PLANT_NETTED_FROM_FAMILY")
+      select(PLANT_NETTED_FROM_GENUS) %>% # extract species names column as vector
+      rename("plant_genus" = "PLANT_NETTED_FROM_GENUS")
     
     # get all of the plant species that pollinators were recorded to interact with
-    plant_species_elle <- extra_interactions_df %>%
-      group_by(plant_family) %>%
+    plant_genus_elle <- extra_interactions_df %>%
+      group_by(plant_genus) %>%
       slice(1) %>% # take one row per species (the name of each species)
       ungroup() %>%
-      select(plant_family) # extract species names column as vector
+      select(plant_genus) # extract species names column as vector
     
     # plant names
-    plant_species_vector_w_extra_data <- plant_species_orig %>%
-      rbind(., plant_species_elle) %>%
-      group_by(plant_family) %>%
+    plant_genus_vector_w_extra_data <- plant_genus_orig %>%
+      rbind(., plant_genus_elle) %>%
+      group_by(plant_genus) %>%
       slice(1) %>% # take one row per species (the name of each species)
       ungroup() %>%
-      pull(plant_family)
+      pull(plant_genus)
     
     # number of plant names
-    n_plant_species_w_extra_data <- length(plant_species_vector_w_extra_data)
+    n_plant_genus_vector_w_extra_data <- length(plant_genus_vector_w_extra_data)
     
     # get all possible interactions so that we can fill undetected inteactions with zeroes
-    all_possible_interactions2 <- as.data.frame(cbind(rep(species_vector, each = n_plant_species_w_extra_data),
-                                                      rep(plant_species_vector_w_extra_data, times = n_species))) %>%
+    all_possible_interactions2 <- as.data.frame(cbind(rep(species_vector, each = n_plant_genus_vector_w_extra_data),
+                                                      rep(plant_genus_vector_w_extra_data, times = n_species))) %>%
       rename("pollinator_species" = "V1",
-             "plant_family" = "V2")
+             "plant_genus" = "V2")
     # join all possible interactions with observed interactions
     interactions_df2 <- left_join(all_possible_interactions2, extra_interactions_df) 
     # replace missing interactions with zeroes instead of NA
     interactions_df2$connection_strength <- interactions_df2$connection_strength %>% replace_na(0)
-    interactions_df2 <- select(interactions_df2, -plant_species)
     
     # prep an interaction frequency matrix
-    A2 <- matrix(data = 0, nrow = n_species, ncol=n_plant_species_w_extra_data,
-                 dimnames = list(species_vector, plant_species_vector_w_extra_data))
+    A2 <- matrix(data = 0, nrow = n_species, ncol=n_plant_genus_vector_w_extra_data,
+                 dimnames = list(species_vector, plant_genus_vector_w_extra_data))
     
     # fill matrix with observed interaction strengths
     for(i in 1:nrow(interactions_df2)){
-      A2[interactions_df2$pollinator_species[i], interactions_df2$plant_family[i]] <- 
+      A2[interactions_df2$pollinator_species[i], interactions_df2$plant_genus[i]] <- 
         interactions_df2$connection_strength[i]
     }
     
@@ -641,22 +700,22 @@ process_raw_data <- function(min_unique_detections, filter_nonnative_woody) {
       mutate(degree_scaled = center_scale(degree),
              normalised.degree_scaled = center_scale(normalised.degree),
              d_scaled = center_scale(d)) %>%
-      rename("degree_supplemented_family" = "degree",
-             "normalised.degree_supplemented_family" = "normalised.degree",
-             "d_supplemented_family" = "d",
-             "degree_scaled_supplemented_family" = "degree_scaled",
-             "normalised.degree_scaled_supplemented_family" = "normalised.degree_scaled",
-             "d_scaled_supplemented_family" = "d_scaled")
+      rename("degree_supplemented_genus" = "degree",
+             "normalised.degree_supplemented_genus" = "normalised.degree",
+             "d_supplemented_genus" = "d",
+             "degree_scaled_supplemented_genus" = "degree_scaled",
+             "normalised.degree_scaled_supplemented_genus" = "normalised.degree_scaled",
+             "d_scaled_supplemented_genus" = "d_scaled")
     
     species_interaction_metrics2 <- cbind(species_interaction_metrics, species_interaction_metrics2)
     
     species_interaction_metrics <- species_interaction_metrics2
-
-    cor <- cor(species_interaction_metrics$d_scaled_supplemented, species_interaction_metrics$d_scaled_supplemented_family)
+    
+    cor <- cor(species_interaction_metrics$d_scaled, species_interaction_metrics$d_scaled_supplemented_genus)
     par(mar = c(5, 5, 2, 2))
-    plot(species_interaction_metrics$d_scaled_supplemented, species_interaction_metrics$d_scaled_supplemented_family,
-         xlab="specialization (with Elle lab interactions)\nat the species level", ylab="specialization (with Elle lab interactions)\nat the family level",)
-    text(x = -0.75, y = 4.5, # Coordinates
+    plot(species_interaction_metrics$d_scaled, species_interaction_metrics$d_scaled_supplemented_genus,
+         xlab="specialization (my data alone)", ylab="specialization at genus level (with Elle lab interactions)",)
+    text(x = 3, y = -1, # Coordinates
          label = paste0("Pearson's R = ", signif(cor, 3)))
     dev.off()
     
@@ -989,7 +1048,6 @@ process_raw_data <- function(min_unique_detections, filter_nonnative_woody) {
     sites = site_vector, # alphabetized site names
     years = year_vector, # ordered vector of intervals
     visits = visit_vector, # ordered vector of visits
-    site_year_visit_count = site_year_visit_count, # matrix containing number of visits per site X year 
     date_scaled = scaled_date_array, # detection covariate (array of scaled julian date of visit)
     date_adjusted_scaled = scaled_date_adjusted_array, 
     habitat_category = HABITAT_CATEGORY, # occupancy and detection covariate (sites mowed or meadow)
