@@ -5,6 +5,8 @@ library(rstan)
 
 min_unique_detections = 1 
 filter_nonnative_woody = FALSE
+supplement_interactions = TRUE
+cluster_interactions_at_family = FALSE
 source("./dynamic_occupancy_model/run_model/prep_data.R")
 my_data <- process_raw_data(min_unique_detections, filter_nonnative_woody)
 
@@ -27,22 +29,34 @@ date_scaled <- my_data$date_scaled
 date_adjusted_scaled <- my_data$date_adjusted_scaled
 habitat_type <- my_data$habitat_category
 species_interaction_metrics <- my_data$species_interaction_metrics
-d <- species_interaction_metrics$d_scaled
-degree <- species_interaction_metrics$degree_scaled
+# use interaction data from our study only (FALSE)? or supplement with external observations (TRUE)?
+if(supplement_interactions == TRUE){
+  d <- species_interaction_metrics$d_scaled_supplemented
+  degree <- species_interaction_metrics$degree_scaled_supplemented
+} else {
+  d <- species_interaction_metrics$d_scaled
+  degree <- species_interaction_metrics$degree_scaled
+}
+# replace with family level specialization?
+if(cluster_interactions_at_family == TRUE){
+  d <- species_interaction_metrics$d_scaled_supplemented_family
+  degree <- species_interaction_metrics$degree_scaled_supplemented_family
+}
 species_names <- my_data$species
 site_names <- my_data$sites
 herbaceous_flowers_scaled <- my_data$herbaceous_flowers_scaled
 woody_flowers_scaled <- my_data$woody_flowers_scaled
 herbaceous_diversity_scaled <- my_data$herbaceous_diversity_scaled
 woody_diversity_scaled <- my_data$woody_diversity_scaled
+woody_diversity_scaled_avg <- cbind(rowMeans(woody_diversity_scaled), rowMeans(woody_diversity_scaled), rowMeans(woody_diversity_scaled))
 herbaceous_flowers_by_survey <- my_data$herbaceous_flowers_by_survey
 woody_flowers_by_survey <- my_data$woody_flowers_by_survey
 flowers_any_by_survey <- my_data$flowers_any_by_survey
 woody_flowers_scaled_all_years <- my_data$woody_flowers_scaled_all_years
+woody_flowers_scaled_all_years_repped <- cbind(woody_flowers_scaled_all_years, woody_flowers_scaled_all_years, woody_flowers_scaled_all_years)
 preestablished <- my_data$preestablished
 
-# could do more detailed variable correlation summaries
-cor.test(herbaceous_diversity_scaled, herbaceous_flowers_scaled)
+# write.csv(as.data.frame(species_interaction_metrics), "./data/species_information.csv")
 
 ## --------------------------------------------------
 ### Prep data and tweak model options
@@ -51,7 +65,7 @@ cor.test(herbaceous_diversity_scaled, herbaceous_flowers_scaled)
 #date_scaled <- date_adjusted_scaled
 # use the diversity instead of abundance data
 #herbaceous_flowers_scaled <- herbaceous_diversity_scaled
-#woody_flowers_scaled <- woody_diversity_scaled
+#woody_flowers_scaled <- woody_diversity_scaled_avg
 
 stan_data <- c("V", "species", "sites", "years", "years_full", 
                "n_species", "n_sites", "n_years", "n_years_minus1", "n_visits",
@@ -97,9 +111,9 @@ params <- c(#"L_species", "sigma_species",
   "psi1_species", "gamma_species", "phi_species", "p_species")
 
 # MCMC settings
-n_iterations <- 4000
+n_iterations <- 400
 n_thin <- 1
-n_burnin <- 2000
+n_burnin <- n_iterations/2
 n_chains <- 4
 n_cores <- n_chains
 delta = 0.95
