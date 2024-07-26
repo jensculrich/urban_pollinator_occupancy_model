@@ -439,8 +439,7 @@ process_raw_data <- function(min_unique_detections, filter_nonnative_woody) {
       mutate(pollinator_species = gsub('_', ' ', pollinator_species),
              plant_species = gsub('_', ' ', plant_species)) %>%
       select(pollinator_species, plant_species) %>%
-      filter(pollinator_species %in% species_vector) 
-    %>%
+      filter(pollinator_species %in% species_vector) %>%
       rbind(., interactions_df2) %>%
       group_by(pollinator_species, plant_species) %>% 
       add_tally() %>%

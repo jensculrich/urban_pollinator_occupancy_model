@@ -111,7 +111,7 @@ params <- c(#"L_species", "sigma_species",
   "psi1_species", "gamma_species", "phi_species", "p_species")
 
 # MCMC settings
-n_iterations <- 400
+n_iterations <- 4000
 n_thin <- 1
 n_burnin <- n_iterations/2
 n_chains <- 4

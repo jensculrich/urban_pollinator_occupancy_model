@@ -30,8 +30,8 @@ years <- seq(1, n_years_minus1, by=1)
 date_scaled <- my_data$date_scaled
 habitat_type <- my_data$habitat_category
 species_interaction_metrics <- my_data$species_interaction_metrics
-d_scaled <- species_interaction_metrics$d_scaled
-d <- species_interaction_metrics$d
+d_scaled <- species_interaction_metrics$d_scaled_supplemented_genus
+d <- species_interaction_metrics$d_supplemented_genus
 species_names <- my_data$species
 site_names <- my_data$sites
 herbaceous_flowers_scaled <- my_data$herbaceous_flowers_scaled
@@ -60,12 +60,12 @@ logit <- function(x) log(x/(1-x))
 n_bins = 12
 my_palette <- palette(viridis(n = n_bins, option = "C"))
 
-seq_original <- seq(min(species_interaction_metrics$d), 
-           max(species_interaction_metrics$d), 
+seq_original <- seq(min(d), 
+           max(d), 
            length.out=n_bins)
 
-seq_scaled <- seq(min(species_interaction_metrics$d_scaled), 
-                    max(species_interaction_metrics$d_scaled), 
+seq_scaled <- seq(min(d_scaled), 
+                    max(d_scaled), 
                     length.out=n_bins)
 
 ## --------------------------------------------------
@@ -79,6 +79,9 @@ hist(d, axes = TRUE, xlim = c(0, 1),
      col = my_palette, breaks = seq_original, 
      freq=TRUE, right = FALSE,
      cex.axis=1.5, cex.lab=2)
+
+mean(species_interaction_metrics$d_supplemented_genus)
+sd(species_interaction_metrics$d_supplemented_genus)
 
 ## --------------------------------------------------
 # global plotting options
@@ -197,21 +200,29 @@ herb_df <- as.data.frame(cbind(original_herb, criC[3,,1],
          "gamma_herb_community_lower50" = "V5",
          "gamma_herb_community_upper50" = "V6")
 
+herb_df <- herb_df[1:2,]
+
 p <- ggplot(data = herb_df, aes(original_herb, gamma_herb_community_mean)) +
-  geom_ribbon(aes(
-    ymin=gamma_herb_community_lower50, 
-    ymax=gamma_herb_community_upper50), alpha=0.8) +
-  geom_ribbon(aes(
-    ymin=gamma_herb_community_lower95, 
-    ymax=gamma_herb_community_upper95), alpha=0.4) +
-  geom_line(size=2, lty=1) +
+  geom_errorbar(aes(ymin=gamma_herb_community_lower95, ymax=gamma_herb_community_upper95),
+                size = 1, width = 0) +
+  geom_errorbar(aes(ymin=gamma_herb_community_lower50, ymax=gamma_herb_community_upper50),
+                size = 4, width = 0) +
+  geom_point(size = 6, shape = 19) +
+  geom_point(size = 3, shape = 19, colour="white") +
+  #geom_ribbon(aes(
+    #ymin=gamma_herb_community_lower50, 
+    #ymax=gamma_herb_community_upper50), alpha=0.8) +
+  #geom_ribbon(aes(
+    #ymin=gamma_herb_community_lower95, 
+    #ymax=gamma_herb_community_upper95), alpha=0.4) +
+  #geom_line(size=2, lty=1) +
   xlim(c(min(original_herb), max(original_herb))) +
   ylim(c(0, 1)) +
   theme_bw() +
   ylab("colonization rate \n(community avg.)") +
   xlab(xlabel) +
-  scale_x_continuous(limits = c(-0.1,1.1), breaks = c(0,1), labels = c(
-    "0" = "control", "1" = "herb. \nenhancement")) +
+  scale_x_continuous(limits = c(-0.4,1.4), breaks = c(0,1), labels = c(
+    "0" = "control", "1" = "herb. enhancement")) +
   scale_y_continuous(limits = c(0,1),
                      breaks = c(0, 0.5, 1),
                      labels = scales::percent 
@@ -237,23 +248,30 @@ herb_df_spec <- as.data.frame(cbind(original_herb,
   mutate(specialization_bin = as.factor(V2)) %>%
   rename("mean" = "V3",
          "lower50" = "V4",
-         "upper50" = "V5")
+         "upper50" = "V5") %>% 
+  group_by(V2) %>%
+  slice(1:2) %>%
+  ungroup()
 
 #herb_df_spec <- herb_df_spec %>%
  # filter(specialization_bin == "12")
 
 p2 <- ggplot(data = herb_df_spec, aes(original_herb, mean, fill=specialization_bin)) +
-  geom_ribbon(aes(
-    ymin=lower50, 
-    ymax=upper50), alpha=0.1) +
-  geom_line(aes(colour=specialization_bin), size=2, lty=1) +
+  geom_errorbar(aes(ymin=lower50, ymax=upper50, colour = specialization_bin),
+                size = 3, width = 0, position=position_dodge(width=0.75), alpha=0.5) +
+  geom_point(aes(colour = specialization_bin), 
+             size = 7, shape = 19, position=position_dodge2(width=0.75)) +
+  #geom_ribbon(aes(
+    #ymin=lower50, 
+    #ymax=upper50), alpha=0.1) +
+  #geom_line(aes(colour=specialization_bin), size=2, lty=1) +
   xlim(c(min(original_herb), max(original_herb))) +
   ylim(c(0, 1)) +
   theme_bw() +
   ylab("colonization rate \n(by specialization)") +
   xlab(xlabel) +
-  scale_x_continuous(limits = c(-0.1,1.1), breaks = c(0,1), labels = c(
-    "0" = "control", "1" = "herb. \nenhancement")) +
+  scale_x_continuous(limits = c(-0.4,1.4), breaks = c(0,1), labels = c(
+    "0" = "control", "1" = "herb. enhancement")) +
   scale_y_continuous(limits = c(0,1),
                      breaks = c(0, 0.5, 1),
                      labels = scales::percent 
@@ -431,21 +449,29 @@ herb_df <- as.data.frame(cbind(original_herb, criC[3,,1],
          "phi_herb_community_lower50" = "V5",
          "phi_herb_community_upper50" = "V6")
 
+herb_df <- herb_df[1:2,]
+
 r <- ggplot(data = herb_df, aes(original_herb, phi_herb_community_mean)) +
-  geom_ribbon(aes(
-    ymin=phi_herb_community_lower50, 
-    ymax=phi_herb_community_upper50), alpha=0.8) +
-  geom_ribbon(aes(
-    ymin=phi_herb_community_lower95, 
-    ymax=phi_herb_community_upper95), alpha=0.4) +
-  geom_line(size=2, lty=1) +
+  geom_errorbar(aes(ymin=phi_herb_community_lower95, ymax=phi_herb_community_upper95),
+                size = 1, width = 0) +
+  geom_errorbar(aes(ymin=phi_herb_community_lower50, ymax=phi_herb_community_upper50),
+                size = 4, width = 0) +
+  geom_point(size = 6, shape = 19) +
+  geom_point(size = 3, shape = 19, colour="white") +
+  #geom_ribbon(aes(
+    #ymin=phi_herb_community_lower50, 
+    #ymax=phi_herb_community_upper50), alpha=0.8) +
+  #geom_ribbon(aes(
+    #ymin=phi_herb_community_lower95, 
+    #ymax=phi_herb_community_upper95), alpha=0.4) +
+  #geom_line(size=2, lty=1) +
   xlim(c(min(original_herb), max(original_herb))) +
   ylim(c(0, 1)) +
   theme_bw() +
   ylab("persistence rate \n(community avg.)") +
   xlab(xlabel) +
-  scale_x_continuous(limits = c(-0.1,1.1), breaks = c(0,1), labels = c(
-    "0" = "control", "1" = "herb. \nenhancement")) +
+  scale_x_continuous(limits = c(-0.4,1.4), breaks = c(0,1), labels = c(
+    "0" = "control", "1" = "herb. enhancement")) +
   scale_y_continuous(limits = c(0,1),
                      breaks = c(0, 0.5, 1),
                      labels = scales::percent 
@@ -471,23 +497,30 @@ herb_df_spec <- as.data.frame(cbind(original_herb,
   mutate(specialization_bin = as.factor(V2)) %>%
   rename("mean" = "V3",
          "lower50" = "V4",
-         "upper50" = "V5")
+         "upper50" = "V5") %>% 
+  group_by(V2) %>%
+  slice(1:2) %>%
+  ungroup()
 
 #herb_df_spec <- herb_df_spec %>%
 # filter(specialization_bin == "12")
 
 r2 <- ggplot(data = herb_df_spec, aes(original_herb, mean, fill=specialization_bin)) +
-  geom_ribbon(aes(
-    ymin=lower50, 
-    ymax=upper50), alpha=0.1) +
-  geom_line(aes(colour=specialization_bin), size=2, lty=1) +
+  geom_errorbar(aes(ymin=lower50, ymax=upper50, colour = specialization_bin),
+                size = 3, width = 0, position=position_dodge(width=0.75), alpha=0.5) +
+  geom_point(aes(colour = specialization_bin), 
+             size = 7, shape = 19, position=position_dodge2(width=0.75)) +
+  #geom_ribbon(aes(
+    #ymin=lower50, 
+    #ymax=upper50), alpha=0.1) +
+  #geom_line(aes(colour=specialization_bin), size=2, lty=1) +
   xlim(c(min(original_herb), max(original_herb))) +
   ylim(c(0, 1)) +
   theme_bw() +
   ylab("persistence rate \n(by specialization)") +
   xlab(xlabel) +
-  scale_x_continuous(limits = c(-0.1,1.1), breaks = c(0,1), labels = c(
-    "0" = "control", "1" = "herb. \nenhancement")) +
+  scale_x_continuous(limits = c(-0.4,1.4), breaks = c(0,1), labels = c(
+    "0" = "control", "1" = "herb. enhancement")) +
   scale_y_continuous(limits = c(0,1),
                      breaks = c(0, 0.5, 1),
                      labels = scales::percent 
@@ -665,21 +698,29 @@ herb_df <- as.data.frame(cbind(original_herb, criC[3,,1],
          "psi1_herb_community_lower50" = "V5",
          "psi1_herb_community_upper50" = "V6")
 
+herb_df <- herb_df[1:2,]
+
 t <- ggplot(data = herb_df, aes(original_herb, psi1_herb_community_mean)) +
-  geom_ribbon(aes(
-    ymin=psi1_herb_community_lower50, 
-    ymax=psi1_herb_community_upper50), alpha=0.8) +
-  geom_ribbon(aes(
-    ymin=psi1_herb_community_lower95, 
-    ymax=psi1_herb_community_upper95), alpha=0.4) +
-  geom_line(size=2, lty=1) +
+  geom_errorbar(aes(ymin=psi1_herb_community_lower95, ymax=psi1_herb_community_upper95),
+                size = 1, width = 0) +
+  geom_errorbar(aes(ymin=psi1_herb_community_lower50, ymax=psi1_herb_community_upper50),
+                size = 4, width = 0) +
+  geom_point(size = 6, shape = 19) +
+  geom_point(size = 3, shape = 19, colour="white") +
+  #geom_ribbon(aes(
+    #ymin=psi1_herb_community_lower50, 
+    #ymax=psi1_herb_community_upper50), alpha=0.8) +
+  #geom_ribbon(aes(
+    #ymin=psi1_herb_community_lower95, 
+    #ymax=psi1_herb_community_upper95), alpha=0.4) +
+  #geom_line(size=2, lty=1) +
   xlim(c(min(original_herb), max(original_herb))) +
   ylim(c(0, 1)) +
   theme_bw() +
   ylab("initial occur. rate \n(community avg.)") +
   xlab(xlabel) +
-  scale_x_continuous(limits = c(-0.1,1.1), breaks = c(0,1), labels = c(
-    "0" = "control", "1" = "herb. \nenhancement")) +
+  scale_x_continuous(limits = c(-0.4,1.4), breaks = c(0,1), labels = c(
+    "0" = "control", "1" = "herb. enhancement")) +
   scale_y_continuous(limits = c(0,1),
                      breaks = c(0, 0.5, 1),
                      labels = scales::percent 
@@ -705,23 +746,30 @@ herb_df_spec <- as.data.frame(cbind(original_herb,
   mutate(specialization_bin = as.factor(V2)) %>%
   rename("mean" = "V3",
          "lower50" = "V4",
-         "upper50" = "V5")
+         "upper50" = "V5") %>% 
+  group_by(V2) %>%
+  slice(1:2) %>%
+  ungroup()
 
 #herb_df_spec <- herb_df_spec %>%
 # filter(specialization_bin == "12")
 
 t2 <- ggplot(data = herb_df_spec, aes(original_herb, mean, fill=specialization_bin)) +
-  geom_ribbon(aes(
-    ymin=lower50, 
-    ymax=upper50), alpha=0.1) +
-  geom_line(aes(colour=specialization_bin), size=2, lty=1) +
+  geom_errorbar(aes(ymin=lower50, ymax=upper50, colour = specialization_bin),
+                size = 3, width = 0, position=position_dodge(width=0.75), alpha=0.5) +
+  geom_point(aes(colour = specialization_bin), 
+             size = 7, shape = 19, position=position_dodge2(width=0.75)) +
+  #geom_ribbon(aes(
+    #ymin=lower50, 
+    #ymax=upper50), alpha=0.1) +
+  #geom_line(aes(colour=specialization_bin), size=2, lty=1) +
   xlim(c(min(original_herb), max(original_herb))) +
   ylim(c(0, 1)) +
   theme_bw() +
   ylab("initial occur. rate \n(by specialization)") +
   xlab(xlabel) +
-  scale_x_continuous(limits = c(-0.1,1.1), breaks = c(0,1), labels = c(
-    "0" = "control", "1" = "herb. \nenhancement")) +
+  scale_x_continuous(limits = c(-0.4,1.4), breaks = c(0,1), labels = c(
+    "0" = "control", "1" = "herb. enhancement")) +
   scale_y_continuous(limits = c(0,1),
                      breaks = c(0, 0.5, 1),
                      labels = scales::percent 
