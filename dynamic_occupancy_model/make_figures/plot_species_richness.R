@@ -30,7 +30,7 @@ years <- seq(1, n_years_minus1, by=1)
 date_scaled <- my_data$date_scaled
 habitat_type <- my_data$habitat_category
 species_interaction_metrics <- my_data$species_interaction_metrics
-d <- species_interaction_metrics$d_scaled
+d <- species_interaction_metrics$d_scaled_supplemented_genus
 species_names <- my_data$species
 site_names <- my_data$sites
 herbaceous_flowers_scaled <- my_data$herbaceous_flowers_scaled
@@ -346,6 +346,72 @@ df <- rbind(df1, df2, df3) %>%
   mutate(year = as.factor(year),
          herb_pred = as.factor(herb_pred))
 
+## --------------------------------------------------
+## Add observed species richness
+
+# read data
+mydata <- read.csv("./data/pollinator_data.csv")
+
+# perform some initial filters on the unfinished prelim data
+mydata_filtered <- mydata %>% 
+  
+  # Filter by CLADE. 
+  # NA's are specimens that haven't been identified yet. 
+  # There are also specimens labelled "Other" if we collected them but they were not bees or hoverflies
+  filter(CLADE %in% c("Anthophila", "Syrphidae")) %>%
+  
+  # Filter by SPECIES
+  # Remove honeybees from our preliminary analysis
+  # remove ~2 dozen rows where we accidentally printed an extra label 
+  # (i.e., field assistant listed more species interacting with a plant at a site/visit than were collected)
+  filter(!SPECIES %in% c("Apis mellifera", "extra_label"))  %>%
+  
+  # Filter by SPECIES
+  # Remove some others until resolved for final analyses
+  # Two un'id bombus were failed to be collected and brought back to lab for ID
+  # one Eupeodes had an unconfident ID (looks intermediate between two species) so we are excluding it
+  # No male Osmia were given an ID and were left simply as Osmia sp.
+  filter(!SPECIES %in% c("Bombus sp.","Eupeodes sp.", "Osmia sp."))  %>%
+  
+  # Reduce sampling rounds in year 1 by 1 (they start at 2 since we did a weird prelim survey first)
+  mutate(SAMPLING_ROUND = as.integer(ifelse(YEAR==1, as.integer(SAMPLING_ROUND) - 1, as.integer(SAMPLING_ROUND)))) %>%
+  
+  # for now we will filter out survey round 7 in year 2 (6 / 18 sites visited a 7th time)
+  filter(SAMPLING_ROUND < 7)
+
+df2 <- mydata_filtered %>%
+  
+  # convert to binary detections
+  group_by(SPECIES, SITE, YEAR) %>%
+  slice(1) %>%
+  ungroup() %>%
+  
+  # change SITE to factor for left_join with HABITAT_CATEGORY created below
+  mutate(SITE = as.factor(SITE))
+
+# add habitat_category of sites
+# make a new dataframe with site names and cats
+SITE <- levels(as.factor(df2$SITE))
+HABITAT_CATEGORY <- c(0,0,1,1,0,0,1,1,1, # 9 mowed sites 
+                      0,1,1,1,0,0,0,1,0) # and 9 meadow sites
+
+habitats_df <- as.data.frame(cbind(SITE, HABITAT_CATEGORY))
+
+# join HABITAT_CATEGORY of sites with df by SITE
+df_joined <- left_join(df2, habitats_df, by = "SITE")
+
+df_joined <- df_joined %>%
+  group_by(SITE, YEAR) %>%
+  add_tally() %>%
+  slice(1) %>%
+  ungroup() %>%
+  group_by(HABITAT_CATEGORY, YEAR) %>%
+  mutate(mean_observed = mean(n)) 
+
+temp <- df_joined  %>%
+  slice(1) %>%
+  ungroup() %>%
+  select(HABITAT_CATEGORY, YEAR, mean_observed)
 
 ## --------------------------------------------------
 ## Draw species richness plot
@@ -365,21 +431,55 @@ df <- rbind(df1, df2, df3) %>%
      width = 0,
      position=position_dodge(width=0.5),
      size=2.5) +
-   scale_colour_manual(name = "",
-                     labels=c("control",
-                              "herb. enhancement"),
-                     values=my_palette[3:4]) +
-   ylim(c(15, 110)) +
+    scale_colour_manual(name = "",
+                   labels=c("control (estimated)",
+                            "herb. enhancement (estimated)"),
+                   values=my_palette[3:4]) +
+   geom_point(data = temp, aes(YEAR, mean_observed, 
+                                    colour=as.factor(HABITAT_CATEGORY)), 
+              shape = 18, size = 6, position=position_dodge(width=0.5)) +
+   geom_jitter(data = df_joined, aes(YEAR, n, 
+                                    colour=as.factor(HABITAT_CATEGORY)), 
+              shape = 1, size = 2, position=position_jitterdodge(jitter.width=0.2, dodge.width=0.5)) +
+   ylim(c(0, 108)) +
    theme_bw() +
-   ylab("Expected species richness") +
+   ylab("Species richness") +
    theme(legend.text=element_text(size=16),
-         legend.position = c(0.75, 0.125),
+         legend.position = c(0.3, 0.9027),
          axis.text.x = element_text(size = 18),
          axis.text.y = element_text(size = 18, angle=45, vjust=-0.5),
          axis.title.x = element_text(size=20),
          axis.title.y = element_text(size = 20),
          panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
          panel.background = element_blank(), axis.line = element_line(colour = "black"))
+)
+
+(p2  <- ggplot(data = df, aes(year, mean, colour=as.factor(original_herb))) +
+    scale_x_discrete(name="Year", breaks = c(1, 2, 3),
+                     labels=c("2021", "2022", "2023"
+                     )) +
+    geom_point(size = 1, position=position_dodge(width=0.5)) +
+    scale_colour_manual(name = "",
+                        labels=c("control (observed)",
+                                 "herb. enhancement (observed)"),
+                        values=my_palette[3:4]) +
+    geom_point(data = temp, aes(YEAR, mean_observed, 
+                                colour=as.factor(HABITAT_CATEGORY)), 
+               shape = 18, size = 6, position=position_dodge(width=0.5)) +
+    geom_jitter(data = df_joined, aes(YEAR, n, 
+                                      colour=as.factor(HABITAT_CATEGORY)), 
+                shape = 1, size = 2, position=position_jitterdodge(jitter.width=0.2, dodge.width=0.5)) +
+    ylim(c(0, 108)) +
+    theme_bw() +
+    ylab("Species richness") +
+    theme(legend.text=element_text(size=16),
+          legend.position = c(0.3, 0.903),
+          axis.text.x = element_text(size = 18),
+          axis.text.y = element_text(size = 18, angle=45, vjust=-0.5),
+          axis.title.x = element_text(size=20),
+          axis.title.y = element_text(size = 20),
+          panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+          panel.background = element_blank(), axis.line = element_line(colour = "black"))
 )
 
 ## --------------------------------------------------
@@ -889,14 +989,14 @@ df_woody <- rbind(df1_woody, df2_woody, df3_woody) %>%
      position=position_dodge(width=0.5),
      size=2.5) +
    scale_colour_manual(name = "",
-                       labels=c("avg. woody plants\n",
-                                "above avg. \nwoody plants"),
+                       labels=c("avg. woody plants\n(estimated)",
+                                "above avg. woody plants\n(estimated)"),
                        values=my_palette[1:2]) +
-   ylim(c(15, 110)) +
+   ylim(c(0, 108)) +
    theme_bw() +
-   ylab("Expected species richness") +
+   ylab("Species richness") +
    theme(legend.text=element_text(size=16),
-         legend.position = c(0.7, 0.125),
+         legend.position = c(0.3, 0.15),
          axis.text.x = element_text(size = 18),
          axis.text.y = element_text(size = 18, angle=45, vjust=-0.5),
          axis.title.x = element_text(size=20),

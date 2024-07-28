@@ -108,7 +108,8 @@ params <- c(#"L_species", "sigma_species",
   "p_year",
   
   "W_species_rep",
-  "psi1_species", "gamma_species", "phi_species", "p_species")
+  "psi1_species", "gamma_species", "phi_species", 
+  "p_species", "p_date", "p_date_sq")
 
 # MCMC settings
 n_iterations <- 4000
