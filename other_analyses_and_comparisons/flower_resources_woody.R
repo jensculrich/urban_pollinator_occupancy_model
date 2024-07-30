@@ -345,13 +345,12 @@ temp <- abundance_df_joined %>%
   slice(1) %>%
   ungroup() %>% 
   filter(HABITAT_CATEGORY == 1) %>%
-  arrange(desc(log_total_abundance_all_sites)) %>%
   mutate(row = row_number()) %>%
   select(SPECIES, row) 
 
 test <- left_join(test, temp, by = "SPECIES") %>%
-  mutate(SPECIES = fct_reorder(SPECIES, (row))) %>%
-  filter(SPECIES != "no flowering species")
+  filter(SPECIES != "no flowering species") 
+  
 
 str(test)
 
@@ -366,6 +365,9 @@ ggplot(test, aes(x=SPECIES, y=log_total_abundance_all_sites, fill=n)) +
   labs(x = "Plant species", y="log(abundance)") +
   scale_fill_brewer(palette="Greens") + theme_classic() +
   theme(legend.position = "none",
-        axis.text.x = element_text(angle = 45, hjust=1, size = 9)) +
+        axis.title.x = element_text(size = 14),
+        axis.title.y = element_text(size = 14),
+        axis.text.y = element_text(size = 12),
+        axis.text.x = element_text(angle = 60, hjust=1, size = 12),
+        strip.text.x = element_text(size = 14)) +
   facet_wrap(test$HABITAT_CATEGORY, ncol=1, labeller=habitat_labeller)
-

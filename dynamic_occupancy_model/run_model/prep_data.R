@@ -129,6 +129,12 @@ process_raw_data <- function(min_unique_detections, filter_nonnative_woody) {
     ungroup() %>%
     select(SPECIES) # extract species names column as vector
   
+  clade_list <- df_joined %>%
+    group_by(SPECIES) %>%
+    slice(1) %>% # take one row per species (the name of each species)
+    ungroup() %>%
+    select(CLADE) # extract species names column as vector
+  
   # create an alphabetized list of all sites
   site_list <- df_joined %>%
     group_by(SITE) %>%
@@ -139,6 +145,9 @@ process_raw_data <- function(min_unique_detections, filter_nonnative_woody) {
   # get vectors of species, sites, intervals, and visits 
   species_vector <- species_list %>%
     pull(SPECIES)
+  
+  clade_vector <- clade_list %>%
+    pull(CLADE)
   
   site_vector <- site_list %>%
     pull(SITE)
@@ -1044,6 +1053,7 @@ process_raw_data <- function(min_unique_detections, filter_nonnative_woody) {
     n_visits = n_visits, ## number of samples per year
     V = V, # detection array
     species = species_vector, # alphabetized species names
+    clade = clade_vector, # anthophila versus syrphidae in same order as species names
     sites = site_vector, # alphabetized site names
     years = year_vector, # ordered vector of intervals
     visits = visit_vector, # ordered vector of visits

@@ -29,6 +29,7 @@ date_scaled <- my_data$date_scaled
 date_adjusted_scaled <- my_data$date_adjusted_scaled
 habitat_type <- my_data$habitat_category
 species_interaction_metrics <- my_data$species_interaction_metrics
+clade <- my_data$clade
 # use interaction data from our study only (FALSE)? or supplement with external observations (TRUE)?
 if(supplement_interactions == TRUE){
   d <- species_interaction_metrics$d_scaled_supplemented
@@ -161,7 +162,8 @@ inits <- lapply(1:n_chains, function(i)
 
 ## --------------------------------------------------
 ### Run model
-# dynocc7 is currently the final form
+
+# final_model.stan is currently the final form
 stan_model <- "./dynamic_occupancy_model/models/final_model.stan"
 
 ## Call Stan from R
@@ -180,9 +182,11 @@ stan_out <- stan(stan_model,
 saveRDS(stan_out, "./dynamic_occupancy_model/model_outputs/stan_out.rds")
 stan_out <- readRDS("./dynamic_occupancy_model/model_outputs/stan_out.rds")
 
+## --------------------------------------------------
+### Model diagnostics (PPCs are in a separate R file)
 
-print(stan_out, probs = c(0.025, 0.05, 0.25, 0.5, 0.75, 0.95, 0.975), digits = 3, 
-      pars = c("psi1_0", #sigma_psi1_species",
+print(stan_out, probs = c(0.025, 0.25, 0.5, 0.75, 0.975), digits = 3, 
+      pars = c("psi1_0", "sigma_psi1_species",
                "psi1_herbaceous_flowers", "psi1_woody_flowers", "psi1_specialization",
                "psi1_interaction_1", "psi1_interaction_2",
                
@@ -192,7 +196,9 @@ print(stan_out, probs = c(0.025, 0.05, 0.25, 0.5, 0.75, 0.95, 0.975), digits = 3
                
                "phi0", "sigma_phi_species",
                "phi_herbaceous_flowers", "phi_woody_flowers", "phi_specialization",
-               "phi_interaction_1", "phi_interaction_2"
+               "phi_interaction_1", "phi_interaction_2",
+               
+               "gamma_year", "phi_year"
       ))
 
 print(stan_out, digits = 3, 
@@ -200,18 +206,10 @@ print(stan_out, digits = 3,
                 "p_specialization",
                 "p_flower_abundance_any",
                 "mu_p_species_date", "sigma_p_species_date", 
-                "mu_p_species_date_sq", "sigma_p_species_date_sq" 
+                "mu_p_species_date_sq", "sigma_p_species_date_sq",
+                "p_year"
                 
       ))
-
-print(stan_out, digits = 3, 
-      pars = c("avg_species_richness_control", "avg_species_richness_enhanced", 
-               "increase_richness_enhanced"
-      ))
-
-print(stan_out,  
-          pars = c("p_year"
-          ))
 
 # for continuous model
 traceplot(stan_out, pars = c(
@@ -219,19 +217,14 @@ traceplot(stan_out, pars = c(
   "psi1_herbaceous_flowers", "psi1_woody_flowers", "psi1_specialization",
   "psi1_interaction_1", "psi1_interaction_2",
   
-  #"psi1_herbaceous_diversity", "psi1_interaction_3",
-  
   "gamma0", "sigma_gamma_species",
   "gamma_herbaceous_flowers", "gamma_woody_flowers", "gamma_specialization",
   "gamma_interaction_1", "gamma_interaction_2",
-  
-  #"gamma_herbaceous_diversity", "gamma_interaction_3",
   
   "phi0", "sigma_phi_species",
   "phi_herbaceous_flowers", "phi_woody_flowers", "phi_specialization",
   "phi_interaction_1", "phi_interaction_2"
   
-  #"phi_herbaceous_diversity", "phi_interaction_3"
 ))
 
 traceplot(stan_out, pars = c(
@@ -242,20 +235,6 @@ traceplot(stan_out, pars = c(
   "mu_p_species_date_sq", "sigma_p_species_date_sq" 
 ))
 
-traceplot(stan_out,  
-          pars = c("L_species", "sigma_species"
-          ))
-
-traceplot(stan_out,  
-      pars = c("avg_species_richness_control", "avg_species_richness_enhanced", 
-               "increase_richness_enhanced"
-))
-
-traceplot(stan_out,  
-          pars = c("gamma_year", 
-                   "phi_year",
-                   "p_year"
-                   ))
 
 pairs(stan_out,  
           pars = c(
@@ -264,5 +243,69 @@ pairs(stan_out,
             "psi1_interaction_1", "psi1_interaction_2"
           ))
 
-print(stan_out, digits = 3, pars = c("P_species"))
 
+## --------------------------------------------------
+### Gather data for species summary table (appendix s2)
+
+fit_summary <- rstan::summary(stan_out)
+View(cbind(1:nrow(fit_summary$summary), fit_summary$summary)) # View to see which row corresponds to the parameter of interest
+
+phenology_peak_mean_estimate <- fit_summary$summary[577:684,1]
+phenology_decay_mean_estimate <- fit_summary$summary[685:792,1]
+
+# retrieve total detections per species
+total_detections <- vector(length = n_species)
+for(i in 1:n_species){
+  total_detections[i] <- sum(V[i,,,])
+}
+  
+
+appendix_s2 <- as.data.frame(cbind(clade, species_names, total_detections,
+            phenology_peak_mean_estimate, phenology_decay_mean_estimate, 
+            species_interaction_metrics))
+
+write.csv(appendix_s2, "./results/appendix_s2.csv")
+
+cor(appendix_s2$phenology_peak_mean_estimate, appendix_s2$d_scaled_supplemented_genus)
+cor(appendix_s2$phenology_decay_mean_estimate, appendix_s2$d_scaled_supplemented_genus)
+
+library(ggplot2)
+
+summary(m1 <- lm(data = appendix_s2, d_scaled_supplemented_genus ~ phenology_peak_mean_estimate))
+p <- ggplot(appendix_s2, aes(phenology_peak_mean_estimate, d_scaled_supplemented_genus)) +
+  geom_point() + 
+  #geom_smooth(alpha=0.3, method="lm") +
+  theme_classic() + 
+  ylab("specialization (d')") +
+  xlab("species effect on phenological peak \n(greater value == later peak date)") +
+  theme(axis.text.x = element_text(size=12),
+      axis.title.x = element_text(size=14),
+      axis.text.y = element_text(size=12),
+      axis.title.y = element_text(size=14))
+p
+
+summary(m2 <- lm(data = appendix_s2, d_scaled_supplemented_genus ~ phenology_decay_mean_estimate))
+q <- ggplot(appendix_s2, aes(phenology_decay_mean_estimate, d_scaled_supplemented_genus)) +
+  geom_point() + 
+  #geom_smooth(alpha=0.3, method="lm") +
+  theme_classic() + 
+  ylab("specialization (d')") +
+  xlab("species-specific phenological decay \n(greater value == longer flight season)") +
+  theme(axis.text.x = element_text(size=12),
+        axis.title.x = element_text(size=14),
+        axis.text.y = element_text(size=12),
+        axis.title.y = element_text(size=14))
+q
+
+summary(m3 <- lm(data = appendix_s2, d_scaled_supplemented_genus ~ total_detections))
+r <- ggplot(appendix_s2, aes(total_detections, d_scaled_supplemented_genus)) +
+  geom_point() + 
+  #geom_smooth(alpha=0.3, method="lm") +
+  theme_classic() + 
+  ylab("specialization (d')") +
+  xlab("total detections") +
+  theme(axis.text.x = element_text(size=12),
+        axis.title.x = element_text(size=14),
+        axis.text.y = element_text(size=12),
+        axis.title.y = element_text(size=14))
+r

@@ -80,6 +80,73 @@ unique_plant_interactions <- mydata_filtered %>%
   select(SPECIES, n) %>%
   rename("unique_plant_interactions" = "n")
 
+## --------------------------------------------------
+## plot interactions by plant
+
+mydata_filtered_plants <- mydata_filtered %>%
+  group_by(PLANT_NETTED_FROM_SCI_NAME) %>%
+  add_tally() %>%
+  ungroup() %>%
+  arrange(desc(n)) %>%
+  mutate(PLANT_NETTED_FROM_SCI_NAME = fct_reorder(PLANT_NETTED_FROM_SCI_NAME, n, .desc = TRUE)) %>%
+  group_by(PLANT_NETTED_FROM_SCI_NAME) %>%
+  mutate(species_ID = cur_group_id()) %>%
+  slice(1) %>%
+  ungroup %>%
+  mutate(log_n = log(n+1))
+  
+# group 1
+mydata_filtered_plants1 <- mydata_filtered_plants %>%
+    filter(species_ID %in% 1:40) 
+
+ggplot(mydata_filtered_plants1, aes(x=fct_infreq(PLANT_NETTED_FROM_SCI_NAME))) +
+  geom_col(aes(y=log_n)) +
+  labs(x = "", y = "log(detected interactions)") +
+  #scale_fill_manual(labels = c("bees (Anthophila)", "hoverflies (Syrphidae)"), values = c("#51b3d6", "#d67451")) +
+  theme_classic() +
+  scale_y_continuous(limits = (c(0, 7))) +
+  theme(legend.position = c(1.1, 0.375),
+        legend.title=element_blank(),
+        legend.text=element_text(size=11),
+        axis.text.x = element_text(size = 12, angle = 65, vjust = 1, hjust=1.1),
+        axis.text.y = element_text(size = 12),
+        axis.title.y = element_text(size = 14),
+        plot.margin = unit(c(1,1,1,1), "cm")) 
+
+mydata_filtered_plants2 <- mydata_filtered_plants %>%
+  filter(species_ID %in% 41:80) 
+
+ggplot(mydata_filtered_plants2, aes(x=fct_infreq(PLANT_NETTED_FROM_SCI_NAME))) +
+  geom_col(aes(y=log_n)) +
+  labs(x = "", y = "log(detected interactions)") +
+  #scale_fill_manual(labels = c("bees (Anthophila)", "hoverflies (Syrphidae)"), values = c("#51b3d6", "#d67451")) +
+  theme_classic() +
+  scale_y_continuous(limits = (c(0, 8))) +
+  theme(legend.position = c(1.1, 0.375),
+        legend.title=element_blank(),
+        legend.text=element_text(size=11),
+        axis.text.x = element_text(size = 12, angle = 65, vjust = 1, hjust=1.1),
+        axis.text.y = element_text(size = 12),
+        axis.title.y = element_text(size = 14),
+        plot.margin = unit(c(1,1,1,1), "cm")) 
+
+mydata_filtered_plants3 <- mydata_filtered_plants %>%
+  filter(species_ID %in% 81:120) 
+
+ggplot(mydata_filtered_plants3, aes(x=fct_infreq(PLANT_NETTED_FROM_SCI_NAME))) +
+  geom_col(aes(y=log_n)) +
+  labs(x = "", y = "log(detected interactions)") +
+  #scale_fill_manual(labels = c("bees (Anthophila)", "hoverflies (Syrphidae)"), values = c("#51b3d6", "#d67451")) +
+  theme_classic() +
+  scale_y_continuous(limits = (c(0, 8))) +
+  theme(legend.position = c(1.1, 0.375),
+        legend.title=element_blank(),
+        legend.text=element_text(size=11),
+        axis.text.x = element_text(size = 12, angle = 65, vjust = 1, hjust=1.1),
+        axis.text.y = element_text(size = 12),
+        axis.title.y = element_text(size = 14),
+        plot.margin = unit(c(1,1,1,1), "cm")) 
+
 
 ## --------------------------------------------------
 ## Species interaction frequency data to be used for model

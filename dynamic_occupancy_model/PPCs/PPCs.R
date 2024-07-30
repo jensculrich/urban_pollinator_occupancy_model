@@ -15,26 +15,9 @@ my_data <- process_raw_data(min_unique_detections)
 # data to feed to the model
 V <- my_data$V # detection data
 n_species <- my_data$n_species # number of species
-n_sites <- my_data$n_sites # number of sites
-n_years <- my_data$n_years # number of surveys 
-n_visits <- my_data$n_visits
-n_years_minus1 <- n_years - 1
 species <- seq(1, n_species, by=1)
-sites <- seq(1, n_sites, by=1)
-years <- seq(1, n_years_minus1, by=1)
-site_year_visit_count <- my_data$site_year_visit_count
-date_scaled <- my_data$date_scaled
-habitat_type <- my_data$habitat_category
-species_interaction_metrics <- my_data$species_interaction_metrics
-d <- species_interaction_metrics$d_scaled
-degree <- species_interaction_metrics$degree_scaled
 species_names <- my_data$species
-site_names <- my_data$sites
-herbaceous_flowers_scaled <- my_data$herbaceous_flowers_scaled
-woody_flowers_scaled <- my_data$woody_flowers_scaled
-herbaceous_flowers_by_survey <- my_data$herbaceous_flowers_by_survey
-woody_flowers_by_survey <- my_data$woody_flowers_by_survey
-flowers_any_by_survey <- my_data$flowers_any_by_survey
+
 
 # Summarize V[i,j,k,l] by species -> to get W[i]
 W_species = vector(length = n_species)
@@ -53,7 +36,7 @@ W_df <- as.data.frame(cbind(species_names, W_species)) %>%
   mutate(W_species = as.numeric(W_species))
 
 # get W distributions from model
-stan_out <- readRDS("./dynamic_occupancy_model/model_outputs/stan_out_binary_habitat.rds")
+stan_out <- readRDS("./dynamic_occupancy_model/model_outputs/stan_out.rds")
 #fit_summary <- rstan::summary(stan_out_sim)
 fit_summary <- rstan::summary(stan_out)
 
@@ -70,11 +53,11 @@ c_mid_highlight <- c("#A25050")
 c_dark <- c("#8F2727")
 c_dark_highlight <- c("#7C0000")
 
-start = 1 # which species to start at (hard to see them all at once)
+start = 73 # which species to start at (hard to see them all at once)
 # start at 1, 37, and 73 is pretty good for visualization
 n = 36 # how many species to plot (36 is a good number to look at the species in 3 slices)
 
-stan_fit_first_W <- 46 # this changes depending on how many params you tracked
+stan_fit_first_W <- 37 # this changes depending on how many params you tracked
 
 df_estimates <- data.frame(X = numeric(), 
                            Y = numeric(), 

@@ -23,7 +23,7 @@ center_scale <- function(x) {
 ## Floral Resources in the quadrats from transects of the lawn / meadow space
 
 # read data
-mydata <- read.csv("./data/flower_resources_quadrats.csv")
+mydata <- read.csv("./data/flower_resources_herb_quadrats.csv")
 
 str(mydata)
 
@@ -372,7 +372,7 @@ center_scale <- function(x) {
 ## Floral Resources in the quadrats from transects of the lawn / meadow space
 
 # read data
-mydata <- read.csv("./data/flower_resources_quadrats.csv")
+mydata <- read.csv("./data/flower_resources_herb_quadrats.csv")
 
 str(mydata)
 
@@ -978,6 +978,11 @@ temp <- abundance_df_joined %>%
 test <- left_join(test, temp, by = "SPECIES") %>%
   mutate(SPECIES = fct_reorder(SPECIES, (row)))
 
+test1 <- test %>%
+  filter(row < 22)
+test2 <- test %>%
+  filter(row >= 22)
+
 str(test)
 
 habitat_names <- list("0" = "control", "1" = "enhanced")
@@ -993,3 +998,29 @@ ggplot(test, aes(x=SPECIES, y=log_total_abundance_all_sites, fill=n)) +
   theme(legend.position = "none",
         axis.text.x = element_text(angle = 45, hjust=1, size = 9)) +
   facet_wrap(test$HABITAT_CATEGORY, ncol=1, labeller=habitat_labeller)
+
+ggplot(test1, aes(x=SPECIES, y=log_total_abundance_all_sites, fill=n)) +
+  geom_col() +
+  labs(x = "Plant species", y="log(abundance)") +
+  scale_fill_brewer(palette="Greens") + theme_classic() +
+  scale_y_continuous(limits = c(0, 12.5)) +
+  theme(legend.position = "none",
+        axis.title.y = element_text(size = 14),
+        axis.title.x = element_text(size = 14),
+        axis.text.y = element_text(size = 11),
+        axis.text.x = element_text(angle = 60, hjust=1, size = 11),
+        strip.text = element_text(size=14)) +
+  facet_wrap(test1$HABITAT_CATEGORY, ncol=1, labeller=habitat_labeller)
+
+ggplot(test2, aes(x=SPECIES, y=log_total_abundance_all_sites, fill=n)) +
+  geom_col() +
+  labs(x = "Plant species", y="log(abundance)") +
+  scale_fill_brewer(palette="Greens") + theme_classic() +
+  scale_y_continuous(limits = c(0, 12.5)) +
+  theme(legend.position = "none",
+        axis.title.y = element_text(size = 14),
+        axis.title.x = element_text(size = 14),
+        axis.text.y = element_text(size = 11),
+        axis.text.x = element_text(angle = 60, hjust=1, size = 11),
+        strip.text = element_text(size=14)) +
+  facet_wrap(test2$HABITAT_CATEGORY, ncol=1, labeller=habitat_labeller)

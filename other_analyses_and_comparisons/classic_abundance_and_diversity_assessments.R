@@ -1,15 +1,15 @@
 library(tidyverse)
 library(lubridate)
 
-# read data
-mydata <- read.csv("./data/pollinator_data.csv")
-
 ## --------------------------------------------------
 ## Operation Functions
 ## predictor center scaling function
 center_scale <- function(x) {
   (x - mean(x)) / sd(x)
 }
+
+# read data
+mydata <- read.csv("./data/pollinator_data.csv")
 
 # perform some initial filters on the unfinished prelim data
 mydata_filtered <- mydata %>% 
@@ -21,14 +21,22 @@ mydata_filtered <- mydata %>%
   
   # Filter by SPECIES
   # Remove honeybees from our preliminary analysis
-  filter(!SPECIES %in% c("Apis mellifera","undetermined", "undetermined/unconfirmed ID"))  %>%
+  # remove ~2 dozen rows where we accidentally printed an extra label 
+  # (i.e., field assistant listed more species interacting with a plant at a site/visit than were collected)
+  filter(!SPECIES %in% c("Apis mellifera", "extra_label"))  %>%
+  
+  # Filter by SPECIES
+  # Remove some others until resolved for final analyses
+  # Two un'id bombus were failed to be collected and brought back to lab for ID
+  # one Eupeodes had an unconfident ID (looks intermediate between two species) so we are excluding it
+  # No male Osmia were given an ID and were left simply as Osmia sp.
+  filter(!SPECIES %in% c("Bombus sp.","Eupeodes sp.", "Osmia sp."))  %>%
   
   # Reduce sampling rounds in year 1 by 1 (they start at 2 since we did a weird prelim survey first)
-  mutate(SAMPLING_ROUND = as.integer(ifelse(YEAR==1, as.integer(SAMPLING_ROUND) - 1, as.integer(SAMPLING_ROUND))))
-
-#%>%
+  mutate(SAMPLING_ROUND = as.integer(ifelse(YEAR==1, as.integer(SAMPLING_ROUND) - 1, as.integer(SAMPLING_ROUND)))) %>%
   
- # filter(!is.na(NO_ID_RESOLUTION))
+  # for now we will filter out survey round 7 in year 2 (6 / 18 sites visited a 7th time)
+  filter(SAMPLING_ROUND < 7)
 
 ## --------------------------------------------------
 ## Let's compare abundances
@@ -106,6 +114,132 @@ p <- ggplot(abundance_df_reduced, aes(x=HABITAT_CATEGORY, y=abundance, fill=HABI
   #geom_hline(yintercept = 14)
 
 p
+
+# number of unique species
+(length(unique(mydata_filtered$SPECIES)))
+
+# easy table summary of total detections per species
+detections_species <- mydata_filtered %>%
+  group_by(SPECIES) %>%
+  count() %>%
+  rename(total_detections = n) 
+
+# remove species detected fewer than min unique occassions (site/year/visit) for figure
+mydata_filtered_min_unique <- mydata_filtered %>%  
+  group_by(SPECIES, SITE, YEAR, SAMPLING_ROUND) %>%
+  slice(1) %>%
+  ungroup() %>%
+  group_by(SPECIES) %>%
+  add_tally() %>%
+  rename(unique_detections = n) %>%
+  filter(unique_detections >= 1)
+
+species_min_or_more <- unique(mydata_filtered_min_unique$SPECIES)
+temp <- mydata_filtered %>%
+  filter(SPECIES %in% species_min_or_more)
+
+# total detections all species
+ggplot(mydata_filtered, aes(x=fct_infreq(SPECIES))) +
+  geom_bar(stat = "count") +
+  labs(x = "", y = "Total detections") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        axis.text.y = element_text(size = 11)) +
+  ggtitle("Total detections per species")
+
+# total detections (species detected _ or more unique occasions)
+ggplot(temp, aes(x=fct_infreq(SPECIES))) +
+  geom_bar(stat = "count") +
+  labs(x = "", y = "Total detections") +
+  theme(axis.text.x = element_text(size = 11, angle = 65, vjust = 1, hjust=1.1),
+        axis.text.y = element_text(size = 11))
+
+# unique detections (split into 3 groups)
+mydata_filtered_min_unique <- mydata_filtered_min_unique %>%
+  arrange(desc(unique_detections)) %>%
+  mutate(SPECIES = fct_reorder(SPECIES, unique_detections, .desc = TRUE)) %>%
+  group_by(SPECIES) %>%
+  mutate(species_ID = cur_group_id()) %>%
+  ungroup
+
+ggplot(mydata_filtered_min_unique, aes(x=fct_infreq(SPECIES))) +
+  geom_bar(stat = "count") +
+  labs(x = "", y = "Unique detections") +
+  theme(axis.text.x = element_text(size = 11, angle = 65, vjust = 1, hjust=1.1),
+        axis.text.y = element_text(size = 11)) +
+  ggtitle(paste0("Unique site/year/visit detections per species"))
+
+# unique detections (split into 3 groups)
+
+# group 1
+mydata_filtered_min_unique1 <- mydata_filtered_min_unique %>%
+  filter(species_ID %in% 1:36)
+
+ggplot(mydata_filtered_min_unique1, aes(x=fct_infreq(SPECIES))) +
+  geom_bar(stat = "count", aes(fill = CLADE)) +
+  labs(x = "", y = "Unique site/year/visit detections") +
+  scale_fill_manual(labels = c("bees (Anthophila)", "hoverflies (Syrphidae)"), values = c("#51b3d6", "#d67451")) +
+  theme_classic() +
+  scale_y_continuous(limits = (c(0, 220))) +
+  theme(legend.position = c(0.7, 0.7),
+        legend.title=element_blank(),
+        legend.text=element_text(size=12),
+        axis.text.x = element_text(size = 12, angle = 65, vjust = 1, hjust=1.1),
+        axis.text.y = element_text(size = 12),
+        axis.title.y = element_text(size = 14),
+        plot.margin = unit(c(1,1,1,1), "cm")) 
+
+# group 2
+mydata_filtered_min_unique2 <- mydata_filtered_min_unique %>%
+  filter(species_ID %in% 37:72)
+
+mydata_filtered_min_unique2[] <- lapply(
+  mydata_filtered_min_unique2, gsub, 
+  pattern = "Lasioglossum (Sphecodogastra) sp.", replacement = "L. (Sphecodogastra) sp.", fixed = TRUE)
+mydata_filtered_min_unique2[] <- lapply(
+  mydata_filtered_min_unique2, gsub, 
+  pattern = "Sphecodes arvensiformis (morph)", replacement = "Sphecodes arvensiformis", fixed = TRUE)
+mydata_filtered_min_unique2[] <- lapply(
+  mydata_filtered_min_unique2, gsub, 
+  pattern = "Sphecodes clematidis (morph)", replacement = "Sphecodes clematidis", fixed = TRUE)
+
+
+ggplot(mydata_filtered_min_unique2, aes(x=fct_infreq(SPECIES))) +
+  geom_bar(stat = "count", aes(fill = CLADE)) +
+  labs(x = "", y = "Unique site/year/visit detections") +
+  scale_fill_manual(labels = c("bees (Anthophila)", "hoverflies (Syrphidae)"), values = c("#51b3d6", "#d67451")) +
+  theme_classic() +
+  scale_y_continuous(limits = (c(0, 220))) +
+  theme(legend.position = c(0.7, 0.7),
+        legend.title=element_blank(),
+        legend.text=element_text(size=12),
+        axis.text.x = element_text(size = 12, angle = 65, vjust = 1, hjust=1.1),
+        axis.text.y = element_text(size = 12),
+        axis.title.y = element_text(size = 14),
+        plot.margin = unit(c(1,1,1,1), "cm")) 
+
+# group 3
+mydata_filtered_min_unique3 <- mydata_filtered_min_unique %>%
+  filter(species_ID %in% 73:108) 
+
+mydata_filtered_min_unique3[] <- lapply(
+  mydata_filtered_min_unique3, gsub, 
+  pattern = "Bombus fervidus (californicus)", replacement = "Bombus fervidus", fixed = TRUE)
+
+ggplot(mydata_filtered_min_unique3, aes(x=fct_infreq(SPECIES))) +
+  geom_bar(stat = "count", aes(fill = CLADE)) +
+  labs(x = "", y = "Unique site/year/visit detections") +
+  scale_fill_manual(labels = c("bees (Anthophila)", "hoverflies (Syrphidae)"), values = c("#51b3d6", "#d67451")) +
+  theme_classic() +
+  scale_y_continuous(limits = (c(0, 220))) +
+  theme(legend.position = c(0.7, 0.7),
+        legend.title=element_blank(),
+        legend.text=element_text(size=12),
+        axis.text.x = element_text(size = 12, angle = 65, vjust = 1, hjust=1.1),
+        axis.text.y = element_text(size = 12),
+        axis.title.y = element_text(size = 14),
+        plot.margin = unit(c(1,1,1,1), "cm")) 
+
+
 
 ## --------------------------------------------------
 ## Model abundance
