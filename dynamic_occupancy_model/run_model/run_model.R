@@ -263,8 +263,9 @@ for(i in 1:n_species){
 appendix_s2 <- as.data.frame(cbind(clade, species_names, total_detections,
             phenology_peak_mean_estimate, phenology_decay_mean_estimate, 
             species_interaction_metrics))
+row.names(appendix_s2) <- NULL
 
-write.csv(appendix_s2, "./results/appendix_s2.csv")
+write.csv(appendix_s2, "./dynamic_occupancy_model/model_outputs/appendix_s2.csv")
 
 cor(appendix_s2$phenology_peak_mean_estimate, appendix_s2$d_scaled_supplemented_genus)
 cor(appendix_s2$phenology_decay_mean_estimate, appendix_s2$d_scaled_supplemented_genus)
