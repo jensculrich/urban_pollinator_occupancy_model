@@ -57,6 +57,9 @@ woody_flowers_scaled_all_years <- my_data$woody_flowers_scaled_all_years
 woody_flowers_scaled_all_years_repped <- cbind(woody_flowers_scaled_all_years, woody_flowers_scaled_all_years, woody_flowers_scaled_all_years)
 preestablished <- my_data$preestablished
 
+mean(species_interaction_metrics$d_supplemented_genus)
+sd(species_interaction_metrics$d_supplemented_genus)
+
 # write.csv(as.data.frame(species_interaction_metrics), "./data/species_information.csv")
 
 ## --------------------------------------------------

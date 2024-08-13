@@ -412,7 +412,7 @@ plants_visited <- pollinator_data %>%
   mutate(log_n = log(n)) %>%
   filter(PLANT_NETTED_FROM_SCI_NAME != "") %>%
   mutate(PLANT_NETTED_FROM_SCI_NAME = fct_reorder(PLANT_NETTED_FROM_SCI_NAME, desc(n))) %>%
-  filter(n >= 5)
+  filter(n >= 1)
 
 ggplot(plants_visited, aes(x=PLANT_NETTED_FROM_SCI_NAME, y=log_n)) +
   geom_col() +
@@ -428,6 +428,11 @@ mydata_subset <- mydata %>%
 species_list_reduced <- plants_visited %>%
   select(PLANT_NETTED_FROM_SCI_NAME) # extract species names column as vector
 
+n_species_visited <- mydata_subset %>%
+  group_by(SPECIES) %>%
+  slice(1) %>%
+  ungroup() %>%
+  nrow()
 
 ## --------------------------------------------------
 ## Abundance

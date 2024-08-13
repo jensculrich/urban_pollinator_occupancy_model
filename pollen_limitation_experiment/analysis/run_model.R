@@ -88,13 +88,15 @@ stan_out <- stan(stan_model,
 
 print(stan_out, digits = 3)
 
-saveRDS(stan_out, "./model_outputs/stan_out_logistic_regression.RDS")
+saveRDS(stan_out, "./pollen_limitation_experiment/model_outputs/stan_out_logistic_regression.RDS")
 
-stan_out <- readRDS("./model_outputs/stan_out_logistic_regression.RDS")
+stan_out <- readRDS("./pollen_limitation_experiment/model_outputs/stan_out_logistic_regression.RDS")
 
 
 ## --------------------------------------------------
 ### Simple diagnostic plots
+
+print(stan_out, digits = 3)
 
 # traceplot
 traceplot(stan_out, pars = c(

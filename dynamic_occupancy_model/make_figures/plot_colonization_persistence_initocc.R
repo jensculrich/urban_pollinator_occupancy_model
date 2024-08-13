@@ -147,7 +147,7 @@ for(i in 1:n_samp){
       
       tmp[i,10]*1 + # for an enhanced park
       
-      # gamma_herbaceous_flowers*x +
+      # gamma_woody_flowers*x +
       tmp[i,11]*woody_pred
   )
   
@@ -222,7 +222,7 @@ p <- ggplot(data = herb_df, aes(original_herb, gamma_herb_community_mean)) +
   ylab("colonization rate \n(community avg.)") +
   xlab(xlabel) +
   scale_x_continuous(limits = c(-0.4,1.4), breaks = c(0,1), labels = c(
-    "0" = "control", "1" = "herb. enhancement")) +
+    "0" = "control", "1" = "restored")) +
   scale_y_continuous(limits = c(0,1),
                      breaks = c(0, 0.5, 1),
                      labels = scales::percent 
@@ -271,7 +271,7 @@ p2 <- ggplot(data = herb_df_spec, aes(original_herb, mean, fill=specialization_b
   ylab("colonization rate \n(by specialization)") +
   xlab(xlabel) +
   scale_x_continuous(limits = c(-0.4,1.4), breaks = c(0,1), labels = c(
-    "0" = "control", "1" = "herb. enhancement")) +
+    "0" = "control", "1" = "restored")) +
   scale_y_continuous(limits = c(0,1),
                      breaks = c(0, 0.5, 1),
                      labels = scales::percent 
@@ -471,7 +471,7 @@ r <- ggplot(data = herb_df, aes(original_herb, phi_herb_community_mean)) +
   ylab("persistence rate \n(community avg.)") +
   xlab(xlabel) +
   scale_x_continuous(limits = c(-0.4,1.4), breaks = c(0,1), labels = c(
-    "0" = "control", "1" = "herb. enhancement")) +
+    "0" = "control", "1" = "restored")) +
   scale_y_continuous(limits = c(0,1),
                      breaks = c(0, 0.5, 1),
                      labels = scales::percent 
@@ -520,7 +520,7 @@ r2 <- ggplot(data = herb_df_spec, aes(original_herb, mean, fill=specialization_b
   ylab("persistence rate \n(by specialization)") +
   xlab(xlabel) +
   scale_x_continuous(limits = c(-0.4,1.4), breaks = c(0,1), labels = c(
-    "0" = "control", "1" = "herb. enhancement")) +
+    "0" = "control", "1" = "restored")) +
   scale_y_continuous(limits = c(0,1),
                      breaks = c(0, 0.5, 1),
                      labels = scales::percent 
@@ -720,7 +720,7 @@ t <- ggplot(data = herb_df, aes(original_herb, psi1_herb_community_mean)) +
   ylab("initial occur. rate \n(community avg.)") +
   xlab(xlabel) +
   scale_x_continuous(limits = c(-0.4,1.4), breaks = c(0,1), labels = c(
-    "0" = "control", "1" = "herb. enhancement")) +
+    "0" = "control", "1" = "restored")) +
   scale_y_continuous(limits = c(0,1),
                      breaks = c(0, 0.5, 1),
                      labels = scales::percent 
@@ -769,7 +769,7 @@ t2 <- ggplot(data = herb_df_spec, aes(original_herb, mean, fill=specialization_b
   ylab("initial occur. rate \n(by specialization)") +
   xlab(xlabel) +
   scale_x_continuous(limits = c(-0.4,1.4), breaks = c(0,1), labels = c(
-    "0" = "control", "1" = "herb. enhancement")) +
+    "0" = "control", "1" = "restored")) +
   scale_y_continuous(limits = c(0,1),
                      breaks = c(0, 0.5, 1),
                      labels = scales::percent 

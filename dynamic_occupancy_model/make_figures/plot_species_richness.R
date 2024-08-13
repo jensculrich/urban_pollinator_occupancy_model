@@ -433,7 +433,7 @@ temp <- df_joined  %>%
      size=2.5) +
     scale_colour_manual(name = "",
                    labels=c("control (estimated)",
-                            "herb. enhancement (estimated)"),
+                            "restored (estimated)"),
                    values=my_palette[3:4]) +
    geom_point(data = temp, aes(YEAR, mean_observed, 
                                     colour=as.factor(HABITAT_CATEGORY)), 
@@ -445,7 +445,7 @@ temp <- df_joined  %>%
    theme_bw() +
    ylab("Species richness") +
    theme(legend.text=element_text(size=16),
-         legend.position = c(0.3, 0.9027),
+         legend.position = c(0.3, 0.895),
          axis.text.x = element_text(size = 18),
          axis.text.y = element_text(size = 18, angle=45, vjust=-0.5),
          axis.title.x = element_text(size=20),
@@ -461,7 +461,7 @@ temp <- df_joined  %>%
     geom_point(size = 1, position=position_dodge(width=0.5)) +
     scale_colour_manual(name = "",
                         labels=c("control (observed)",
-                                 "herb. enhancement (observed)"),
+                                 "restored (observed)"),
                         values=my_palette[3:4]) +
     geom_point(data = temp, aes(YEAR, mean_observed, 
                                 colour=as.factor(HABITAT_CATEGORY)), 
@@ -667,7 +667,7 @@ grid.arrange(r, r2, ncol=2)
 grid.arrange(r, r2, ncol=2)
 
 ##------------------------------------------------------------------------------
-## Now do it with woody plant richness
+## Now do it with woody plant abundance
 
 ## --------------------------------------------------
 ## continuous habitat species richness plot
