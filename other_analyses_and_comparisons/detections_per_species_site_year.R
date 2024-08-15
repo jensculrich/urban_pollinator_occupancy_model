@@ -2,7 +2,7 @@ library(reshape2)
 library(tidyverse)
 
 max_unique_detections = 500 # can lower this to filter off the top if too many species to plot in one page
-min_unique_detections = 1
+min_unique_detections = 10
 
 # read data
 mydata <- read.csv("./data/pollinator_data.csv")
@@ -17,13 +17,22 @@ mydata_filtered <- mydata %>%
   
   # Filter by SPECIES
   # Remove honeybees from our preliminary analysis
-  filter(!SPECIES %in% c("Apis mellifera","undetermined", "undetermined/unconfirmed ID"))  %>%
+  # remove ~2 dozen rows where we accidentally printed an extra label 
+  # (i.e., field assistant listed more species interacting with a plant at a site/visit than were collected)
+  filter(!SPECIES %in% c("Apis mellifera", "extra_label"))  %>%
+  
+  # Filter by SPECIES
+  # Remove some others until resolved for final analyses
+  # Two un'id bombus were failed to be collected and brought back to lab for ID
+  # one Eupeodes had an unconfident ID (looks intermediate between two species) so we are excluding it
+  # No male Osmia were given an ID and were left simply as Osmia sp.
+  filter(!SPECIES %in% c("Bombus sp.","Eupeodes sp.", "Osmia sp."))  %>%
   
   # Reduce sampling rounds in year 1 by 1 (they start at 2 since we did a weird prelim survey first)
-  mutate(SAMPLING_ROUND = as.integer(ifelse(YEAR==1, as.integer(SAMPLING_ROUND) - 1, as.integer(SAMPLING_ROUND)))) 
-#%>%
+  mutate(SAMPLING_ROUND = as.integer(ifelse(YEAR==1, as.integer(SAMPLING_ROUND) - 1, as.integer(SAMPLING_ROUND)))) %>%
   
-  #filter(is.na(NO_ID_RESOLUTION))
+  # for now we will filter out survey round 7 in year 2 (6 / 18 sites visited a 7th time)
+  filter(SAMPLING_ROUND < 7)
 
 
 
@@ -185,14 +194,13 @@ detections_heatmap_plot_year1 <-
   labs(x = "Site", y = "Species") +
   theme_bw() +
   geom_vline(xintercept = 9.5, linewidth = 1, colour="goldenrod", linetype = "longdash") +
-  geom_hline(yintercept = 54.5, linewidth = 1, colour="orange3", linetype = "longdash") +
+  geom_hline(yintercept = 41.5, linewidth = 1, colour="orange3", linetype = "longdash") +
   theme(#legend.position = "bottom",
         legend.position = "none",
         axis.text.x = element_text(angle = 45, hjust=1),
-        axis.text.y = element_text(size=5),
+        axis.text.y = element_text(size=6.5),
         panel.border = element_blank(), panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
-  ggtitle("Detections per species/site 2021")
+        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))
 
 plot(detections_heatmap_plot_year1)
 
@@ -204,13 +212,14 @@ detections_heatmap_plot_year2 <-
   labs(x = "Site", y = "Species") +
   theme_bw() +
   geom_vline(xintercept = 9.5, linewidth = 1, colour="goldenrod", linetype = "longdash") +
-  geom_hline(yintercept = 54.5, linewidth = 1, colour="orange3", linetype = "longdash") +
+  geom_hline(yintercept = 41.5, linewidth = 1, colour="orange3", linetype = "longdash") +
   theme(legend.position = "none",
         axis.text.x = element_text(angle = 45, hjust=1),
-        axis.text.y = element_text(size=5),
+        axis.text.y = element_text(size=6.5),
         panel.border = element_blank(), panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
-  ggtitle("Detections per species/site 2022")
+        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))
+
+plot(detections_heatmap_plot_year2)
 
 detections_heatmap_plot_year3 <-
   ggplot(df_melted_year3, aes(SITE, fct_rev((fct_reorder(SPECIES, desc(CLADE)))))) +
@@ -220,13 +229,13 @@ detections_heatmap_plot_year3 <-
   labs(x = "Site", y = "Species") +
   theme_bw() +
   geom_vline(xintercept = 9.5, linewidth = 1, colour="goldenrod", linetype = "longdash") +
-  geom_hline(yintercept = 54.5, linewidth = 1, colour="orange3", linetype = "longdash") +
+  geom_hline(yintercept = 41.5, linewidth = 1, colour="orange3", linetype = "longdash") +
   theme(legend.position = "none",
         axis.text.x = element_text(angle = 45, hjust=1),
-        axis.text.y = element_text(size=5),
+        axis.text.y = element_text(size=6.5),
         panel.border = element_blank(), panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
-  ggtitle("Detections per species/site 2023")
+        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) 
+plot(detections_heatmap_plot_year3)
 
 gridExtra::grid.arrange(
   detections_heatmap_plot_year1, detections_heatmap_plot_year2, detections_heatmap_plot_year3,

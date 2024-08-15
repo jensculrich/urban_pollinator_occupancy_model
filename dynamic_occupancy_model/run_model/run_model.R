@@ -184,6 +184,7 @@ stan_out <- stan(stan_model,
 
 saveRDS(stan_out, "./dynamic_occupancy_model/model_outputs/stan_out.rds")
 stan_out <- readRDS("./dynamic_occupancy_model/model_outputs/stan_out.rds")
+stan_out <- readRDS("./dynamic_occupancy_model/model_outputs/stan_out_no_specialization_effects.rds")
 
 ## --------------------------------------------------
 ### Model diagnostics (PPCs are in a separate R file)
@@ -214,6 +215,11 @@ print(stan_out, digits = 3,
                 
       ))
 
+print(stan_out, digits = 3, 
+      pars = c( "psi1_woody_flowers"
+                
+      ))
+
 # for continuous model
 traceplot(stan_out, pars = c(
   "psi1_0","sigma_psi1_species",
@@ -229,6 +235,8 @@ traceplot(stan_out, pars = c(
   "phi_interaction_1", "phi_interaction_2"
   
 ))
+
+
 
 traceplot(stan_out, pars = c(
   "p0", "sigma_p_species", 
