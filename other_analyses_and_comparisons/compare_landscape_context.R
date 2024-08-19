@@ -59,7 +59,7 @@ sd_enhanced1 <- sd(enhanced$imp_standardized)
     annotate("text", x = 1.5, y = 0.15, size=6, label = paste0("t = ", t1)) +
     annotate("text", x = 1.5, y = 0.07, size=6, label = paste0("p-value = ", pvalue1)) +
     scale_x_discrete(name="", breaks = c("comparison", "meadow"),
-                     labels=c("control", "enhanced"
+                     labels=c("control", "restored"
                      )) +
     ylab("(%) impervious surface cover \nin 500m radius") +
     scale_y_continuous(limits = c(0,1),
@@ -92,7 +92,7 @@ sd_enhanced2 <- sd(enhanced$canopy_standardized)
     annotate("text", x = 1.5, y = 0.97, size=6, label = paste0("t = ", t2)) +
     annotate("text", x = 1.5, y = 0.89, size=6, label = paste0("p-value = ", pvalue2)) +
     scale_x_discrete(name="", breaks = c("comparison", "meadow"),
-                     labels=c("control", "enhanced"
+                     labels=c("control", "restored"
                      )) +
     ylab("(%) tree canopy cover \nin 500m radius") +
     scale_y_continuous(limits = c(0,1),

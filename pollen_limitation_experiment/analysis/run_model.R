@@ -324,13 +324,19 @@ herb_df <- as.data.frame(cbind(original_herb, cri[3,],
 tmp2 <- as.data.frame(cbind(herb_enhancement, y))
 
 p <- ggplot(data = herb_df, aes(original_herb, mean)) +
-  geom_ribbon(aes(
-    ymin=lower50, 
-    ymax=upper50), alpha=0.8) +
-  geom_ribbon(aes(
-    ymin=lower95, 
-    ymax=upper95), alpha=0.4) +
-  geom_line(size=2, lty=1) +
+  #geom_ribbon(aes(
+    #ymin=lower50, 
+    #ymax=upper50), alpha=0.8) +
+  #geom_ribbon(aes(
+    #ymin=lower95, 
+    #ymax=upper95), alpha=0.4) +
+  #geom_line(size=2, lty=1) +
+  geom_errorbar(aes(ymin=lower95, ymax=upper95),
+                size = 1, width = 0) +
+  geom_errorbar(aes(ymin=lower50, ymax=upper50),
+                size = 4, width = 0) +
+  geom_point(size = 6, shape = 19) +
+  geom_point(size = 3, shape = 19, colour="white") +
   geom_jitter(data = tmp2, aes(x=herb_enhancement, y=y),
               width = 0.1, height = 0.1, alpha=0.5, size=2.5) +
   xlim(c(min(original_herb), max(original_herb))) +
@@ -340,7 +346,7 @@ p <- ggplot(data = herb_df, aes(original_herb, mean)) +
   xlab("") +
   scale_x_continuous(limits = c(-0.15, 1.15),
                      breaks = c(0, 1),
-                     labels = c("control","herb. enhancement")) +
+                     labels = c("control","restored")) +
   scale_y_continuous(limits = c(-0.1, 1.1),
                      breaks = c(0, 0.25, 0.5, 0.75, 1),
                      labels = scales::percent) +

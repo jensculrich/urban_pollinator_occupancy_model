@@ -104,14 +104,14 @@ p <- ggplot(abundance_df_reduced, aes(x=HABITAT_CATEGORY, y=log_total_flower_abu
   geom_boxplot() +
   stat_summary(fun=mean, geom="point", shape=23, size=6) +
   geom_jitter(shape=16, position=position_jitter(0.2)) +
-  scale_fill_brewer(palette="Blues") + theme_classic() +
+  scale_fill_brewer(palette="Greens") + theme_classic() +
   labs(title="",x="", y = "log(flower resource abundance)") +
   theme(legend.position = "none",
         axis.title.y = element_text(size=16),
         axis.title.x = element_text(size=16),
         axis.text.y = element_text(size=14),
         axis.text.x = element_text(size=14)) +
-  scale_x_discrete(labels = c("Control","Enhanced")) 
+  scale_x_discrete(labels = c("control","restored")) 
   # ggtitle("Flower resources in lawn/meadow space")
 
 p  
@@ -220,14 +220,14 @@ q <- ggplot(diversity_df_reduced, aes(x=HABITAT_CATEGORY, y=species_richness, fi
   geom_boxplot() +
   stat_summary(fun=mean, geom="point", shape=23, size=6) +
   geom_jitter(shape=16, position=position_jitter(0.2)) +
-  scale_fill_brewer(palette="Blues") + theme_classic() +
+  scale_fill_brewer(palette="Greens") + theme_classic() +
   labs(title="",x="", y = "Flower resource diversity (species richness)") +
   theme(legend.position = "none",
         axis.title.y = element_text(size=16),
         axis.title.x = element_text(size=16),
         axis.text.y = element_text(size=14),
         axis.text.x = element_text(size=14)) +
-  scale_x_discrete(labels = c("Control","Enhanced")) 
+  scale_x_discrete(labels = c("control","restored")) 
 
 q
 
@@ -235,14 +235,14 @@ r <- ggplot(diversity_df_reduced, aes(x=HABITAT_CATEGORY, y=shannon_index, fill=
   geom_boxplot() +
   stat_summary(fun=mean, geom="point", shape=23, size=6) +
   geom_jitter(shape=16, position=position_jitter(0.2)) +
-  scale_fill_brewer(palette="Blues") + theme_classic() +
+  scale_fill_brewer(palette="Greens") + theme_classic() +
   labs(title="",x="", y = "Flower resource diversity (Shannon index)") +
   theme(legend.position = "none",
         axis.title.y = element_text(size=16),
         axis.title.x = element_text(size=16),
         axis.text.y = element_text(size=14),
         axis.text.x = element_text(size=14)) +
-  scale_x_discrete(labels = c("Control","Enhanced")) 
+  scale_x_discrete(labels = c("control","restored")) 
 
 r
 
@@ -250,19 +250,23 @@ s <- ggplot(diversity_df_reduced, aes(x=HABITAT_CATEGORY, y=simpsons_index, fill
   geom_boxplot() +
   stat_summary(fun=mean, geom="point", shape=23, size=6) +
   geom_jitter(shape=16, position=position_jitter(0.2)) +
-  scale_fill_brewer(palette="Blues") + theme_classic() +
+  scale_fill_brewer(palette="Greens") + theme_classic() +
   labs(title="",x="", y = "Flower resource diversity (Simpson's index)") +
   theme(legend.position = "none",
         axis.title.y = element_text(size=16),
         axis.title.x = element_text(size=16),
         axis.text.y = element_text(size=14),
         axis.text.x = element_text(size=14)) +
-  scale_x_discrete(labels = c("Control","Enhanced")) 
+  scale_x_discrete(labels = c("control","restored")) 
 
 s
 
 gridExtra::grid.arrange(
   p, q, r, s,
+  nrow=1)
+
+gridExtra::grid.arrange(
+  p, q,
   nrow=1)
 
 ## --------------------------------------------------
@@ -408,7 +412,7 @@ plants_visited <- pollinator_data %>%
   add_tally() %>%
   slice(1) %>% # take one row per species (the name of each species)
   ungroup() %>%
-  select(PLANT_NETTED_FROM_SCI_NAME, n) %>% 
+  select(PLANT_NETTED_FROM_SCI_NAME, PLANT_NETTED_FROM_FAMILY, n) %>% 
   mutate(log_n = log(n)) %>%
   filter(PLANT_NETTED_FROM_SCI_NAME != "") %>%
   mutate(PLANT_NETTED_FROM_SCI_NAME = fct_reorder(PLANT_NETTED_FROM_SCI_NAME, desc(n))) %>%
@@ -434,6 +438,9 @@ n_species_visited <- mydata_subset %>%
   ungroup() %>%
   nrow()
 
+plants_visited <- plants_visited %>%
+  rename("SPECIES" = "PLANT_NETTED_FROM_SCI_NAME")
+
 ## --------------------------------------------------
 ## Abundance
 
@@ -444,7 +451,8 @@ abundance_df <- mydata_subset %>%
   mutate(total_flower_abundance = sum(NUM_FLORAL_UNITS),
          log_total_flower_abundance = log(total_flower_abundance + 1)) %>%
   # change SITE to factor for left_join with HABITAT_CATEGORY created below
-  mutate(SITE = as.factor(SITE))
+  mutate(SITE = as.factor(SITE)) %>%
+  left_join(., select(plants_visited, SPECIES, PLANT_NETTED_FROM_FAMILY))
 
 # find study dimensions from the pooled data
 n_species <- length(levels(as.factor(abundance_df$SPECIES)))
@@ -478,14 +486,14 @@ p <- ggplot(abundance_df_reduced, aes(x=HABITAT_CATEGORY, y=log_total_flower_abu
   geom_boxplot() +
   stat_summary(fun=mean, geom="point", shape=23, size=6) +
   geom_jitter(shape=16, position=position_jitter(0.2)) +
-  scale_fill_brewer(palette="Blues") + theme_classic() +
+  scale_fill_brewer(palette="Greens") + theme_classic() +
   labs(title="",x="", y = "log(flower resource abundance)") +
   theme(legend.position = "none",
         axis.title.y = element_text(size=16),
         axis.title.x = element_text(size=16),
         axis.text.y = element_text(size=14),
         axis.text.x = element_text(size=14)) +
-  scale_x_discrete(labels = c("Control","Enhanced")) 
+  scale_x_discrete(labels = c("control","restored")) 
 # ggtitle("Flower resources in lawn/meadow space")
 
 p  
@@ -580,14 +588,14 @@ q <- ggplot(diversity_df_reduced, aes(x=HABITAT_CATEGORY, y=species_richness, fi
   geom_boxplot() +
   stat_summary(fun=mean, geom="point", shape=23, size=6) +
   geom_jitter(shape=16, position=position_jitter(0.2)) +
-  scale_fill_brewer(palette="Blues") + theme_classic() +
+  scale_fill_brewer(palette="Greens") + theme_classic() +
   labs(title="",x="", y = "Flower resource diversity (species richness)") +
   theme(legend.position = "none",
         axis.title.y = element_text(size=16),
         axis.title.x = element_text(size=16),
         axis.text.y = element_text(size=14),
         axis.text.x = element_text(size=14)) +
-  scale_x_discrete(labels = c("Control","Enhanced")) 
+  scale_x_discrete(labels = c("control","restored")) 
 
 q
 
@@ -623,6 +631,10 @@ s
 
 gridExtra::grid.arrange(
   p, q, r, s,
+  nrow=1)
+
+gridExtra::grid.arrange(
+  p, q,
   nrow=1)
 
 ## --------------------------------------------------
@@ -730,14 +742,14 @@ p <- ggplot(abundance_df_reduced, aes(x=HABITAT_CATEGORY, y=log_total_flower_abu
   geom_boxplot() +
   stat_summary(fun=mean, geom="point", shape=23, size=6) +
   geom_jitter(shape=16, position=position_jitter(0.2)) +
-  scale_fill_brewer(palette="Blues") + theme_classic() +
+  scale_fill_brewer(palette="Greens") + theme_classic() +
   labs(title="",x="", y = "log(flower resource abundance)") +
   theme(legend.position = "none",
         axis.title.y = element_text(size=16),
         axis.title.x = element_text(size=16),
         axis.text.y = element_text(size=14),
         axis.text.x = element_text(size=14, angle = 45, hjust=1)) +
-  scale_x_discrete(labels = c("Control","Enhanced")) +
+  scale_x_discrete(labels = c("control","restored")) +
   facet_wrap(~YEAR, labeller=year_labeller)
 # ggtitle("Flower resources in lawn/meadow space")
 
@@ -782,14 +794,14 @@ q <- ggplot(diversity_df_reduced, aes(x=HABITAT_CATEGORY, y=species_richness, fi
   geom_boxplot() +
   stat_summary(fun=mean, geom="point", shape=23, size=6) +
   geom_jitter(shape=16, position=position_jitter(0.2)) +
-  scale_fill_brewer(palette="Blues") + theme_classic() +
+  scale_fill_brewer(palette="Greens") + theme_classic() +
   labs(title="",x="", y = "Flower resource diversity (species richness)") +
   theme(legend.position = "none",
         axis.title.y = element_text(size=16),
         axis.title.x = element_text(size=16),
         axis.text.y = element_text(size=14),
         axis.text.x = element_text(size=14, angle = 45, hjust=1)) +
-  scale_x_discrete(labels = c("Control","Enhanced"))  +
+  scale_x_discrete(labels = c("control","enhanced"))  +
   facet_wrap(~YEAR, labeller=year_labeller)
 
 q
@@ -827,7 +839,7 @@ s <- ggplot(diversity_df_reduced, aes(x=HABITAT_CATEGORY, y=simpsons_index, fill
 s
 
 gridExtra::grid.arrange(
-  p, q, r, s,
+  p, q,
   nrow=1)
 
 ## --------------------------------------------------
@@ -916,7 +928,7 @@ p <- ggplot(abundance_sites, aes(x=SITE, y=log_total_flower_abundance, fill=HABI
   geom_boxplot() +
   stat_summary(fun=mean, geom="point", shape=23, size=6) +
   geom_jitter(shape=16, position=position_jitter(0.2)) +
-  scale_fill_brewer(palette="Blues") + theme_classic() +
+  scale_fill_brewer(palette="Greens") + theme_classic() +
   labs(title="",x="", y = "log(flower resource abundance)") +
   theme(legend.position = "none",
         axis.title.y = element_text(size=16),
@@ -935,7 +947,7 @@ q <- ggplot(diversity_sites, aes(x=SITE, y=species_richness, fill=HABITAT_CATEGO
   geom_boxplot() +
   stat_summary(fun=mean, geom="point", shape=23, size=6) +
   geom_jitter(shape=16, position=position_jitter(0.2)) +
-  scale_fill_brewer(palette="Blues") + theme_classic() +
+  scale_fill_brewer(palette="Greens") + theme_classic() +
   labs(title="",x="", y = "Flower resource diversity (species richness)") +
   theme(legend.position = "none",
         axis.title.y = element_text(size=16),
@@ -978,7 +990,7 @@ temp <- abundance_df_joined %>%
   filter(HABITAT_CATEGORY == 1) %>%
   arrange(desc(log_total_abundance_all_sites)) %>%
   mutate(row = row_number()) %>%
-  select(SPECIES, row)
+  select(SPECIES, PLANT_NETTED_FROM_FAMILY, row)
 
 test <- left_join(test, temp, by = "SPECIES") %>%
   mutate(SPECIES = fct_reorder(SPECIES, (row)))
@@ -990,26 +1002,29 @@ test2 <- test %>%
 
 str(test)
 
-habitat_names <- list("0" = "control", "1" = "enhanced")
+habitat_names <- list("0" = "control", "1" = "restored")
 
 habitat_labeller <- function(variable,value){
   return(habitat_names[value])
 }
 
-ggplot(test, aes(x=SPECIES, y=log_total_abundance_all_sites, fill=n)) +
+ggplot(test, aes(x=SPECIES, y=log_total_abundance_all_sites, fill=PLANT_NETTED_FROM_FAMILY.x)) +
   geom_col() +
   labs(x = "Plant species", y="log(abundance)") +
-  scale_fill_brewer(palette="Greens") + theme_classic() +
-  theme(legend.position = "none",
-        axis.text.x = element_text(angle = 45, hjust=1, size = 9)) +
+  scale_fill_discrete(name="Plant Family") + 
+  theme_classic() +
+  theme(legend.position = "top",
+        axis.text.x = element_text(angle = 90, hjust=1, vjust=0.5, 
+                                   size = 10)) +
   facet_wrap(test$HABITAT_CATEGORY, ncol=1, labeller=habitat_labeller)
 
-ggplot(test1, aes(x=SPECIES, y=log_total_abundance_all_sites, fill=n)) +
+ggplot(test1, aes(x=SPECIES, y=log_total_abundance_all_sites, fill=PLANT_NETTED_FROM_FAMILY.x)) +
   geom_col() +
   labs(x = "Plant species", y="log(abundance)") +
-  scale_fill_brewer(palette="Greens") + theme_classic() +
+  #scale_fill_brewer(palette="Greens") + 
+  theme_classic() +
   scale_y_continuous(limits = c(0, 12.5)) +
-  theme(legend.position = "none",
+  theme(
         axis.title.y = element_text(size = 14),
         axis.title.x = element_text(size = 14),
         axis.text.y = element_text(size = 11),

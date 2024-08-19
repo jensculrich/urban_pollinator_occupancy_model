@@ -64,7 +64,7 @@ library(ggplot2)
 ###-----------------------------------------------------------------------------
 ## Analysis with real data
 
-df <- read.csv("./data/clarkia_pollination_data_2022.csv")
+df <- read.csv("./pollen_limitation_experiment/data/clarkia_pollination_data_2022.csv")
 
 ###-----------------------------------------------------------------------------
 ## Basic data summary
@@ -168,19 +168,22 @@ PL_response_threshold <- 0.5
 (ggplot(df_prepped) +
    
    geom_density(aes(x=PL_INDEX, fill=SITE_TREATMENT), alpha=0.5) +
-   scale_x_continuous(name = "1 - Pollen Limitation") +
+   scale_x_continuous(name = "1 - Pollen Limitation",
+                      limits = c(0, 2), 
+                      breaks = c(0, .5, 1, 1.5, 2),
+                      label = c("0", "0.5", "1", "1.5", "2")) +
    scale_y_continuous(name = "Density", limits = c(0,1),
                       breaks = c(0, .5, 1),
                       label = c("0", "0.5", "1")) +
-   scale_fill_discrete(name = "Site type", 
+   scale_fill_discrete(name = "", 
                        breaks = c("control", "treatment"),
-                       labels = c("control", "herb. enhancement")) + 
+                       labels = c("control", "restored")) + 
    theme_bw() +
-   theme(legend.text=element_text(size=10),
-         axis.text.x = element_text(size = 12),
-         axis.text.y =element_text(size = 12),
-         axis.title.x = element_text(size = 14),
-         axis.title.y = element_text(size = 14),
+   theme(legend.text=element_text(size=14),
+         axis.text.x = element_text(size = 14),
+         axis.text.y =element_text(size = 14),
+         axis.title.x = element_text(size = 16),
+         axis.title.y = element_text(size = 16),
          plot.background = element_blank(),
          panel.grid.major = element_blank(),
          panel.grid.minor = element_blank()) +

@@ -354,7 +354,7 @@ test <- left_join(test, temp, by = "SPECIES") %>%
 
 str(test)
 
-habitat_names <- list("0" = "control", "1" = "enhanced")
+habitat_names <- list("0" = "control", "1" = "restored")
 
 habitat_labeller <- function(variable,value){
   return(habitat_names[value])

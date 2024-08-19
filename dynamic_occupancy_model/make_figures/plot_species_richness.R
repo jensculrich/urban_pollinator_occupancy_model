@@ -52,7 +52,9 @@ logit <- function(x) log(x/(1-x))
 n_bins = 4 # 
 n_years = 3
 n_years_minus1 = n_years - 1
-my_palette <- palette(viridis(n = n_bins, option = "viridis"))
+
+my_palette <- palette.colors(palette = "Paired")
+#my_palette <- palette(viridis(n = n_bins, option = "viridis"))
 
 ## --------------------------------------------------
 ## get prediction range
@@ -88,6 +90,8 @@ occurrence_simmed <- array(data = NA, dim=c(n_species, pred_length, n_years))
 random_draws_from_posterior = seq(length.out=n_draws)
 
 richness = array(data = NA, dim=c( pred_length, n_years, n_draws))
+richness_difference = array(data = NA, dim=c(n_years, n_draws))
+
 psi <- array(data = NA, dim=c(n_species, pred_length, n_years_minus1))
 turnover <- array(data = NA, dim=c(n_species, pred_length, n_years_minus1, n_draws))
 
@@ -285,7 +289,11 @@ for(draw in 1:n_draws){
       richness[j,k,draw] <- sum(occurrence_simmed[1:n_species,j,k])
     }
   }
-    
+  
+  for(k in 1:n_years){
+    richness_difference[k,draw] <- richness[2,k,draw] - richness[1,k,draw]
+  }
+  
 } 
   
 mean = matrix(nrow=pred_length, ncol=n_years)
@@ -445,7 +453,7 @@ temp <- df_joined  %>%
    theme_bw() +
    ylab("Species richness") +
    theme(legend.text=element_text(size=16),
-         legend.position = c(0.3, 0.895),
+         legend.position = c(0.28, 0.895),
          axis.text.x = element_text(size = 18),
          axis.text.y = element_text(size = 18, angle=45, vjust=-0.5),
          axis.title.x = element_text(size=20),
@@ -481,6 +489,23 @@ temp <- df_joined  %>%
           panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
           panel.background = element_blank(), axis.line = element_line(colour = "black"))
 )
+
+# species richness difference estimate
+mean_dif = matrix(nrow=1, ncol=n_years)
+lower_50_dif = matrix(nrow=1, ncol=n_years)
+upper_50_dif = matrix(nrow=1, ncol=n_years)
+lower_95_dif = matrix(nrow=1, ncol=n_years)
+upper_95_dif = matrix(nrow=1, ncol=n_years)
+
+  for(k in 1:n_years){
+    quants = as.vector(quantile(richness_difference[k,], probs = c(0.05, 0.25, 0.50, 0.75, 0.95)))
+    
+    mean_dif[k] = quants[3]
+    lower_50_dif[k] = quants[2]
+    upper_50_dif[k] = quants[4]
+    lower_95_dif[k] = quants[1]
+    upper_95_dif[k] = quants[5]
+  }
 
 ## --------------------------------------------------
 ## turnover summary
