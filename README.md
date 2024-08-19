@@ -15,6 +15,7 @@
 - pollinator_data.csv (pollinator detections and the plants that they were recorded interacting with)
 - metada.doc (contains detailed descriptions of column names from each data file)
 - Pollen limitation data are stored in a separate folder. Navigate to this directory to access: ./pollen_limitation_experiment/data/clarkia_pollination_data_2022.csv.
+- Appendix S2 (species detections, specialization, and phenology metrics) is available at: https://github.com/jensculrich/urban_pollinator_occupancy_model/blob/main/dynamic_occupancy_model/model_outputs/appendix_s2.xlsx. The metadata are included on the second page of the excel document.
 
 ## To conduct the occupancy model analysis:
 - navigate to ./dynamic_occupancy_model/run_model/run_model.R
