@@ -15,7 +15,7 @@ library(rstan)
 max_PL_accepted = 2
 PL_response_threshold = 0.5
 
-source("./pollen_limitation_experiment/analysis/prep_data.R")
+source("./pollen_limitation_experiment/analysis/prep_data_pollen_limitation.R")
 my_data <- prep_data(max_PL_accepted,
                      PL_response_threshold)
 
@@ -72,7 +72,7 @@ inits <- lapply(1:n_chains, function(i)
 ## --------------------------------------------------
 ### Run model
 
-stan_model <- "./pollen_limitation_experiment/models/logistic_model_binary_covs.stan"
+stan_model <- "./pollen_limitation_experiment/models/logistic_model_pollen_limitation.stan"
 
 ## Call Stan from R
 stan_out <- stan(stan_model,
