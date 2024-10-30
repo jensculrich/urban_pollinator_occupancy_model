@@ -8,20 +8,22 @@
 # figure 4 depicts the effects of woody plants on initial occupancy, colonization and
 # persistence. 
 
-# The code below is organized by response.
+# The code below is organized by response (colonization, persistence, initial occurrence).
 # To create figures 3 and 4 we combined the desired panels in illustrator:
-# restoration on colonization (community avg.) - p
-# restoration on colonization (by specialization bin) - p2
-# woody plants on colonization (community avg.) - q
-# woody plants on colonization (by specialization bin) - q2
-# restoration on persistence (community avg.) - r
-# restoration on persistence (by specialization bin) - r2
-# woody plants on persistence (community avg.) - s
-# woody plants on persistence (by specialization bin) - s2
-# restoration on initial occurrence (community avg.) - t
-# restoration on initial occurrence (by specialization bin) - t2
-# woody plants on initial occurrence (community avg.) - u
-# woody plants on initial occurrence (by specialization bin) - u2
+
+# restoration on initial occurrence (community avg.) - t (Figure 3a)
+# restoration on initial occurrence (by specialization bin) - t2 (Figure 3b)
+# restoration on colonization (community avg.) - p (Figure 3c)
+# restoration on colonization (by specialization bin) - p2 (Figure 3d)
+# restoration on persistence (community avg.) - r (Figure 3e)
+# restoration on persistence (by specialization bin) - r2 (Figure 3f)
+
+# woody plants on initial occurrence (community avg.) - u (Figure 4a)
+# woody plants on initial occurrence (by specialization bin) - u2 (Figure 4b)
+# woody plants on colonization (community avg.) - q  (Figure 4c)
+# woody plants on colonization (by specialization bin) - q2 (Figure 4d)
+# woody plants on persistence (community avg.) - s (Figure 4e)
+# woody plants on persistence (by specialization bin) - s2 (Figure 4f)
 
 # in the code text and parameter names "herb" refers to effects of the herbaceous restorations
 
