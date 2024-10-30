@@ -1,3 +1,16 @@
+# This file can be used to generate figure 5 of the manuscript
+# Figure 5 depicts the estimated species richness for control versus restored sites (a)
+# and for sites with average versus above average abundance of existing woody flowering plants.
+# for (a) we also display the observed species richness at these sites.
+
+# Figure 5a is made from plot p. We also generated a blank plot p2 with the second
+# legend for observed species richness and then combined this with plot p in illustrator.
+
+# Figure 5b is made from plot q.
+
+# In the R code below we also derived estimates of species turnover, 
+# this information was not included in the manuscript.
+
 library(rstan)
 library(viridis)
 library(gridExtra)
@@ -54,7 +67,6 @@ n_years = 3
 n_years_minus1 = n_years - 1
 
 my_palette <- palette.colors(palette = "Paired")
-#my_palette <- palette(viridis(n = n_bins, option = "viridis"))
 
 ## --------------------------------------------------
 ## get prediction range
@@ -66,12 +78,6 @@ pred_length = 2
 
 original_herb <- as.numeric(0:1) # reasonable prediction range 
 herb_pred <- original_herb
-
-
-#original_woody <- seq(min(original_woody_abundance), 
-#                      max(original_woody_abundance), 
-#                      length.out = pred_length) # reasonable prediction range
-#woody_pred <- (original_woody - mean(original_woody_abundance)) / sd(original_woody_abundance) # unscale the dates
 
 original_woody <- as.numeric(c(0,1)) # reasonable prediction range 
 woody_pred <- original_woody
@@ -508,7 +514,7 @@ upper_95_dif = matrix(nrow=1, ncol=n_years)
   }
 
 ## --------------------------------------------------
-## turnover summary
+## turnover summary (not used in the manuscript)
 
 mean_t = matrix(nrow=pred_length, ncol=n_years_minus1)
 lower_50_t = matrix(nrow=pred_length, ncol=n_years_minus1)

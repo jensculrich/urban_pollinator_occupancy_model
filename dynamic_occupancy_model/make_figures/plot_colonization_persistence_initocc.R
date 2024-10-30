@@ -1,3 +1,30 @@
+# This file can be used to generate figures 2, 3 and 4 of the manuscript
+
+# figure 2 depicts the range of specialization in our pollinator community, 
+# created by calling hist(d).
+
+# figure 3 depicts the effects of restoration on initial occupancy, colonization and
+# persistence. 
+# figure 4 depicts the effects of woody plants on initial occupancy, colonization and
+# persistence. 
+
+# The code below is organized by response.
+# To create figures 3 and 4 we combined the desired panels in illustrator:
+# restoration on colonization (community avg.) - p
+# restoration on colonization (by specialization bin) - p2
+# woody plants on colonization (community avg.) - q
+# woody plants on colonization (by specialization bin) - q2
+# restoration on persistence (community avg.) - r
+# restoration on persistence (by specialization bin) - r2
+# woody plants on persistence (community avg.) - s
+# woody plants on persistence (by specialization bin) - s2
+# restoration on initial occurrence (community avg.) - t
+# restoration on initial occurrence (by specialization bin) - t2
+# woody plants on initial occurrence (community avg.) - u
+# woody plants on initial occurrence (by specialization bin) - u2
+
+# in the code text and parameter names "herb" refers to effects of the herbaceous restorations
+
 library(rstan)
 library(viridis)
 library(gridExtra)
@@ -58,7 +85,7 @@ logit <- function(x) log(x/(1-x))
 #seq <- seq(-2, 5, 0.65)
 
 n_bins = 12
-my_palette <- palette(viridis(n = n_bins, option = "C"))
+my_palette <- viridis(n = n_bins, option = "C")
 
 seq_original <- seq(min(d), 
            max(d), 
@@ -209,13 +236,6 @@ p <- ggplot(data = herb_df, aes(original_herb, gamma_herb_community_mean)) +
                 size = 4, width = 0) +
   geom_point(size = 6, shape = 19) +
   geom_point(size = 3, shape = 19, colour="white") +
-  #geom_ribbon(aes(
-    #ymin=gamma_herb_community_lower50, 
-    #ymax=gamma_herb_community_upper50), alpha=0.8) +
-  #geom_ribbon(aes(
-    #ymin=gamma_herb_community_lower95, 
-    #ymax=gamma_herb_community_upper95), alpha=0.4) +
-  #geom_line(size=2, lty=1) +
   xlim(c(min(original_herb), max(original_herb))) +
   ylim(c(0, 1)) +
   theme_bw() +
@@ -253,18 +273,11 @@ herb_df_spec <- as.data.frame(cbind(original_herb,
   slice(1:2) %>%
   ungroup()
 
-#herb_df_spec <- herb_df_spec %>%
- # filter(specialization_bin == "12")
-
 p2 <- ggplot(data = herb_df_spec, aes(original_herb, mean, fill=specialization_bin)) +
   geom_errorbar(aes(ymin=lower50, ymax=upper50, colour = specialization_bin),
                 size = 3, width = 0, position=position_dodge(width=0.75), alpha=0.5) +
   geom_point(aes(colour = specialization_bin), 
              size = 7, shape = 19, position=position_dodge2(width=0.75)) +
-  #geom_ribbon(aes(
-    #ymin=lower50, 
-    #ymax=upper50), alpha=0.1) +
-  #geom_line(aes(colour=specialization_bin), size=2, lty=1) +
   xlim(c(min(original_herb), max(original_herb))) +
   ylim(c(0, 1)) +
   theme_bw() +
@@ -458,13 +471,6 @@ r <- ggplot(data = herb_df, aes(original_herb, phi_herb_community_mean)) +
                 size = 4, width = 0) +
   geom_point(size = 6, shape = 19) +
   geom_point(size = 3, shape = 19, colour="white") +
-  #geom_ribbon(aes(
-    #ymin=phi_herb_community_lower50, 
-    #ymax=phi_herb_community_upper50), alpha=0.8) +
-  #geom_ribbon(aes(
-    #ymin=phi_herb_community_lower95, 
-    #ymax=phi_herb_community_upper95), alpha=0.4) +
-  #geom_line(size=2, lty=1) +
   xlim(c(min(original_herb), max(original_herb))) +
   ylim(c(0, 1)) +
   theme_bw() +
@@ -502,18 +508,11 @@ herb_df_spec <- as.data.frame(cbind(original_herb,
   slice(1:2) %>%
   ungroup()
 
-#herb_df_spec <- herb_df_spec %>%
-# filter(specialization_bin == "12")
-
 r2 <- ggplot(data = herb_df_spec, aes(original_herb, mean, fill=specialization_bin)) +
   geom_errorbar(aes(ymin=lower50, ymax=upper50, colour = specialization_bin),
                 size = 3, width = 0, position=position_dodge(width=0.75), alpha=0.5) +
   geom_point(aes(colour = specialization_bin), 
              size = 7, shape = 19, position=position_dodge2(width=0.75)) +
-  #geom_ribbon(aes(
-    #ymin=lower50, 
-    #ymax=upper50), alpha=0.1) +
-  #geom_line(aes(colour=specialization_bin), size=2, lty=1) +
   xlim(c(min(original_herb), max(original_herb))) +
   ylim(c(0, 1)) +
   theme_bw() +
@@ -540,7 +539,7 @@ grid.arrange(r, r2, ncol=2)
 
 #-------------------------------------------------------------------------------
 
-# community plot - gamma woody
+# community plot - phi woody
 woody_df <- as.data.frame(cbind(original_woody, criC[3,,2], 
                                 criC[1,,2], criC[5,,2],
                                 criC[2,,2], criC[4,,2])) %>%
@@ -578,7 +577,7 @@ s <- ggplot(data = woody_df, aes(original_woody, phi_woody_community_mean)) +
         panel.background = element_blank(), axis.line = element_line(colour = "black"))
 s
 
-# specialization bin plot - gamma herb
+# specialization bin plot - phi herb
 
 woody_df_spec <- as.data.frame(cbind(original_woody, 
                                      rep(1:n_bins, each=pred_length),
@@ -589,9 +588,6 @@ woody_df_spec <- as.data.frame(cbind(original_woody,
   rename("mean" = "V3",
          "lower50" = "V4",
          "upper50" = "V5")
-
-#herb_df_spec <- herb_df_spec %>%
-# filter(specialization_bin == "12")
 
 s2 <- ggplot(data = woody_df_spec, aes(original_woody, mean, fill=specialization_bin)) +
   geom_ribbon(aes(
@@ -688,7 +684,7 @@ criSpec <- apply(predSpec, c(1,3,4), function(x) quantile(x, prob = c(0.25, 0.5,
 
 #-------------------------------------------------------------------------------
 
-# community plot - psi1 herb
+# community plot - initial occupancy herb
 herb_df <- as.data.frame(cbind(original_herb, criC[3,,1], 
                                criC[1,,1], criC[5,,1],
                                criC[2,,1], criC[4,,1])) %>%
@@ -707,13 +703,6 @@ t <- ggplot(data = herb_df, aes(original_herb, psi1_herb_community_mean)) +
                 size = 4, width = 0) +
   geom_point(size = 6, shape = 19) +
   geom_point(size = 3, shape = 19, colour="white") +
-  #geom_ribbon(aes(
-    #ymin=psi1_herb_community_lower50, 
-    #ymax=psi1_herb_community_upper50), alpha=0.8) +
-  #geom_ribbon(aes(
-    #ymin=psi1_herb_community_lower95, 
-    #ymax=psi1_herb_community_upper95), alpha=0.4) +
-  #geom_line(size=2, lty=1) +
   xlim(c(min(original_herb), max(original_herb))) +
   ylim(c(0, 1)) +
   theme_bw() +
@@ -736,7 +725,7 @@ t <- ggplot(data = herb_df, aes(original_herb, psi1_herb_community_mean)) +
         panel.background = element_blank(), axis.line = element_line(colour = "black"))
 t
 
-# specialization bin plot - phi herb
+# specialization bin plot - init occupancy herb
 
 herb_df_spec <- as.data.frame(cbind(original_herb, 
                                     rep(1:n_bins, each=pred_length),
@@ -751,18 +740,11 @@ herb_df_spec <- as.data.frame(cbind(original_herb,
   slice(1:2) %>%
   ungroup()
 
-#herb_df_spec <- herb_df_spec %>%
-# filter(specialization_bin == "12")
-
 t2 <- ggplot(data = herb_df_spec, aes(original_herb, mean, fill=specialization_bin)) +
   geom_errorbar(aes(ymin=lower50, ymax=upper50, colour = specialization_bin),
                 size = 3, width = 0, position=position_dodge(width=0.75), alpha=0.5) +
   geom_point(aes(colour = specialization_bin), 
              size = 7, shape = 19, position=position_dodge2(width=0.75)) +
-  #geom_ribbon(aes(
-    #ymin=lower50, 
-    #ymax=upper50), alpha=0.1) +
-  #geom_line(aes(colour=specialization_bin), size=2, lty=1) +
   xlim(c(min(original_herb), max(original_herb))) +
   ylim(c(0, 1)) +
   theme_bw() +
@@ -787,7 +769,7 @@ t2
 
 #-------------------------------------------------------------------------------
 
-# community plot - gamma woody
+# community plot - init occupancy woody
 woody_df <- as.data.frame(cbind(original_woody, criC[3,,2], 
                                 criC[1,,2], criC[5,,2],
                                 criC[2,,2], criC[4,,2])) %>%
@@ -825,7 +807,7 @@ u <- ggplot(data = woody_df, aes(original_woody, psi1_woody_community_mean)) +
         panel.background = element_blank(), axis.line = element_line(colour = "black"))
 u
 
-# specialization bin plot - gamma herb
+# specialization bin plot - init occupancy woody
 
 woody_df_spec <- as.data.frame(cbind(original_woody, 
                                      rep(1:n_bins, each=pred_length),
@@ -836,9 +818,6 @@ woody_df_spec <- as.data.frame(cbind(original_woody,
   rename("mean" = "V3",
          "lower50" = "V4",
          "upper50" = "V5")
-
-#herb_df_spec <- herb_df_spec %>%
-# filter(specialization_bin == "12")
 
 u2 <- ggplot(data = woody_df_spec, aes(original_woody, mean, fill=specialization_bin)) +
   geom_ribbon(aes(

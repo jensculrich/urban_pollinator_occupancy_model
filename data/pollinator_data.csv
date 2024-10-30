@@ -1153,7 +1153,7 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 3,5,killarney,7.13.2023,Anthophila,Melissodes microstictus,f,y,jcu2023_1171,Asteraceae,Achillea,Achillea millefolium,NA
 3,5,killarney,7.13.2023,Anthophila,Melissodes microstictus,f,n,jcu2023_1184,Asteraceae,Gaillardia ,Gaillardia pulchella,NA
 3,5,killarney,7.13.2023,Anthophila,Melissodes microstictus,f,n,jcu2023_1185,Asteraceae,Gaillardia ,Gaillardia pulchella,NA
-3,5,killarney,7.13.2023,Anthophila,Melissodes microstictus,f,n,jcu2023_1187,Asteraceae,Chamaemelum,Chamaemelum nobile,jcu2023_1011
+3,5,killarney,7.13.2023,Anthophila,Melissodes microstictus,f,n,jcu2023_1187,Asteraceae,Chamaemelum,Chamaemelum nobile,NA
 3,5,killarney,7.13.2023,Anthophila,Melissodes microstictus,f,y,jcu2023_1200,Asteraceae,Coreopsis,Coreopsis lanceolata,NA
 3,5,killarney,7.13.2023,Anthophila,Melissodes microstictus,f,y,jcu2023_1201,Asteraceae,Coreopsis,Coreopsis lanceolata,NA
 3,5,killarney,7.13.2023,Anthophila,Melissodes microstictus,f,y,jcu2023_1202,Asteraceae,Coreopsis,Coreopsis lanceolata,NA
@@ -1189,7 +1189,7 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 3,5,killarney,7.13.2023,Anthophila,Apis mellifera,NA,n,jcu2023_1186,Fabaceae,Melilotus,Melilotus albus,NA
 3,5,prince of wales,7.14.2023,Anthophila,Melissodes microstictus,f,y,jcu2023_1306,Asteraceae,Achillea,Achillea millefolium,NA
 3,5,killarney,7.13.2023,Anthophila,Anthidium oblongatum,m,y,jcu2023_1188,Asteraceae,Chamaemelum,Chamaemelum nobile,NA
-3,5,killarney,7.13.2023,Syrphidae,Eupeodes sp.,m,y,jcu2023_1189,Fabaceae,Medicago,Medicago sativa,species ID not confirmed
+3,5,killarney,7.13.2023,Syrphidae,Eupeodes sp.,m,y,jcu2023_1189,Fabaceae,Medicago,Medicago sativa,NA
 3,5,killarney,7.13.2023,Anthophila,Megachile rotundata,f,y,jcu2023_1190,Fabaceae,Medicago,Medicago sativa,NA
 3,5,killarney,7.13.2023,Syrphidae,Eristalis tenax,f,y,jcu2023_1191,Fabaceae,Medicago,Medicago sativa,NA
 3,5,killarney,7.13.2023,Syrphidae,Eristalis arbustorum,f,y,jcu2023_1192,Fabaceae,Medicago,Medicago sativa,NA
@@ -2446,7 +2446,7 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 2,2,locarno,5.16.2022,Anthophila,Andrena miserabilis,f,y,jcu2022_302,Geraniaceae,Erodium,Erodium cicutarium,NA
 2,2,locarno,5.16.2022,Anthophila,Andrena miserabilis,f,y,jcu2022_303,Geraniaceae,Erodium,Erodium cicutarium,NA
 2,2,locarno,5.16.2022,Anthophila,Bombus melanopygus,NA,n,jcu2022_304,Ericaceae,Rhododendron,Rhododendron macrophyllum,NA
-2,2,locarno,5.16.2022,Anthophila,Bombus sitkensis,f,y,jcu2022_305,Ericaceae,Rhododendron,Rhododendron macrophyllum,Kept as voucher
+2,2,locarno,5.16.2022,Anthophila,Bombus sitkensis,f,y,jcu2022_305,Ericaceae,Rhododendron,Rhododendron macrophyllum,NA
 2,2,locarno,5.16.2022,Anthophila,Andrena saliciflorus,f,y,jcu2022_306,Roseaceae,Rubus,Rubus spectabilis,NA
 2,2,locarno,5.16.2022,Anthophila,Nomada sp.,m,y,jcu2022_307,Asteraceae,Bellis,Bellis perennis,NA
 2,2,locarno,5.16.2022,Anthophila,Bombus flavifrons,NA,n,jcu2022_308,Roseaceae,Malus,Malus fusca,NA
@@ -2490,7 +2490,7 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 2,2,prince of wales,5.17.2022,Anthophila,Halictus rubicundus,f,n,jcu2022_346,Asteraceae,Taraxacum,Taraxacum officinale,NA
 2,2,prince of wales,5.17.2022,Anthophila,Halictus rubicundus,f,n,jcu2022_347,Asteraceae,Taraxacum,Taraxacum officinale,NA
 2,2,prince of wales,5.17.2022,Anthophila,Apis mellifera,NA,n,jcu2022_348,Asteraceae,Taraxacum,Taraxacum officinale,NA
-2,2,prince of wales,5.17.2022,Anthophila,Bombus rufocinctus,NA,n,jcu2022_349,Asteraceae,Taraxacum,Taraxacum officinale,Took lots of pictures for ID-- need to confirm (was confirmed as B. rufocinctus)
+2,2,prince of wales,5.17.2022,Anthophila,Bombus rufocinctus,NA,n,jcu2022_349,Asteraceae,Taraxacum,Taraxacum officinale,NA
 2,2,moberly,5.17.2022,Anthophila,Apis mellifera,NA,n,jcu2022_350,Asteraceae,Taraxacum,Taraxacum officinale,NA
 2,2,moberly,5.17.2022,Anthophila,Apis mellifera,NA,n,jcu2022_351,Asteraceae,Taraxacum,Taraxacum officinale,NA
 2,2,moberly,5.17.2022,Anthophila,Andrena saliciflorus,f,y,jcu2022_352,Asteraceae,Bellis,Bellis perennis,NA
@@ -2528,7 +2528,7 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 2,2,kensington,5.19.2022,Anthophila,Andrena miserabilis,f,y,jcu2022_384,Roseaceae,Sorbus,Sorbus hybrida,"""sorbus hybrida 'oakleaf'"""
 2,2,kensington,5.19.2022,Anthophila,Andrena nivalis,f,y,jcu2022_385,Roseaceae,Sorbus,Sorbus hybrida,"""sorbus hybrida 'oakleaf'"""
 2,2,winona,5.19.2022,Anthophila,Agapostemon texanus,f,n,jcu2022_386,Asteraceae,Taraxacum,Taraxacum officinale,NA
-2,2,winona,5.19.2022,Anthophila,Agapostemon texanus,f,y,jcu2022_387,Asteraceae,Bellis,Bellis perennis,kept as voucher
+2,2,winona,5.19.2022,Anthophila,Agapostemon texanus,f,y,jcu2022_387,Asteraceae,Bellis,Bellis perennis,NA
 2,2,winona,5.19.2022,Anthophila,Andrena miserabilis,f,y,jcu2022_388,Asteraceae,Bellis,Bellis perennis,NA
 2,2,winona,5.19.2022,Anthophila,Lasioglossum knereri,f,y,jcu2022_389,Asteraceae,Bellis,Bellis perennis,NA
 2,2,winona,5.19.2022,Anthophila,Andrena miserabilis,f,y,jcu2022_390,Asteraceae,Bellis,Bellis perennis,NA
@@ -2645,7 +2645,7 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 2,3,kensington,5.31.2022,Anthophila,Bombus vosnesenskii,f,n,jcu2022_500,Rosaceae,Sorbus,Sorbus hybrida,NA
 2,3,memorial south,5.31.2022,Anthophila,Bombus vosnesenskii,f,n,jcu2022_501,Sapindaceae,Aesculus,Aesculus hippocastanum,NA
 2,3,memorial south,5.31.2022,Anthophila,Bombus flavifrons,f,n,jcu2022_502,Fabaceae,Lupinus,Lupinus polyphyllus,NA
-2,3,memorial south,5.31.2022,Anthophila,Bombus rufocinctus,f,n,jcu2022_503,Fabaceae,Vicia,Vicia sativa,pictured but didn't keep bc it was a queen
+2,3,memorial south,5.31.2022,Anthophila,Bombus rufocinctus,f,n,jcu2022_503,Fabaceae,Vicia,Vicia sativa,NA
 2,3,memorial south,5.31.2022,Syrphidae,Toxomerus occidentalis,f,y,jcu2022_504,Lamiaceae,Lamium,Lamium purpureum,NA
 2,3,china creek,5.31.2022,Anthophila,Bombus flavifrons,f,n,jcu2022_505,Fabaceae,Lupinus,Lupinus polyphyllus,NA
 2,3,china creek,5.31.2022,Anthophila,Bombus flavifrons,f,n,jcu2022_506,Fabaceae,Lupinus,Lupinus polyphyllus,NA
@@ -2707,7 +2707,7 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 2,3,slocan,5.31.2022,Anthophila,Apis mellifera,NA,n,jcu2022_562,Asteraceae,Bellis,Bellis perennis,NA
 2,3,killarney,5.31.2022,Anthophila,Apis mellifera,NA,n,jcu2022_563,Fabaceae,Trifolium,Trifolium incarnatum,NA
 2,3,killarney,5.31.2022,Anthophila,Apis mellifera,NA,n,jcu2022_564,Fabaceae,Trifolium,Trifolium incarnatum,NA
-2,3,killarney,5.31.2022,Anthophila,Bombus vosnesenskii,f,n,jcu2022_565,Fabaceae,Trifolium,Trifolium incarnatum,"Said ""565, 567""-- assumed 565-567 was meant, as 566 is not mentioned anywhere else in the data sheet"
+2,3,killarney,5.31.2022,Anthophila,Bombus vosnesenskii,f,n,jcu2022_565,Fabaceae,Trifolium,Trifolium incarnatum,NA
 2,3,killarney,5.31.2022,Anthophila,Bombus vosnesenskii,f,n,jcu2022_566,Fabaceae,Trifolium,Trifolium incarnatum,NA
 2,3,killarney,5.31.2022,Anthophila,Bombus vosnesenskii,f,n,jcu2022_567,Fabaceae,Trifolium,Trifolium incarnatum,NA
 2,3,killarney,5.31.2022,Syrphidae,Merodon equestris,m,y,jcu2022_568,Linaceae,Linum,Linum lewisii,NA
@@ -2739,7 +2739,7 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 2,3,locarno,6.1.2022,Anthophila,Andrena miserabilis,f,y,jcu2022_594,Rosaceae,Prunus,Prunus serotina,NA
 2,3,locarno,6.1.2022,Anthophila,Bombus mixtus,m,n,jcu2022_595,Ericaceae,Rhododendron,Rhododendron macrophyllum,NA
 2,3,locarno,6.1.2022,Anthophila,Bombus melanopygus,m,n,jcu2022_596,Ericaceae,Rhododendron,Rhododendron macrophyllum,NA
-2,3,locarno,6.1.2022,Anthophila,Bombus melanopygus,m,y,jcu2022_597,Ericaceae,Rhododendron,Rhododendron macrophyllum,kept as voucher
+2,3,locarno,6.1.2022,Anthophila,Bombus melanopygus,m,y,jcu2022_597,Ericaceae,Rhododendron,Rhododendron macrophyllum,NA
 2,3,locarno,6.1.2022,Anthophila,Osmia dolerosa,f,y,jcu2022_598,Geraniaceae,Erodium,Erodium cicutarium,NA
 2,3,locarno,6.1.2022,Anthophila,Nomada sp.,m,y,jcu2022_599,Asteraceae,Bellis,Bellis perennis,NA
 2,3,prince of wales,6.1.2022,Anthophila,Halictus confusus,f,n,jcu2022_600,Ranunculaceae,Ranunculus,Ranunculus repens,NA
@@ -2782,9 +2782,9 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 2,3,oak meadows,6.1.2022,Anthophila,Bombus flavifrons,f,n,jcu2022_637,Fabaceae,Lupinus,Lupinus polyphyllus,NA
 2,3,oak meadows,6.1.2022,Anthophila,Bombus flavifrons,f,n,jcu2022_638,Fabaceae,Lupinus,Lupinus polyphyllus,NA
 2,3,oak meadows,6.1.2022,Anthophila,Bombus flavifrons,f,n,jcu2022_639,Fabaceae,Lupinus,Lupinus polyphyllus,NA
-2,3,oak meadows,6.1.2022,Anthophila,Bombus nevadensis,f,y,jcu2022_640,Fabaceae,Lupinus,Lupinus polyphyllus,kept as voucher
+2,3,oak meadows,6.1.2022,Anthophila,Bombus nevadensis,f,y,jcu2022_640,Fabaceae,Lupinus,Lupinus polyphyllus,NA
 2,3,oak meadows,6.1.2022,Anthophila,Bombus nevadensis,f,n,jcu2022_641,Fabaceae,Lupinus,Lupinus polyphyllus,NA
-2,3,oak meadows,6.1.2022,Anthophila,Bombus mixtus,f,y,jcu2022_642,Fabaceae,Lupinus,Lupinus polyphyllus,kept as voucher
+2,3,oak meadows,6.1.2022,Anthophila,Bombus mixtus,f,y,jcu2022_642,Fabaceae,Lupinus,Lupinus polyphyllus,NA
 2,3,oak meadows,6.1.2022,Anthophila,Bombus mixtus,NA,n,jcu2022_643,Fabaceae,Lupinus,Lupinus polyphyllus,NA
 2,3,oak meadows,6.1.2022,Anthophila,Nomada sp.,f,y,jcu2022_644,Ranunculaceae,Ranunculus,Ranunculus repens,NA
 2,3,oak meadows,6.1.2022,Syrphidae,Merodon equestris,m,y,jcu2022_645,Ranunculaceae,Ranunculus,Ranunculus repens,NA
@@ -2815,8 +2815,8 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 2,3,bobolink,6.7.2022,Anthophila,Halictus rubicundus,f,n,jcu2022_670,Ranunculaceae,Ranunculus,Ranunculus repens,NA
 2,3,bobolink,6.7.2022,Anthophila,Halictus rubicundus,f,n,jcu2022_671,Ranunculaceae,Ranunculus,Ranunculus repens,NA
 2,3,bobolink,6.7.2022,Anthophila,Halictus rubicundus,f,n,jcu2022_672,Ranunculaceae,Ranunculus,Ranunculus repens,NA
-2,3,gordon,6.7.2022,Anthophila,Lasioglossum cressonii,f,y,jcu2022_673,Asteraceae,Bellis,Bellis perennis,accidentally labelled vials as 773 and 774; should be 673 and 674
-2,3,gordon,6.7.2022,Anthophila,Lasioglossum pacatum,f,y,jcu2022_674,Asteraceae,Bellis,Bellis perennis,accidentally labelled vials as 773 and 774; should be 673 and 674
+2,3,gordon,6.7.2022,Anthophila,Lasioglossum cressonii,f,y,jcu2022_673,Asteraceae,Bellis,Bellis perennis,NA
+2,3,gordon,6.7.2022,Anthophila,Lasioglossum pacatum,f,y,jcu2022_674,Asteraceae,Bellis,Bellis perennis,NA
 2,3,moberly,6.7.2022,Anthophila,Apis mellifera,NA,n,jcu2022_675,Asteraceae,Bellis,Bellis perennis,NA
 2,3,moberly,6.7.2022,Anthophila,Agapostemon texanus,f,n,jcu2022_676,Asteraceae,Bellis,Bellis perennis,NA
 2,3,moberly,6.7.2022,Anthophila,Andrena w-scripta,f,y,jcu2022_677,Asteraceae,Bellis,Bellis perennis,NA
@@ -3020,8 +3020,8 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 2,4,winona,6.13.2022,Anthophila,Bombus vosnesenskii,f,n,jcu2022_875,Fabaceae,Trifolium,Trifolium repens,NA
 2,4,winona,6.13.2022,Anthophila,Bombus vosnesenskii,f,n,jcu2022_876,Fabaceae,Trifolium,Trifolium repens,NA
 2,4,winona,6.13.2022,Anthophila,Bombus mixtus,m,n,jcu2022_877,Fabaceae,Trifolium,Trifolium repens,NA
-2,4,winona,6.13.2022,Anthophila,Bombus mixtus,f,y,jcu2022_878,Fabaceae,Trifolium,Trifolium repens,Bombus; unconfident of IDs
-2,4,winona,6.13.2022,Anthophila,Bombus mixtus,f,y,jcu2022_879,Fabaceae,Trifolium,Trifolium repens,Bombus; unconfident of IDs
+2,4,winona,6.13.2022,Anthophila,Bombus mixtus,f,y,jcu2022_878,Fabaceae,Trifolium,Trifolium repens,NA
+2,4,winona,6.13.2022,Anthophila,Bombus mixtus,f,y,jcu2022_879,Fabaceae,Trifolium,Trifolium repens,NA
 2,4,queen elizabeth,6.13.2022,Syrphidae,Eupeodes fumipennis,f,y,jcu2022_880,Ranunculaceae,Ranunculus,Ranunculus repens,NA
 2,4,queen elizabeth,6.13.2022,Anthophila,Lasioglossum (Sphecodogastra) sp.,f,y,jcu2022_881,Ranunculaceae,Ranunculus,Ranunculus repens,NA
 2,4,queen elizabeth,6.13.2022,Anthophila,Lasioglossum cressonii,f,y,jcu2022_882,Ranunculaceae,Ranunculus,Ranunculus repens,NA
@@ -3141,8 +3141,8 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 2,4,china creek,6.15.2022,Syrphidae,Eupeodes fumipennis,f,y,jcu2022_995,Limnanthaceae,Limnanthes,Limnanthes douglasii,NA
 2,4,china creek,6.15.2022,Anthophila,Apis mellifera,NA,n,jcu2022_996,Brassicaceae,Lunaria,Lunaria annua,NA
 2,4,china creek,6.15.2022,Anthophila,Bombus mixtus,f,n,jcu2022_997,Boraginaceae,Phacelia,Phacelia tanacetifolia,NA
-2,4,china creek,6.15.2022,Anthophila,Bombus mixtus,m,y,jcu2022_998,Boraginaceae,Phacelia,Phacelia tanacetifolia,Bombus but unconfident of ID
-2,4,china creek,6.15.2022,Anthophila,Bombus rufocinctus,f,y,jcu2022_999,Boraginaceae,Phacelia,Phacelia tanacetifolia,Bombus but unconfident of ID
+2,4,china creek,6.15.2022,Anthophila,Bombus mixtus,m,y,jcu2022_998,Boraginaceae,Phacelia,Phacelia tanacetifolia,NA
+2,4,china creek,6.15.2022,Anthophila,Bombus rufocinctus,f,y,jcu2022_999,Boraginaceae,Phacelia,Phacelia tanacetifolia,NA
 2,4,china creek,6.15.2022,Anthophila,Bombus mixtus,m,n,jcu2022_1000,Fabaceae,Trifolium,Trifolium repens,NA
 2,4,china creek,6.15.2022,Anthophila,Bombus mixtus,m,n,jcu2022_1001,Fabaceae,Trifolium,Trifolium repens,NA
 2,4,china creek,6.15.2022,Anthophila,Bombus mixtus,m,n,jcu2022_1002,Fabaceae,Trifolium,Trifolium repens,NA
@@ -3214,7 +3214,7 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 2,4,oak meadows,6.17.2022,Anthophila,Bombus flavifrons,f,n,jcu2022_1068,Fabaceae,Lupinus,Lupinus polyphyllus,NA
 2,4,oak meadows,6.17.2022,Anthophila,Bombus flavifrons,f,n,jcu2022_1069,Fabaceae,Lupinus,Lupinus polyphyllus,NA
 2,4,oak meadows,6.17.2022,Anthophila,Bombus flavifrons,f,n,jcu2022_1070,Fabaceae,Lupinus,Lupinus polyphyllus,NA
-2,4,oak meadows,6.17.2022,Anthophila,Bombus mixtus,m,y,jcu2022_1071,Ranunculaceae,Ranunculus,Ranunculus acris,Accidentally kept
+2,4,oak meadows,6.17.2022,Anthophila,Bombus mixtus,m,y,jcu2022_1071,Ranunculaceae,Ranunculus,Ranunculus acris,NA
 2,4,slocan,6.17.2022,Anthophila,Apis mellifera,NA,n,jcu2022_1072,Fabaceae,Trifolium,Trifolium repens,NA
 2,4,slocan,6.17.2022,Anthophila,Apis mellifera,NA,n,jcu2022_1073,Fabaceae,Trifolium,Trifolium repens,NA
 2,4,slocan,6.17.2022,Anthophila,Apis mellifera,NA,n,jcu2022_1074,Fabaceae,Trifolium,Trifolium repens,NA
@@ -3233,9 +3233,9 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 2,4,slocan,6.17.2022,Anthophila,Bombus vosnesenskii,f,n,jcu2022_1087,Fabaceae,Trifolium,Trifolium repens,NA
 2,4,slocan,6.17.2022,Anthophila,Bombus vosnesenskii,f,n,jcu2022_1088,Fabaceae,Trifolium,Trifolium repens,NA
 2,4,slocan,6.17.2022,Anthophila,Bombus vosnesenskii,f,n,jcu2022_1089,Fabaceae,Trifolium,Trifolium repens,NA
-2,4,slocan,6.17.2022,Anthophila,Bombus mixtus,m,y,jcu2022_1090,Fabaceae,Trifolium,Trifolium repens,Kept to confirm ID
-2,4,slocan,6.17.2022,Anthophila,Halictus confusus,f,y,jcu2022_1091,Fabaceae,Trifolium,Trifolium repens,Kept to confirm ID
-2,4,slocan,6.17.2022,Anthophila,Bombus mixtus,m,y,jcu2022_1092,Fabaceae,Trifolium,Trifolium repens,Kept to confirm ID
+2,4,slocan,6.17.2022,Anthophila,Bombus mixtus,m,y,jcu2022_1090,Fabaceae,Trifolium,Trifolium repens,NA
+2,4,slocan,6.17.2022,Anthophila,Halictus confusus,f,y,jcu2022_1091,Fabaceae,Trifolium,Trifolium repens,NA
+2,4,slocan,6.17.2022,Anthophila,Bombus mixtus,m,y,jcu2022_1092,Fabaceae,Trifolium,Trifolium repens,NA
 2,4,slocan,6.17.2022,NA,undetermined,NA,y,jcu2022_1093,Fabaceae,Trifolium,Trifolium repens,NA
 2,4,slocan,6.17.2022,NA,undetermined,NA,y,jcu2022_1094,Fabaceae,Trifolium,Trifolium repens,NA
 2,4,slocan,6.17.2022,Syrphidae,Syrphus opinator,f,y,jcu2022_1095,Asteraceae,Bellis,Bellis perennis,NA
@@ -3336,7 +3336,7 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 2,4,bobolink,6.20.2022,Anthophila,Bombus vosnesenskii,f,n,jcu2022_1190,Fabaceae,Trifolium,Trifolium repens,NA
 2,4,bobolink,6.20.2022,Anthophila,Bombus vosnesenskii,f,n,jcu2022_1191,Fabaceae,Trifolium,Trifolium repens,NA
 2,4,bobolink,6.20.2022,Anthophila,Apis mellifera,NA,n,jcu2022_1192,Fabaceae,Trifolium,Trifolium repens,NA
-2,4,bobolink,6.20.2022,Anthophila,Bombus mixtus,f,y,jcu2022_1193,Fabaceae,Trifolium,Trifolium repens,"""funny-looking Bombus"""
+2,4,bobolink,6.20.2022,Anthophila,Bombus mixtus,f,y,jcu2022_1193,Fabaceae,Trifolium,Trifolium repens,NA
 2,4,killarney,6.20.2022,Anthophila,Apis mellifera,NA,n,jcu2022_1194,Asteraceae,Achillea,Achillea millefolium,NA
 2,4,killarney,6.20.2022,NA,NA,NA,NA,jcu2022_1195,NA,NA,NA,extra label made
 2,4,killarney,6.20.2022,Syrphidae,Syrphus opinator,m,y,jcu2022_1196,Ranunculaceae,Ranunculus,Ranunculus repens,NA
@@ -3405,9 +3405,9 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 2,5,moberly,7.8.2022,Anthophila,Apis mellifera,NA,n,jcu2022_1258,Fabaceae,Trifolium,Trifolium repens,NA
 2,5,moberly,7.8.2022,Anthophila,Apis mellifera,NA,n,jcu2022_1259,Fabaceae,Trifolium,Trifolium repens,NA
 2,5,moberly,7.8.2022,Anthophila,Apis mellifera,NA,n,jcu2022_1260,Fabaceae,Trifolium,Trifolium repens,NA
-2,5,moberly,7.8.2022,Anthophila,Anthidium oblongatum,f,y,jcu2022_1261,Fabaceae,Trifolium,Trifolium repens,"Anthidium voucher, oblong"
-2,5,moberly,7.8.2022,Anthophila,Anthidium oblongatum,m,y,jcu2022_1262,Fabaceae,Trifolium,Trifolium repens,"Anthidium voucher, oblong"
-2,5,moberly,7.8.2022,Anthophila,Bombus rufocinctus,f,y,jcu2022_1263,Fabaceae,Trifolium,Trifolium repens,Bombus rufocinctus
+2,5,moberly,7.8.2022,Anthophila,Anthidium oblongatum,f,y,jcu2022_1261,Fabaceae,Trifolium,Trifolium repens,NA
+2,5,moberly,7.8.2022,Anthophila,Anthidium oblongatum,m,y,jcu2022_1262,Fabaceae,Trifolium,Trifolium repens,NA
+2,5,moberly,7.8.2022,Anthophila,Bombus rufocinctus,f,y,jcu2022_1263,Fabaceae,Trifolium,Trifolium repens,NA
 2,5,moberly,7.8.2022,Anthophila,Bombus vosnesenskii,m,n,jcu2022_1264,Fabaceae,Trifolium,Trifolium repens,NA
 2,5,moberly,7.8.2022,Anthophila,Bombus vosnesenskii,m,n,jcu2022_1265,Fabaceae,Trifolium,Trifolium repens,NA
 2,5,moberly,7.8.2022,Anthophila,Bombus mixtus,m,n,jcu2022_1266,Caprifoliaceae,Symphoricarpos,Symphoricarpos albus,NA
@@ -3454,9 +3454,9 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 2,5,killarney,7.8.2022,Anthophila,Halictus rubicundus,f,n,jcu2022_1307,Plantaginaceae,Plantago,Plantago lanceolata,NA
 2,5,killarney,7.8.2022,Anthophila,Megachile frigida,m,y,jcu2022_1308,Fabaceae,Medicago,Medicago sativa,NA
 2,5,killarney,7.8.2022,Anthophila,Megachile frigida,m,y,jcu2022_1309,Fabaceae,Medicago,Medicago sativa,NA
-2,5,killarney,7.8.2022,Anthophila,Anthidium oblongatum,f,y,jcu2022_1310,Fabaceae,Melilotus,Melilotus officinalis,"voucher, anthidium, oblong"
-2,5,killarney,7.8.2022,Anthophila,Anthidium oblongatum,m,y,jcu2022_1311,Fabaceae,Melilotus,Melilotus officinalis,"voucher, anthidium, oblong"
-2,5,killarney,7.8.2022,Anthophila,Anthidium oblongatum,f,n,jcu2022_1312,Fabaceae,Melilotus,Melilotus officinalis,voucher  
+2,5,killarney,7.8.2022,Anthophila,Anthidium oblongatum,f,y,jcu2022_1310,Fabaceae,Melilotus,Melilotus officinalis,NA
+2,5,killarney,7.8.2022,Anthophila,Anthidium oblongatum,m,y,jcu2022_1311,Fabaceae,Melilotus,Melilotus officinalis,NA
+2,5,killarney,7.8.2022,Anthophila,Anthidium oblongatum,f,n,jcu2022_1312,Fabaceae,Melilotus,Melilotus officinalis,NA
 2,5,killarney,7.8.2022,Anthophila,Apis mellifera,NA,n,jcu2022_1313,Fabaceae,Melilotus,Melilotus officinalis,NA
 2,5,killarney,7.8.2022,Syrphidae,Eristalis arbustorum,f,y,jcu2022_1314,Asteraceae,Hypochaeris,Hypochaeris radicata,NA
 2,5,killarney,7.8.2022,Anthophila,Andrena nigrihirta,m,y,jcu2022_1315,Asteraceae,Hypochaeris,Hypochaeris radicata,NA
@@ -3489,7 +3489,7 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 2,5,killarney,7.8.2022,Anthophila,Apis mellifera,NA,n,jcu2022_1342,Asteraceae,Crepis,Crepis capillaris,NA
 2,5,killarney,7.8.2022,Anthophila,Apis mellifera,NA,n,jcu2022_1343,Fabaceae,Melilotus,Melilotus albus,NA
 2,5,killarney,7.8.2022,Anthophila,Apis mellifera,NA,n,jcu2022_1344,Fabaceae,Melilotus,Melilotus albus,NA
-2,5,falaise,7.8.2022,Anthophila,Lasioglossum pacatum,f,y,jcu2022_1345,Asteraceae,Crepis,Crepis capillaris,Including Anthidium obl. Vouchers
+2,5,falaise,7.8.2022,Anthophila,Lasioglossum pacatum,f,y,jcu2022_1345,Asteraceae,Crepis,Crepis capillaris,NA
 2,5,falaise,7.8.2022,Anthophila,Ceratina acantha,f,y,jcu2022_1346,Caryophyllaceae,Cerastium,Cerastium glomeratum,NA
 2,5,falaise,7.8.2022,Syrphidae,Platycheirus stegnus,f,y,jcu2022_1347,Rosaceae,Spiraea,Spiraea douglasii,NA
 2,5,falaise,7.8.2022,Anthophila,Halictus rubicundus,f,n,jcu2022_1348,Rosaceae,Spiraea,Spiraea douglasii,NA
@@ -4104,7 +4104,7 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 2,5,gordon,7.14.2022,Syrphidae,Eupeodes fumipennis,f,y,jcu2022_1955,Fabaceae,Trifolium,Trifolium repens,NA
 2,5,gordon,7.14.2022,Anthophila,Bombus impatiens,f,y,jcu2022_1956,Fabaceae,Trifolium,Trifolium repens,NA
 2,5,gordon,7.14.2022,Anthophila,Bombus impatiens,f,y,jcu2022_1957,Fabaceae,Trifolium,Trifolium repens,NA
-2,5,gordon,7.14.2022,Anthophila,Bombus impatiens,m,y,jcu2022_1958,Fabaceae,Trifolium,Trifolium repens,1959 skipped
+2,5,gordon,7.14.2022,Anthophila,Bombus impatiens,m,y,jcu2022_1958,Fabaceae,Trifolium,Trifolium repens,NA
 2,6,oak meadows,7.28.2022,Anthophila,Melissodes microstictus,f,n,jcu2022_2145,Asteraceae,Achillea,Achillea millefolium,NA
 2,6,locarno,7.27.2022,Anthophila,Bombus impatiens,f,y,jcu2022_1960,Asteraceae,Hypochaeris,Hypochaeris radicata,NA
 2,6,locarno,7.27.2022,Anthophila,Megachile frigida,f,y,jcu2022_1961,Roseaceae,Rubus,Rubus armeniacus,NA
@@ -5467,7 +5467,7 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 1,3,falaise,6.3.2021,Anthophila,Andrena crataegi,f,y,JCU2021_125,Rosaceae,Physocarpus,Physocarpus capitatus,NA
 1,3,falaise,6.3.2021,Anthophila,Andrena angustitarsata,f,y,JCU2021_126,Rosaceae,Physocarpus,Physocarpus capitatus,NA
 1,3,falaise,6.3.2021,Syrphidae,Syritta pipiens,f,y,JCU2021_127,Rosaceae,Physocarpus,Physocarpus capitatus,NA
-1,3,falaise,6.3.2021,,undetermined,NA,y,JCU2021_128,Rosaceae,Physocarpus,Physocarpus capitatus,NA
+1,3,falaise,6.3.2021,NA,undetermined,NA,y,JCU2021_128,Rosaceae,Physocarpus,Physocarpus capitatus,NA
 1,3,falaise,6.3.2021,Anthophila,Andrena saliciflorus,f,y,JCU2021_129,Rosaceae,Physocarpus,Physocarpus capitatus,NA
 1,3,falaise,6.3.2021,Anthophila,Andrena vicinoides,f,y,JCU2021_130,Rosaceae,Physocarpus,Physocarpus capitatus,NA
 1,3,falaise,6.3.2021,Anthophila,Andrena vicinoides,f,y,JCU2021_131,Rosaceae,Physocarpus,Physocarpus capitatus,NA
@@ -6152,7 +6152,7 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 1,5,killarney,7.9.2021,Syrphidae,Eristalis arbustorum,m,y,JCU2021_447,Brassicaceae,Rorippa,Rorippa palustris,NA
 1,5,killarney,7.9.2021,Anthophila,Andrena prunorum,f,y,JCU2021_449,Brassicaceae,Rorippa,Rorippa palustris,NA
 1,5,killarney,7.9.2021,Anthophila,Megachile rotundata,f,y,JCU2021_448,Brassicaceae,Rorippa,Rorippa palustris,NA
-1,5,killarney,7.9.2021,,Syrphidae,NA,y,JCU2021_449,Brassicaceae,Rorippa,Rorippa palustris,NA
+1,5,killarney,7.9.2021,Syrphidae,Syrphidae,NA,y,JCU2021_449,Brassicaceae,Rorippa,Rorippa palustris,NA
 1,5,killarney,7.9.2021,Syrphidae,Eristalis arbustorum,m,y,JCU2021_450,Brassicaceae,Rorippa,Rorippa palustris,NA
 1,5,killarney,7.9.2021,Syrphidae,Eristalis arbustorum,m,y,JCU2021_451,Brassicaceae,Rorippa,Rorippa palustris,NA
 1,5,killarney,7.9.2021,Syrphidae,Eristalis arbustorum,m,y,JCU2021_452,Brassicaceae,Rorippa,Rorippa palustris,NA
@@ -6341,8 +6341,8 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 1,5,slocan,7.13.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Fabaceae,Trifolium,Trifolium repens,NA
 1,5,slocan,7.13.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Asteraceae,Hypochaeris,Hypochaeris radicata,NA
 1,5,slocan,7.13.2021,Anthophila,Halictus confusus,f,y,JCU2021_559,Asteraceae,Crepis,Crepis capillaris,NA
-1,5,memorial south,7.2.2021,Anthophila,Bombus flavifrons,NA,n,,Ranunculaceae,Delphinium,Delphinium consolida,NA
-1,5,memorial south,7.2.2021,Anthophila,Apis mellifera,NA,n,,Ranunculaceae,Delphinium,Delphinium consolida,NA
+1,5,memorial south,7.2.2021,Anthophila,Bombus flavifrons,NA,n,NA,Ranunculaceae,Delphinium,Delphinium consolida,NA
+1,5,memorial south,7.2.2021,Anthophila,Apis mellifera,NA,n,NA,Ranunculaceae,Delphinium,Delphinium consolida,NA
 1,5,memorial south,7.2.2021,Anthophila,Lasioglossum cressonii,f,y,JCU2021_865,Brassicaceae,Diplotaxus,Diplotaxis tenuifolia,NA
 1,5,memorial south,7.2.2021,Anthophila,Anthidium manicatum,m,y,JCU2021_841,Campanulaceae,Campanula,Campanula rapunculoides,NA
 1,5,memorial south,7.2.2021,Anthophila,Megachile melanophaea,f,y,JCU2021_842,Campanulaceae,Campanula,Campanula rapunculoides,NA
@@ -6350,22 +6350,22 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 1,5,memorial south,7.2.2021,Anthophila,Megachile frigida,f,y,JCU2021_844,Campanulaceae,Campanula,Campanula rapunculoides,NA
 1,5,memorial south,7.2.2021,Syrphidae,Eristalis arbustorum,f,y,JCU2021_902,Asteraceae,Achillea,Achillea millefolium,NA
 1,5,memorial south,7.2.2021,Anthophila,Megachile rotundata,f,y,JCU2021_903,Asteraceae,Achillea,Achillea millefolium,NA
-1,5,memorial south,7.2.2021,Anthophila,Apis mellifera,NA,n,,Asteraceae,Achillea,Achillea millefolium,NA
+1,5,memorial south,7.2.2021,Anthophila,Apis mellifera,NA,n,NA,Asteraceae,Achillea,Achillea millefolium,NA
 1,5,memorial south,7.2.2021,Other: Diptera,Tabanidae,NA,y,JCU2021_904,Asteraceae,Achillea,Achillea millefolium,NA
-1,5,memorial south,7.2.2021,Anthophila,Apis mellifera,NA,n,,Asteraceae,Achillea,Achillea millefolium,NA
-1,5,memorial south,7.2.2021,Anthophila,Bombus vosnesenskii,NA,n,,Fabaceae,Melilotus,Melilotus albus,NA
+1,5,memorial south,7.2.2021,Anthophila,Apis mellifera,NA,n,NA,Asteraceae,Achillea,Achillea millefolium,NA
+1,5,memorial south,7.2.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Fabaceae,Melilotus,Melilotus albus,NA
 1,5,memorial south,7.2.2021,Syrphidae,Syritta pipiens,m,y,JCU2021_830,Apiaceae,Daucus,Daucus carota,NA
 1,5,memorial south,7.2.2021,Syrphidae,Eristalis arbustorum,m,y,JCU2021_831,Apiaceae,Daucus,Daucus carota,NA
 1,5,memorial south,7.2.2021,Syrphidae,Syritta pipiens,f,y,JCU2021_832,Apiaceae,Daucus,Daucus carota,NA
 1,5,memorial south,7.2.2021,Anthophila,Andrena milwaukeensis,f,y,JCU2021_833,Apiaceae,Daucus,Daucus carota,NA
-1,5,memorial south,7.2.2021,Anthophila,Bombus vosnesenskii,NA,n,,Papaveraceae,Eschscholzia,Eschscholzia californica,NA
-1,5,memorial south,7.2.2021,Anthophila,Bombus vosnesenskii,NA,n,,Papaveraceae,Eschscholzia,Eschscholzia californica,NA
-1,5,memorial south,7.2.2021,Anthophila,Halictus rubicundus,f,n,,Papaveraceae,Eschscholzia,Eschscholzia californica,NA
-1,5,memorial south,7.2.2021,Anthophila,Bombus impatiens,NA,n,,Fabaceae,Trifolium,Trifolium repens,NA
-1,5,memorial south,7.2.2021,Anthophila,Bombus vosnesenskii,NA,n,,Fabaceae,Trifolium,Trifolium pratense,NA
+1,5,memorial south,7.2.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Papaveraceae,Eschscholzia,Eschscholzia californica,NA
+1,5,memorial south,7.2.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Papaveraceae,Eschscholzia,Eschscholzia californica,NA
+1,5,memorial south,7.2.2021,Anthophila,Halictus rubicundus,f,n,NA,Papaveraceae,Eschscholzia,Eschscholzia californica,NA
+1,5,memorial south,7.2.2021,Anthophila,Bombus impatiens,NA,n,NA,Fabaceae,Trifolium,Trifolium repens,NA
+1,5,memorial south,7.2.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Fabaceae,Trifolium,Trifolium pratense,NA
 1,5,memorial south,7.2.2021,Anthophila,Bombus mixtus,f,y,JCU2021_828,Fabaceae,Trifolium,Trifolium pratense,NA
 1,5,memorial south,7.2.2021,Anthophila,Bombus mixtus,m,y,JCU2021_829,Fabaceae,Trifolium,Trifolium pratense,NA
-1,5,memorial south,7.2.2021,Anthophila,Apis mellifera,NA,n,,Campanulaceae,Campanula,Campanula rapunculoides,NA
+1,5,memorial south,7.2.2021,Anthophila,Apis mellifera,NA,n,NA,Campanulaceae,Campanula,Campanula rapunculoides,NA
 1,5,memorial south,7.2.2021,Anthophila,Apis mellifera,NA,n,NA,Asteraceae,Achillea,Achillea millefolium,NA
 1,5,west memorial,7.6.2021,Anthophila,Anthidium oblongatum,f,y,JCU2021_560,Asteraceae,Hypochaeris,Hypochaeris radicata,NA
 1,5,west memorial,7.6.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Asteraceae,Hypochaeris,Hypochaeris radicata,NA
@@ -6421,7 +6421,7 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 1,6,bobolink,7.29.2021,Anthophila,Anthidium oblongatum,f,y,JCU2021_568,Fabaceae,Trifolium,Trifolium repens,NA
 1,6,bobolink,7.29.2021,Anthophila,Bombus rufocinctus,f,y,JCU2021_569,Fabaceae,Trifolium,Trifolium repens,NA
 3,4,moberly,6.28.2023,Anthophila,Melissodes microstictus,f,n,jcu2023_1044,Ranunculaceae,Ranunculus,Ranunculus repens,NA
-1,6,bobolink,7.29.2021,,Lasioglossum,f,y,JCU2021_571,Asteraceae,Crepis,Crepis capillaris,NA
+1,6,bobolink,7.29.2021,Anthophila,Lasioglossum,f,y,JCU2021_571,Asteraceae,Crepis,Crepis capillaris,NA
 1,6,bobolink,7.29.2021,Anthophila,Apis mellifera,NA,n,NA,Asteraceae,Hypochaeris,Hypochaeris radicata,NA
 1,6,bobolink,7.29.2021,Syrphidae,Eristalis arbustorum,f,y,JCU2021_572,Asteraceae,Hypochaeris,Hypochaeris radicata,NA
 1,6,bobolink,7.29.2021,Anthophila,Lasioglossum inconditum,f,y,JCU2021_573,Asteraceae,Hypochaeris,Hypochaeris radicata,NA
@@ -6450,7 +6450,7 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 1,6,china creek,7.27.2021,Syrphidae,Syritta pipiens,m,y,JCU2021_892,Apiaceae,Daucus,Daucus carota,NA
 1,6,china creek,7.27.2021,Anthophila,Hylaeus punctatus,f,y,JCU2021_893,Apiaceae,Daucus,Daucus carota,NA
 1,6,china creek,7.27.2021,Syrphidae,Syritta pipiens,m,y,JCU2021_894,Apiaceae,Daucus,Daucus carota,NA
-1,6,china creek,7.27.2021,Anthophila,Bombus impatiens,NA,n,need labels,Apiaceae,Daucus,Daucus carota,NA
+1,6,china creek,7.27.2021,Anthophila,Bombus impatiens,NA,n,NA,Apiaceae,Daucus,Daucus carota,NA
 1,6,china creek,7.27.2021,Syrphidae,Syritta pipiens,m,y,JCU2021_895,Apiaceae,Daucus,Daucus carota,NA
 1,6,china creek,7.27.2021,Anthophila,Megachile rotundata,m,y,JCU2021_582,Fabaceae,Medicago,Medicago sativa,NA
 1,6,china creek,7.27.2021,Anthophila,Megachile rotundata,f,y,JCU2021_583,Fabaceae,Medicago,Medicago sativa,NA
@@ -6459,7 +6459,7 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 1,6,china creek,7.27.2021,Anthophila,Halictus confusus,f,y,JCU2021_585,Fabaceae,Medicago,Medicago sativa,NA
 1,6,china creek,7.27.2021,Syrphidae,Syritta pipiens,m,y,JCU2021_586,Fabaceae,Medicago,Medicago sativa,NA
 1,6,china creek,7.27.2021,Anthophila,Megachile rotundata,f,y,JCU2021_587,Fabaceae,Medicago,Medicago sativa,NA
-1,6,china creek,7.27.2021,,Lasioglossum,f,y,JCU2021_588,Fabaceae,Medicago,Medicago sativa,NA
+1,6,china creek,7.27.2021,Anthophila,Lasioglossum,f,y,JCU2021_588,Fabaceae,Medicago,Medicago sativa,NA
 1,6,china creek,7.27.2021,Syrphidae,Syritta pipiens,m,y,JCU2021_589,Fabaceae,Medicago,Medicago sativa,NA
 1,6,china creek,7.27.2021,Anthophila,Megachile rotundata,f,y,JCU2021_590,Fabaceae,Medicago,Medicago sativa,NA
 1,6,china creek,7.27.2021,Anthophila,Megachile rotundata,f,y,JCU2021_591,Fabaceae,Medicago,Medicago sativa,NA
@@ -6472,7 +6472,7 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 1,6,china creek,7.27.2021,Anthophila,Megachile rotundata,m,y,JCU2021_598,Asteraceae,Achillea,Achillea millefolium,NA
 1,6,china creek,7.27.2021,Syrphidae,Eristalis arbustorum,m,y,JCU2021_599,Asteraceae,Achillea,Achillea millefolium,NA
 1,6,china creek,7.27.2021,Anthophila,Lasioglossum knereri,m,y,JCU2021_593,Asteraceae,Achillea,Achillea millefolium,NA
-1,6,china creek,7.27.2021,,Syrphidae,NA,y,JCU2021_594,Asteraceae,Achillea,Achillea millefolium,NA
+1,6,china creek,7.27.2021,Syrphidae,Syrphidae,NA,y,JCU2021_594,Asteraceae,Achillea,Achillea millefolium,NA
 1,6,china creek,7.27.2021,Syrphidae,Syritta pipiens,f,y,JCU2021_595,Asteraceae,Achillea,Achillea millefolium,NA
 1,6,china creek,7.27.2021,Anthophila,Apis mellifera,NA,n,NA,Papaveraceae,Eschscholzia,Eschscholzia californica,NA
 1,6,china creek,7.27.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Papaveraceae,Eschscholzia,Eschscholzia californica,NA
@@ -6536,7 +6536,7 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 1,6,gordon,7.23.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Fabaceae,Trifolium,Trifolium repens,NA
 1,6,gordon,7.23.2021,Anthophila,Megachile rotundata,f,y,JCU2021_619,Fabaceae,Trifolium,Trifolium repens,NA
 1,6,gordon,7.23.2021,Anthophila,Megachile rotundata,m,y,JCU2021_620,Fabaceae,Trifolium,Trifolium repens,NA
-1,6,gordon,7.23.2021,,Lasioglossum,f,y,JCU2021_621,Fabaceae,Trifolium,Trifolium repens,NA
+1,6,gordon,7.23.2021,Anthophila,Lasioglossum,f,y,JCU2021_621,Fabaceae,Trifolium,Trifolium repens,NA
 1,6,gordon,7.23.2021,Anthophila,Megachile rotundata,f,y,JCU2021_622,Fabaceae,Trifolium,Trifolium repens,NA
 1,6,gordon,7.23.2021,Anthophila,Anthidium oblongatum,m,y,JCU2021_623,Fabaceae,Trifolium,Trifolium repens,NA
 1,6,gordon,7.23.2021,Anthophila,Bombus impatiens,NA,n,NA,Fabaceae,Trifolium,Trifolium repens,NA
@@ -6638,8 +6638,8 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 1,6,oak meadows,7.23.2021,Anthophila,Bombus impatiens,NA,n,NA,Asteraceae,Hypochaeris,Hypochaeris radicata,NA
 1,6,oak meadows,7.23.2021,Anthophila,Apis mellifera,f,y,JCU2021_668,Asteraceae,Hypochaeris,Hypochaeris radicata,NA
 1,6,oak meadows,7.23.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Asteraceae,Hypochaeris,Hypochaeris radicata,NA
-1,6,oak meadows,7.23.2021,Anthophila,Apis mellifera,NA,n,NA,Asteraceae,Hypochaeris,Hypochaeris radicata,no pollen sample
-1,6,oak meadows,7.23.2021,Syrphidae,Syritta pipiens,m,y,JCU2021_669,Asteraceae,Hypochaeris,Hypochaeris radicata,no pollen sample
+1,6,oak meadows,7.23.2021,Anthophila,Apis mellifera,NA,n,NA,Asteraceae,Hypochaeris,Hypochaeris radicata,NA
+1,6,oak meadows,7.23.2021,Syrphidae,Syritta pipiens,m,y,JCU2021_669,Asteraceae,Hypochaeris,Hypochaeris radicata,NA
 1,6,oak meadows,7.23.2021,Anthophila,Apis mellifera,NA,n,NA,Asteraceae,Hypochaeris,Hypochaeris radicata,NA
 1,6,oak meadows,7.23.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Asteraceae,Hypochaeris,Hypochaeris radicata,NA
 2,5,moberly,7.8.2022,Anthophila,Melissodes microstictus,m,y,jcu2022_1273,Ranunculaceae,Ranunculus,Ranunculus repens,NA
@@ -6736,41 +6736,41 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 1,6,slocan,7.27.2021,Anthophila,Bombus impatiens,NA,n,NA,Fabaceae,Trifolium,Trifolium repens,NA
 1,6,slocan,7.27.2021,Anthophila,Bombus impatiens,NA,n,NA,Fabaceae,Trifolium,Trifolium repens,NA
 1,6,slocan,7.27.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Fabaceae,Trifolium,Trifolium repens,NA
-1,6,memorial south,7.22.2021,Anthophila,Apis mellifera,NA,n,,Asteraceae,Achillea,Achillea millefolium,NA
+1,6,memorial south,7.22.2021,Anthophila,Apis mellifera,NA,n,NA,Asteraceae,Achillea,Achillea millefolium,NA
 1,6,memorial south,7.22.2021,Syrphidae,Syritta pipiens,m,y,JCU2021_883,Asteraceae,Achillea,Achillea millefolium,NA
 1,6,memorial south,7.22.2021,Syrphidae,Syritta pipiens,m,y,JCU2021_884,Asteraceae,Achillea,Achillea millefolium,NA
-1,6,memorial south,7.22.2021,Anthophila,Bombus vosnesenskii,NA,n,,Fabaceae,Melilotus,Melilotus albus,NA
+1,6,memorial south,7.22.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Fabaceae,Melilotus,Melilotus albus,NA
 1,6,memorial south,7.22.2021,Anthophila,Megachile rotundata,m,y,JCU2021_869,Fabaceae,Melilotus,Melilotus albus,NA
-1,6,memorial south,7.22.2021,Anthophila,Bombus vosnesenskii,NA,n,,Fabaceae,Melilotus,Melilotus albus,NA
+1,6,memorial south,7.22.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Fabaceae,Melilotus,Melilotus albus,NA
 1,6,memorial south,7.22.2021,Anthophila,Megachile rotundata,f,y,JCU2021_870,Fabaceae,Melilotus,Melilotus albus,NA
 1,6,memorial south,7.22.2021,Anthophila,Megachile rotundata,m,y,JCU2021_871,Fabaceae,Melilotus,Melilotus albus,NA
-1,6,memorial south,7.22.2021,Anthophila,Bombus vosnesenskii,NA,n,,Fabaceae,Trifolium,Trifolium pratense,NA
-1,6,memorial south,7.22.2021,Anthophila,Bombus vosnesenskii,NA,n,,Fabaceae,Trifolium,Trifolium pratense,NA
+1,6,memorial south,7.22.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Fabaceae,Trifolium,Trifolium pratense,NA
+1,6,memorial south,7.22.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Fabaceae,Trifolium,Trifolium pratense,NA
 1,6,memorial south,7.22.2021,Syrphidae,Myathropa florea,f,y,JCU2021_866,Apiaceae,Daucus,Daucus carota,NA
 1,6,memorial south,7.22.2021,Anthophila,Hylaeus punctatus,f,y,JCU2021_867,Apiaceae,Daucus,Daucus carota,NA
 1,6,memorial south,7.22.2021,Syrphidae,Syritta pipiens,m,y,JCU2021_868,Apiaceae,Daucus,Daucus carota,NA
-1,6,memorial south,7.22.2021,Anthophila,Bombus vosnesenskii,NA,n,,Campanulaceae,Campanula,Campanula rapunculoides,NA
+1,6,memorial south,7.22.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Campanulaceae,Campanula,Campanula rapunculoides,NA
 1,6,memorial south,7.22.2021,Anthophila,Apis mellifera,f,y,JCU2021_845,Campanulaceae,Campanula,Campanula rapunculoides,NA
 1,6,memorial south,7.22.2021,Syrphidae,Eupeodes volucris,f,y,JCU2021_846,Brassicaceae,Diplotaxus,Diplotaxis tenuifolia,NA
 1,6,memorial south,7.22.2021,Syrphidae,Syritta pipiens,m,y,JCU2021_847,Brassicaceae,Diplotaxus,Diplotaxis tenuifolia,NA
 1,6,memorial south,7.22.2021,Syrphidae,Syritta pipiens,m,y,JCU2021_848,Brassicaceae,Diplotaxus,Diplotaxis tenuifolia,NA
 1,6,memorial south,7.22.2021,Anthophila,Megachile mendica,m,y,JCU2021_849,Brassicaceae,Diplotaxus,Diplotaxis tenuifolia,NA
 1,6,memorial south,7.22.2021,Anthophila,Agapostemon texanus,m,y,JCU2021_850,Brassicaceae,Diplotaxus,Diplotaxis tenuifolia,NA
-1,6,memorial south,7.22.2021,Anthophila,Apis mellifera,NA,n,,Brassicaceae,Diplotaxus,Diplotaxis tenuifolia,NA
+1,6,memorial south,7.22.2021,Anthophila,Apis mellifera,NA,n,NA,Brassicaceae,Diplotaxus,Diplotaxis tenuifolia,NA
 1,6,memorial south,7.22.2021,Syrphidae,Eristalis arbustorum,m,y,JCU2021_851,Brassicaceae,Diplotaxus,Diplotaxis tenuifolia,NA
-1,6,memorial south,7.22.2021,Anthophila,Apis mellifera,NA,n,,Brassicaceae,Diplotaxus,Diplotaxis tenuifolia,NA
+1,6,memorial south,7.22.2021,Anthophila,Apis mellifera,NA,n,NA,Brassicaceae,Diplotaxus,Diplotaxis tenuifolia,NA
 1,6,memorial south,7.22.2021,Syrphidae,Eristalis arbustorum,m,y,JCU2021_852,Brassicaceae,Diplotaxus,Diplotaxis tenuifolia,NA
 1,6,memorial south,7.22.2021,Anthophila,Megachile rotundata,f,y,JCU2021_823,Fabaceae,Medicago,Medicago sativa,NA
 1,6,memorial south,7.22.2021,Anthophila,Megachile rotundata,m,y,JCU2021_824,Fabaceae,Medicago,Medicago sativa,NA
-1,6,memorial south,7.22.2021,Anthophila,Bombus vosnesenskii,NA,n,,Papaveraceae,Eschscholzia,Eschscholzia californica,NA
-1,6,memorial south,7.22.2021,Anthophila,Bombus vosnesenskii,NA,n,,Papaveraceae,Eschscholzia,Eschscholzia californica,NA
-1,6,memorial south,7.22.2021,Anthophila,Bombus vosnesenskii,NA,n,,Papaveraceae,Eschscholzia,Eschscholzia californica,NA
+1,6,memorial south,7.22.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Papaveraceae,Eschscholzia,Eschscholzia californica,NA
+1,6,memorial south,7.22.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Papaveraceae,Eschscholzia,Eschscholzia californica,NA
+1,6,memorial south,7.22.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Papaveraceae,Eschscholzia,Eschscholzia californica,NA
 1,6,memorial south,7.22.2021,Anthophila,Megachile relativa,f,y,JCU2021_836,Asteraceae,Centaurea,Centaurea cyanus,NA
 1,6,memorial south,7.22.2021,Anthophila,Lasioglossum knereri,f,y,JCU2021_816,Asteraceae,Hypochaeris,Hypochaeris radicata,NA
 1,6,memorial south,7.22.2021,Syrphidae,Myathropa florea,f,y,JCU2021_817,Asteraceae,Hypochaeris,Hypochaeris radicata,NA
 1,6,memorial south,7.22.2021,Other: Diptera,Tabanidae,NA,y,JCU2021_818,Asteraceae,Hypochaeris,Hypochaeris radicata,NA
 1,6,memorial south,7.22.2021,Anthophila,Bombus nevadensis,f,y,JCU2021_853,Ranunculaceae,Delphinium,Delphinium consolida,NA
-1,6,memorial south,7.22.2021,Anthophila,Bombus flavifrons,NA,n,,Ranunculaceae,Delphinium,Delphinium consolida,NA
+1,6,memorial south,7.22.2021,Anthophila,Bombus flavifrons,NA,n,NA,Ranunculaceae,Delphinium,Delphinium consolida,NA
 1,6,memorial south,7.22.2021,Anthophila,Apis mellifera,NA,n,NA,Brassicaceae,Diplotaxus,Diplotaxis tenuifolia,NA
 1,6,west memorial,7.20.2021,Anthophila,Apis mellifera,NA,n,NA,Fabaceae,Trifolium,Trifolium repens,NA
 1,6,west memorial,7.20.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Fabaceae,Trifolium,Trifolium repens,NA
@@ -6793,7 +6793,7 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 1,6,winona,7.23.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Fabaceae,Trifolium,Trifolium repens,NA
 1,6,winona,7.23.2021,Anthophila,Apis mellifera,NA,n,NA,Fabaceae,Trifolium,Trifolium repens,NA
 1,6,winona,7.23.2021,Anthophila,Bombus mixtus,m,y,JCU2021_705,Fabaceae,Trifolium,Trifolium repens,NA
-1,6,winona,7.23.2021,,Bombus sp.,f,n,,Fabaceae,Trifolium,Trifolium repens,NA
+1,6,winona,7.23.2021,Anthophila,Bombus sp.,f,n,NA,Fabaceae,Trifolium,Trifolium repens,NA
 1,6,winona,7.23.2021,Anthophila,Bombus impatiens,NA,n,NA,Asteraceae,Hypochaeris,Hypochaeris radicata,NA
 1,6,winona,7.23.2021,Anthophila,Lasioglossum zonulum,m,y,JCU2021_706,Lamiaceae,Origanum,Origanum vulgare,NA
 1,6,winona,7.23.2021,Anthophila,Lasioglossum zonulum,f,y,JCU2021_707,Asteraceae,Crepis,Crepis capillaris,NA
@@ -6856,7 +6856,7 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 1,7,falaise,8.10.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Lythraceae,Lythrum,Lythrum salicaria,NA
 1,7,falaise,8.10.2021,Anthophila,Lasioglossum inconditum,m,y,JCU2021_741,Asteraceae,Crepis,Crepis capillaris,NA
 1,7,falaise,8.10.2021,Syrphidae,Eristalis arbustorum,m,y,JCU2021_742,Asteraceae,Crepis,Crepis capillaris,NA
-1,7,falaise,8.10.2021,Anthophila,Halictus confusus,,y,JCU2021_743,Asteraceae,Crepis,Crepis capillaris,NA
+1,7,falaise,8.10.2021,Anthophila,Halictus confusus,NA,y,JCU2021_743,Asteraceae,Crepis,Crepis capillaris,NA
 1,7,falaise,8.10.2021,Anthophila,Apis mellifera,NA,n,NA,Asteraceae,Crepis,Crepis capillaris,NA
 1,7,falaise,8.10.2021,Syrphidae,Heringia morph2,f,y,JCU2021_744,Asteraceae,Crepis,Crepis capillaris,NA
 1,7,falaise,8.10.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Asteraceae,Crepis,Crepis capillaris,NA
@@ -6926,7 +6926,7 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 1,7,moberly,8.10.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Fabaceae,Trifolium,Trifolium repens,NA
 1,7,moberly,8.10.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Fabaceae,Trifolium,Trifolium repens,NA
 1,7,moberly,8.10.2021,Anthophila,Bombus impatiens,NA,n,NA,Fabaceae,Trifolium,Trifolium repens,NA
-1,7,moberly,8.10.2021,Anthophila,Agapostemon texanus,m,y,JCU2021_770,Fabaceae,Trifolium,Trifolium repens,no pollen
+1,7,moberly,8.10.2021,Anthophila,Agapostemon texanus,m,y,JCU2021_770,Fabaceae,Trifolium,Trifolium repens,NA
 1,7,moberly,8.10.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Fabaceae,Trifolium,Trifolium repens,NA
 1,7,moberly,8.10.2021,Anthophila,Bombus impatiens,NA,n,NA,Fabaceae,Trifolium,Trifolium repens,NA
 1,7,moberly,8.10.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Asteraceae,Echinacea,Echinacea purpurea,NA
@@ -6979,7 +6979,7 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 1,7,rupert,8.11.2021,Anthophila,Apis mellifera,NA,n,NA,Asteraceae,Crepis,Crepis capillaris,NA
 1,7,rupert,8.11.2021,Anthophila,Megachile rotundata,m,y,JCU2021_789,Asteraceae,Crepis,Crepis capillaris,NA
 1,7,rupert,8.11.2021,Syrphidae,Eristalis arbustorum,m,y,JCU2021_790,Asteraceae,Crepis,Crepis capillaris,NA
-1,7,rupert,8.11.2021,Anthophila,Halictus confusus,,y,JCU2021_791,Asteraceae,Crepis,Crepis capillaris,NA
+1,7,rupert,8.11.2021,Anthophila,Halictus confusus,NA,y,JCU2021_791,Asteraceae,Crepis,Crepis capillaris,NA
 1,7,rupert,8.11.2021,Anthophila,Megachile rotundata,f,y,JCU2021_792,Asteraceae,Crepis,Crepis capillaris,NA
 1,7,rupert,8.11.2021,Anthophila,Bombus impatiens,NA,n,NA,Asteraceae,Crepis,Crepis capillaris,NA
 1,7,rupert,8.11.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Asteraceae,Crepis,Crepis capillaris,NA
@@ -7020,15 +7020,15 @@ YEAR,SAMPLING_ROUND,SITE,DATE,CLADE,SPECIES,SEX,COLLECTED_SPECIMEN,UNIQUE_SPECIM
 1,7,memorial south,8.8.2021,Anthophila,Agapostemon texanus,m,y,JCU2021_856,Asteraceae,Centaurea,Centaurea cyanus,NA
 1,7,memorial south,8.8.2021,Anthophila,Lasioglossum inconditum,m,y,JCU2021_861,Asteraceae,Hypochaeris,Hypochaeris radicata,NA
 1,7,memorial south,8.8.2021,Anthophila,Lasioglossum inconditum,m,y,JCU2021_862,Asteraceae,Hypochaeris,Hypochaeris radicata,NA
-1,7,memorial south,8.8.2021,Anthophila,Bombus vosnesenskii,NA,n,,Fabaceae,Trifolium,Trifolium pratense,NA
-1,7,memorial south,8.8.2021,Anthophila,Bombus impatiens,NA,n,,Fabaceae,Trifolium,Trifolium pratense,NA
+1,7,memorial south,8.8.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Fabaceae,Trifolium,Trifolium pratense,NA
+1,7,memorial south,8.8.2021,Anthophila,Bombus impatiens,NA,n,NA,Fabaceae,Trifolium,Trifolium pratense,NA
 1,7,memorial south,8.8.2021,Syrphidae,Syritta pipiens,f,y,JCU2021_857,Brassicaceae,Diplotaxus,Diplotaxis tenuifolia,NA
-1,7,memorial south,8.8.2021,Anthophila,Apis mellifera,NA,n,,Brassicaceae,Diplotaxus,Diplotaxis tenuifolia,NA
+1,7,memorial south,8.8.2021,Anthophila,Apis mellifera,NA,n,NA,Brassicaceae,Diplotaxus,Diplotaxis tenuifolia,NA
 1,7,memorial south,8.8.2021,Syrphidae,Syritta pipiens,m,y,JCU2021_858,Brassicaceae,Diplotaxus,Diplotaxis tenuifolia,NA
 1,7,memorial south,8.8.2021,Syrphidae,Syritta pipiens,m,y,JCU2021_859,Brassicaceae,Diplotaxus,Diplotaxis tenuifolia,NA
 1,7,memorial south,8.8.2021,Syrphidae,Syritta pipiens,m,y,JCU2021_860,Brassicaceae,Diplotaxus,Diplotaxis tenuifolia,NA
 1,7,west memorial,8.19.2021,Anthophila,Bombus impatiens,NA,n,JCU2021_871,Solanaceae,Solanum,Solanum dulcamara,NA
-1,7,winona,8.10.2021,,Megachile,NA,y,JCU2021_883,Fabaceae,Trifolium,Trifolium repens,NA
+1,7,winona,8.10.2021,Anthophila,Megachile,NA,y,JCU2021_883,Fabaceae,Trifolium,Trifolium repens,NA
 1,7,winona,8.10.2021,Anthophila,Bombus impatiens,NA,n,JCU2021_884,Fabaceae,Trifolium,Trifolium repens,NA
 1,7,winona,8.10.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Fabaceae,Trifolium,Trifolium repens,NA
 1,7,winona,8.10.2021,Anthophila,Bombus vosnesenskii,NA,n,NA,Fabaceae,Trifolium,Trifolium repens,NA

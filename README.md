@@ -23,7 +23,6 @@
 - specifiy the appropriate stan model to estimate posterior distributions for unknown parameters and then call stan using rstan to run the model. The model used for the submitted version of the manuscript is labelled: ./dynamic_occupancy_model/models/final_model.stan
 - model diagnostics and posterior distribution summaries can be pulled out at the end of the run_model.R file.
 - navigate to ./dynamic_occupancy_model/PPCs/PPCs.R to run posterior predictive checks.
-- navigate to ./dynamic_occupancy_model/make_figures/ to recreate figures 3 and 4 from the paper.
 
 ## To conduct the pollen limitation analysis:
 - navigate to ./pollen_limitation_experiment/analysis/run_model_pollen_limitation.R
@@ -33,6 +32,11 @@
 - model diagnostics and posterior distribution summaries can be pulled out at the end of the run_model_pollen_limitation.R file.
 - posterior predictive checks can be pulled out at the end of the run_model.R file..
 - navigate to ./pollen_limitation_experiment/figures/make_figures.R to recreate pollen limitation figure from the paper (Figure S23).
+
+## Recreate main figures from the manuscript
+- Figure 1 was created in QGIS using the data file: land_cover_by_site_reduced.csv.
+- Navigate to ./dynamic_occupancy_model/make_figures/plot_colonization_persistence_initocc.R to recreate figures 2, 3 and 4 from the manuscript.
+- Navigate to ./dynamic_occupancy_model/make_figures/plot_species_richness.R to recreate figures 5 from the manuscript.
 
 ## Other stuff:
 #### ./static_occupancy_model/
