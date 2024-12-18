@@ -112,6 +112,7 @@ hist(d, axes = TRUE, xlim = c(0, 1),
 mean(species_interaction_metrics$d_supplemented_genus)
 sd(species_interaction_metrics$d_supplemented_genus)
 
+
 ## --------------------------------------------------
 # global plotting options
 
@@ -847,3 +848,21 @@ u2 <- ggplot(data = woody_df_spec, aes(original_woody, mean, fill=specialization
 u2
 
 grid.arrange(t, t2, u, u2, ncol=2)
+
+
+# for actual figure 3 in the paper
+# initial occurrence community (left) and spec (right) t, t2,
+# colonization community (left) and spec (right) p, p2
+# persistence community (left) and spec (right) r, r2
+cowplot::plot_grid(t, t2, p, p2, r, r2, 
+                   labels = c("a)", "b)", "c)", "d)", "e)", "f)"), 
+                   label_size = 20,
+                   hjust = 0,
+                   ncol = 2)
+
+# for actual figure 4 in the paper
+cowplot::plot_grid(u, u2, q, q2, s, s2, 
+                   labels = c("a)", "b)", "c)", "d)", "e)", "f)"), 
+                   label_size = 20,
+                   hjust = 0,
+                   ncol = 2)
